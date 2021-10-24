@@ -4,18 +4,18 @@ services:
   patches-api:
     image: patches-api
     build:
-     context: .
-     dockerfile: PatchesApi/Dockerfile
-     args:
-     - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
+      context: .
+      dockerfile: PatchesApi/Dockerfile
+      args:
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     ports:
       - 3000:3000
     environment:
-     - DynamoDb_LocalMode=true
-     - DynamoDb_LocalServiceUrl=http://dynamodb-database:8000
-     - AWS_REGION=eu-west-2
-     - AWS_ACCESS_KEY_ID=local
-     - AWS_SECRET_ACCESS_KEY=local
+      - DynamoDb_LocalMode=true
+      - DynamoDb_LocalServiceUrl=http://dynamodb-database:8000
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
     links:
       - dynamodb-database
 
@@ -27,16 +27,17 @@ services:
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     environment:
-     - DynamoDb_LocalMode=true
-     - DynamoDb_LocalServiceUrl=http://dynamodb-database:8000
-     - AWS_REGION=eu-west-2
-     - AWS_ACCESS_KEY_ID=local
-     - AWS_SECRET_ACCESS_KEY=local
+      - DynamoDb_LocalMode=true
+      - DynamoDb_LocalServiceUrl=http://dynamodb-database:8000
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
     links:
-     - dynamodb-database
+      - dynamodb-database
 
-
- dynamodb-database:
-   image: amazon/dynamodb-local
-   ports:
-     - 8000:8000
+  dynamodb-database:
+    image: amazon/dynamodb-local
+    ports:
+      - 8000:8000
+      
+  
