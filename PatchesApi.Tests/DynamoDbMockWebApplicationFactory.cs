@@ -39,7 +39,6 @@ namespace PatchesApi.Tests
                 EnsureTablesExist(DynamoDb, _tables);
             });
         }
-
         private static void EnsureTablesExist(IAmazonDynamoDB dynamoDb, List<TableDef> tables)
         {
             foreach (var table in tables)
