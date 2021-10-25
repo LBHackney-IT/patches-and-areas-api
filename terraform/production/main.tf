@@ -40,6 +40,6 @@ terraform {
     bucket  = "terraform-state-housing-production"
     encrypt = true
     region  = "eu-west-2"
-    key     = services/patches-api/state 
+    key     = "services/patches-api/state"
   }
 }
