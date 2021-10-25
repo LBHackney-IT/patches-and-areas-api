@@ -1,9 +1,7 @@
 using Amazon.DynamoDBv2.DataModel;
 using AutoFixture;
-using PatchesApi.Tests.V1.Helper;
 using PatchesApi.V1.Domain;
 using PatchesApi.V1.Gateways;
-using PatchesApi.V1.Infrastructure;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
