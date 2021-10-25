@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 
 namespace PatchesApi.V1.UseCase
 {
-    public class GetByIdUseCase : IGetByIdUseCase
+    public class GetPatchByIdUseCase : IGetPatchByIdUseCase
     {
         private IPatchesGateway _gateway;
-        public GetByIdUseCase(IPatchesGateway gateway)
+        public GetPatchByIdUseCase(IPatchesGateway gateway)
         {
             _gateway = gateway;
         }
         [LogCall]
-        //TODO: rename id to the name of the identifier that will be used for this API, the type may also need to change
-        public Task<Entity> Execute(PatchesQueryObject query)
+        public async Task<PatchEntity> Execute(PatchesQueryObject query)
         {
-            return _gateway.GetEntityById(query);
+            var patch = await _gateway.GetPatchByIdAsync(query).ConfigureAwait(false);
+            return patch;
         }
     }
 }

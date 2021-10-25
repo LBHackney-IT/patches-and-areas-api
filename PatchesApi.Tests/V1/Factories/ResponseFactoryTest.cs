@@ -11,7 +11,7 @@ namespace PatchesApi.Tests.V1.Factories
         [Fact]
         public void CanMapADatabaseEntityToADomainObject()
         {
-            var domain = new Entity();
+            var domain = new PatchEntity();
             var response = domain.ToResponse();
             //TODO: check here that all of the fields have been mapped correctly. i.e. response.fieldOne.Should().Be("one")
         }

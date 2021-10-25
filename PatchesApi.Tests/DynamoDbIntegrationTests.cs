@@ -21,7 +21,7 @@ namespace PatchesApi.Tests
         {
             new TableDef {
                 Name = "Patches",
-                KeyName = "Id",
+                KeyName = "id",
                 KeyType = ScalarAttributeType.S,
 
 

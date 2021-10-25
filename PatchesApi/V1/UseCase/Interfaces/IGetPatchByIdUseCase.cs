@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace PatchesApi.V1.UseCase.Interfaces
 {
-    public interface IGetByIdUseCase
+    public interface IGetPatchByIdUseCase
     {
-        Task<Entity> Execute(PatchesQueryObject query);
+        Task<PatchEntity> Execute(PatchesQueryObject query);
     }
 }

@@ -62,7 +62,7 @@ namespace PatchesApi
 
             services.AddSingleton<IApiVersionDescriptionProvider, DefaultApiVersionDescriptionProvider>();
 
-            services.AddDynamoDbHealthCheck<DatabaseEntity>();
+            services.AddDynamoDbHealthCheck<PatchesDb>();
 
             services.AddSwaggerGen(c =>
             {
@@ -141,7 +141,7 @@ namespace PatchesApi
 
         private static void RegisterUseCases(IServiceCollection services)
         {
-            services.AddScoped<IGetByIdUseCase, GetByIdUseCase>();
+            services.AddScoped<IGetPatchByIdUseCase, GetPatchByIdUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

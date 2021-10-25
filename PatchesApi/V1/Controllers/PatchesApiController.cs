@@ -5,35 +5,44 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PatchesApi.V1.UseCase.Interfaces;
 using PatchesApi.V1.Boundary.Request;
+using System.Threading.Tasks;
+using PatchesApi.V1.Factories;
 
 namespace PatchesApi.V1.Controllers
 {
     [ApiController]
-    [Route("api/v1/patches")]
+    [Route("api/v1/patch")]
     [Produces("application/json")]
     [ApiVersion("1.0")]
     public class PatchesApiController : BaseController
     {
-        private readonly IGetByIdUseCase _getByIdUseCase;
-        public PatchesApiController(IGetByIdUseCase getByIdUseCase)
+        private readonly IGetPatchByIdUseCase _getByIdUseCase;
+        public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase)
         {
             _getByIdUseCase = getByIdUseCase;
         }
 
 
         /// <summary>
-        /// ...
+        /// Retrives the Patch record corresponding to the supplied id
         /// </summary>
-        /// <response code="200">...</response>
-        /// <response code="404">No ? found for the specified ID</response>
+        /// <response code="200">Success</response>
+        /// <response code="400">Invalid id value supplied</response>
+        /// <response code="404">No patch found for the specified id</response>
+        /// <response code="500">Something went wrong</response>
         [ProducesResponseType(typeof(PatchesResponseObject), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [LogCall(LogLevel.Information)]
-        //TODO: rename to match the identifier that will be used
-        [Route("{yourId}")]
-        public IActionResult ViewRecord(PatchesQueryObject query)
+        [Route("{id}")]
+        public async Task<IActionResult> GetPatchById(PatchesQueryObject query)
         {
-            return Ok(_getByIdUseCase.Execute(query));
+            var patch = await _getByIdUseCase.Execute(query).ConfigureAwait(false);
+            if (patch == null) return NotFound(query.Id);
+
+            return Ok(patch.ToResponse());
         }
     }
 }

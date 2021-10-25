@@ -7,15 +7,23 @@ namespace PatchesApi.V1.Factories
 {
     public static class ResponseFactory
     {
-        //TODO: Map the fields in the domain object(s) to fields in the response object(s).
-        // More information on this can be found here https://github.com/LBHackney-IT/lbh-patches-api/wiki/Factory-object-mappings
-        public static PatchesResponseObject ToResponse(this Entity domain)
+        public static PatchesResponseObject ToResponse(this PatchEntity domain)
         {
-            return new PatchesResponseObject();
+            return new PatchesResponseObject
+            {
+                Id = domain.Id,
+                ParentId = domain.ParentId,
+                Name = domain.Name,
+                Domain = domain.Domain,
+                PatchType = domain.PatchType,
+                ResponsibleEntities = domain.ResponsibleEntities
+            };
         }
 
-        public static List<PatchesResponseObject> ToResponse(this IEnumerable<Entity> domainList)
+        public static List<PatchesResponseObject> ToResponse(this IEnumerable<PatchEntity> domainList)
         {
+            if (null == domainList) return new List<PatchesResponseObject>();
+
             return domainList.Select(domain => domain.ToResponse()).ToList();
         }
     }

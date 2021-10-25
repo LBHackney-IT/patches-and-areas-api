@@ -24,11 +24,11 @@ namespace PatchesApi.V1.Gateways
         }
 
         [LogCall]
-        public async Task<Entity> GetEntityById(PatchesQueryObject query)
+        public async Task<PatchEntity> GetPatchByIdAsync(PatchesQueryObject query)
         {
             _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}");
 
-            var result = await _dynamoDbContext.LoadAsync<DatabaseEntity>(query.Id).ConfigureAwait(false);
+            var result = await _dynamoDbContext.LoadAsync<PatchesDb>(query.Id).ConfigureAwait(false);
             return result?.ToDomain();
         }
     }
