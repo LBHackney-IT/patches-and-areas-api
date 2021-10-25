@@ -15,6 +15,7 @@ using System.Collections.Generic;
 
 namespace PatchesApi.Tests.V1.Gateways
 {
+    [Collection("DynamoDb collection")]
     public class DynamoDbGatewayTests : IDisposable
     {
         private readonly Fixture _fixture = new Fixture();
