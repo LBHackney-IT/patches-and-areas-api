@@ -157,7 +157,7 @@ namespace PatchesApi
                   .AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .WithExposedHeaders("x-correlation-id"));
+                  .WithExposedHeaders("ETag", "x-correlation-id"));
 
             app.UseCorrelationId();
             app.UseLoggingScope();
