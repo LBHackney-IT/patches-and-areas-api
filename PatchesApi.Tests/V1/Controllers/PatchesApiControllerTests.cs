@@ -10,6 +10,12 @@ using PatchesApi.V1.Domain;
 using Microsoft.AspNetCore.Mvc;
 using FluentAssertions;
 using PatchesApi.V1.Factories;
+using PatchesApi.V1.Infrastructure;
+using Microsoft.Extensions.Primitives;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace PatchesApi.Tests.V1.Controllers
 {
@@ -23,8 +29,13 @@ namespace PatchesApi.Tests.V1.Controllers
 
         public PatchesApiControllerTests()
         {
+            var stubHttpContext = new DefaultHttpContext();
+            var controllerContext = new ControllerContext(new ActionContext(stubHttpContext, new RouteData(), new ControllerActionDescriptor()));
+
             _mockGetByIdUseCase = new Mock<IGetPatchByIdUseCase>();
             _classUnderTest = new PatchesApiController(_mockGetByIdUseCase.Object);
+            _classUnderTest.ControllerContext = controllerContext;
+
         }
 
         private PatchesQueryObject ConstructQuery()
@@ -60,6 +71,8 @@ namespace PatchesApi.Tests.V1.Controllers
 
             // Assert
             response.Should().BeOfType(typeof(OkObjectResult));
+            _classUnderTest.HttpContext.Response.Headers.TryGetValue(HeaderConstants.ETag, out StringValues val).Should().BeTrue();
+            val.First().Should().Be($"\"{patchResponse.VersionNumber.ToString()}\"");
             (response as OkObjectResult).Value.Should().BeEquivalentTo(patchResponse.ToResponse());
         }
 

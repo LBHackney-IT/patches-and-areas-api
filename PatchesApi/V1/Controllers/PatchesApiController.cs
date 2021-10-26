@@ -7,6 +7,8 @@ using PatchesApi.V1.UseCase.Interfaces;
 using PatchesApi.V1.Boundary.Request;
 using System.Threading.Tasks;
 using PatchesApi.V1.Factories;
+using System.Net.Http.Headers;
+using PatchesApi.V1.Infrastructure;
 
 namespace PatchesApi.V1.Controllers
 {
@@ -37,10 +39,16 @@ namespace PatchesApi.V1.Controllers
         [HttpGet]
         [LogCall(LogLevel.Information)]
         [Route("{id}")]
-        public async Task<IActionResult> GetPatchById(PatchesQueryObject query)
+        public async Task<IActionResult> GetPatchById([FromRoute] PatchesQueryObject query)
         {
             var patch = await _getByIdUseCase.Execute(query).ConfigureAwait(false);
             if (patch == null) return NotFound(query.Id);
+
+            var eTag = string.Empty;
+            if (patch.VersionNumber.HasValue)
+                eTag = patch.VersionNumber.ToString();
+
+            HttpContext.Response.Headers.Add(HeaderConstants.ETag, EntityTagHeaderValue.Parse($"\"{eTag}\"").Tag);
 
             return Ok(patch.ToResponse());
         }

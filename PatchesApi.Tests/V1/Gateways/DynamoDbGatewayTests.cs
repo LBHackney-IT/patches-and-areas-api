@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using PatchesApi.V1.Boundary.Request;
 using Xunit;
 using System.Collections.Generic;
+using PatchesApi.V1.Infrastructure;
+using PatchesApi.V1.Factories;
 
 namespace PatchesApi.Tests.V1.Gateways
 {
@@ -26,8 +28,8 @@ namespace PatchesApi.Tests.V1.Gateways
 
         public DynamoDbGatewayTests(DynamoDbIntegrationTests<Startup> dbTestFixture)
         {
-            _logger = new Mock<ILogger<PatchesGateway>>();
             _dynamoDb = dbTestFixture.DynamoDbContext;
+            _logger = new Mock<ILogger<PatchesGateway>>();
             _classUnderTest = new PatchesGateway(_dynamoDb, _logger.Object);
         }
 
@@ -58,7 +60,9 @@ namespace PatchesApi.Tests.V1.Gateways
 
         public async Task GetPatchByIdReturnsNullIfEntityDoesntExist()
         {
-            var entity = _fixture.Build<PatchEntity>().Create();
+            var entity = _fixture.Build<PatchEntity>()
+                                 .With(x => x.VersionNumber, (int?) null)
+                                 .Create();
             var query = ConstructQuery(entity.Id);
             var response = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
 
@@ -70,20 +74,24 @@ namespace PatchesApi.Tests.V1.Gateways
         [Fact]
         public async Task GetPatchByIdReturnsThePatchIfItExists()
         {
-            var entity = _fixture.Build<PatchEntity>().Create();
-            await InsertDatatoDynamoDB(entity).ConfigureAwait(false);
+            var entity = _fixture.Build<PatchEntity>()
+                                 .With(x => x.VersionNumber, (int?) null)
+                                 .Create();
+            var dbEntity = entity.ToDatabase();
+
+            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
 
             var query = ConstructQuery(entity.Id);
 
             var result = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
-            result.Should().BeEquivalentTo(entity);
+            result.Should().BeEquivalentTo(dbEntity, config => config.Excluding(y => y.VersionNumber));
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
         }
 
-        private async Task InsertDatatoDynamoDB(PatchEntity entity)
+        private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
         {
-            await _dynamoDb.SaveAsync<PatchEntity>(entity).ConfigureAwait(false);
-            _cleanup.Add(async () => await _dynamoDb.DeleteAsync(entity).ConfigureAwait(false));
+            await _dynamoDb.SaveAsync<PatchesDb>(dbEntity).ConfigureAwait(false);
+            _cleanup.Add(async () => await _dynamoDb.DeleteAsync(dbEntity).ConfigureAwait(false));
         }
     }
 }

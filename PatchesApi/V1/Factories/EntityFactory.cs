@@ -15,7 +15,8 @@ namespace PatchesApi.V1.Factories
                 Name = databaseEntity.Name,
                 Domain = databaseEntity.Domain,
                 PatchType = databaseEntity.PatchType,
-                ResponsibleEntities = databaseEntity.ResponsibleEntities
+                ResponsibleEntities = databaseEntity.ResponsibleEntities,
+                VersionNumber = databaseEntity.VersionNumber
             };
         }
 
@@ -29,7 +30,8 @@ namespace PatchesApi.V1.Factories
                 Name = entity.Name,
                 Domain = entity.Domain,
                 PatchType = entity.PatchType,
-                ResponsibleEntities = entity.ResponsibleEntities
+                ResponsibleEntities = entity.ResponsibleEntities,
+                VersionNumber = entity.VersionNumber
             };
         }
     }

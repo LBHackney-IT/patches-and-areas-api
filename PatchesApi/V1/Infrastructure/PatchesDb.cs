@@ -27,5 +27,8 @@ namespace PatchesApi.V1.Infrastructure
         [DynamoDBProperty(Converter = typeof(DynamoDbObjectConverter<ResponsibleEntities>))]
         public ResponsibleEntities ResponsibleEntities { get; set; }
 
+        [DynamoDBVersion]
+        public int? VersionNumber { get; set; }
+
     }
 }

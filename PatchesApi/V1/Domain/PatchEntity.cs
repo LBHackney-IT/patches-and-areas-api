@@ -10,5 +10,7 @@ namespace PatchesApi.V1.Domain
         public PatchType PatchType { get; set; }
         public string Domain { get; set; }
         public ResponsibleEntities ResponsibleEntities { get; set; }
+        public int? VersionNumber { get; set; }
+
     }
 }

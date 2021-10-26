@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Xunit;
+using HeaderConstants = Hackney.Core.Middleware.HeaderConstants;
 
 namespace PatchesApi.Tests.V1.Controllers
 {
