@@ -5,26 +5,33 @@ namespace PatchesApi.V1.Factories
 {
     public static class EntityFactory
     {
-        public static Entity ToDomain(this DatabaseEntity databaseEntity)
+        public static PatchEntity ToDomain(this PatchesDb databaseEntity)
         {
-            //TODO: Map the rest of the fields in the domain object.
-            // More information on this can be found here https://github.com/LBHackney-IT/lbh-patches-api/wiki/Factory-object-mappings
 
-            return new Entity
+            return new PatchEntity
             {
                 Id = databaseEntity.Id,
-                CreatedAt = databaseEntity.CreatedAt
+                ParentId = databaseEntity.ParentId,
+                Name = databaseEntity.Name,
+                Domain = databaseEntity.Domain,
+                PatchType = databaseEntity.PatchType,
+                ResponsibleEntities = databaseEntity.ResponsibleEntities,
+                VersionNumber = databaseEntity.VersionNumber
             };
         }
 
-        public static DatabaseEntity ToDatabase(this Entity entity)
+        public static PatchesDb ToDatabase(this PatchEntity entity)
         {
-            //TODO: Map the rest of the fields in the database object.
 
-            return new DatabaseEntity
+            return new PatchesDb
             {
                 Id = entity.Id,
-                CreatedAt = entity.CreatedAt
+                ParentId = entity.ParentId,
+                Name = entity.Name,
+                Domain = entity.Domain,
+                PatchType = entity.PatchType,
+                ResponsibleEntities = entity.ResponsibleEntities,
+                VersionNumber = entity.VersionNumber
             };
         }
     }

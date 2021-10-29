@@ -10,7 +10,7 @@ namespace PatchesApi.V1.Gateways
 {
     public interface IPatchesGateway
     {
-        Task<Entity> GetEntityById(PatchesQueryObject query);
+        Task<PatchEntity> GetPatchByIdAsync(PatchesQueryObject query);
 
     }
 }

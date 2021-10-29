@@ -30,6 +30,9 @@ using Hackney.Core.HealthCheck;
 using Hackney.Core.Middleware.CorrelationId;
 using Hackney.Core.DynamoDb.HealthCheck;
 using Hackney.Core.DynamoDb;
+using Hackney.Core.Middleware.Exception;
+using Hackney.Core.JWT;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace PatchesApi
 {
@@ -50,6 +53,8 @@ namespace PatchesApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
             services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
@@ -62,7 +67,7 @@ namespace PatchesApi
 
             services.AddSingleton<IApiVersionDescriptionProvider, DefaultApiVersionDescriptionProvider>();
 
-            services.AddDynamoDbHealthCheck<DatabaseEntity>();
+            services.AddDynamoDbHealthCheck<PatchesDb>();
 
             services.AddSwaggerGen(c =>
             {
@@ -124,7 +129,7 @@ namespace PatchesApi
             services.ConfigureLambdaLogging(Configuration);
 
             services.AddLogCallAspect();
-
+            services.AddTokenFactory();
             services.ConfigureDynamoDB();
 
             RegisterGateways(services);
@@ -141,7 +146,8 @@ namespace PatchesApi
 
         private static void RegisterUseCases(IServiceCollection services)
         {
-            services.AddScoped<IGetByIdUseCase, GetByIdUseCase>();
+            services.AddScoped<IGetPatchByIdUseCase, GetPatchByIdUseCase>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -151,7 +157,7 @@ namespace PatchesApi
                   .AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .WithExposedHeaders("x-correlation-id"));
+                  .WithExposedHeaders("ETag", "x-correlation-id"));
 
             app.UseCorrelationId();
             app.UseLoggingScope();

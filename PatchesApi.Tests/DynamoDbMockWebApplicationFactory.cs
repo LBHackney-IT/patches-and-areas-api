@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using System;
 
 namespace PatchesApi.Tests
 {
@@ -30,6 +31,13 @@ namespace PatchesApi.Tests
                 .UseStartup<Startup>();
             builder.ConfigureServices(services =>
             {
+                var url = Environment.GetEnvironmentVariable("DynamoDb_LocalServiceUrl");
+                services.AddSingleton<IAmazonDynamoDB>(sp =>
+                {
+                    var clientConfig = new AmazonDynamoDBConfig { ServiceURL = url };
+                    return new AmazonDynamoDBClient(clientConfig);
+                });
+
                 services.ConfigureDynamoDB();
 
                 var serviceProvider = services.BuildServiceProvider();

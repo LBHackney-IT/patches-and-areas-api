@@ -1,9 +1,8 @@
-using PatchesApi.V1.Domain;
 using System;
 
-namespace PatchesApi.V1.Boundary.Response
+namespace PatchesApi.V1.Domain
 {
-    public class PatchesResponseObject
+    public class PatchEntity
     {
         public Guid Id { get; set; }
         public Guid ParentId { get; set; }
@@ -11,6 +10,7 @@ namespace PatchesApi.V1.Boundary.Response
         public PatchType PatchType { get; set; }
         public string Domain { get; set; }
         public ResponsibleEntities ResponsibleEntities { get; set; }
+        public int? VersionNumber { get; set; }
 
     }
 }
