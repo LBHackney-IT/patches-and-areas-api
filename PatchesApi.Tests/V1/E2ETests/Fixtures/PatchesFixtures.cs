@@ -15,7 +15,9 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
         public PatchesDb PatchesDb { get; private set; }
 
         public Guid Id { get; private set; }
+        public Guid ParentId { get; private set; }
         public string InvalidId { get; private set; }
+        public string InvalidParentId { get; private set; }
 
         public PatchesFixtures(IDynamoDBContext dbContext)
         {
@@ -51,17 +53,20 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
                 _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
                 PatchesDb = patch;
                 Id = patch.Id;
+                ParentId = patch.ParentId;
             }
         }
 
         public void GivenAPatchDoesNotExist()
         {
             Id = Guid.NewGuid();
+            ParentId = Guid.NewGuid();
         }
 
         public void GivenAnInvalidId()
         {
             InvalidId = "1234567";
+            InvalidParentId = "1234567890";
         }
 
 

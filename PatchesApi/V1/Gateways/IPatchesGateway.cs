@@ -11,6 +11,8 @@ namespace PatchesApi.V1.Gateways
     public interface IPatchesGateway
     {
         Task<PatchEntity> GetPatchByIdAsync(PatchesQueryObject query);
+        Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query);
+
 
     }
 }

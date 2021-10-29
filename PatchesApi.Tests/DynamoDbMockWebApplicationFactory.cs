@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace PatchesApi.Tests
 {
@@ -53,12 +54,26 @@ namespace PatchesApi.Tests
             {
                 try
                 {
-                    var request = new CreateTableRequest(table.Name,
-                        new List<KeySchemaElement> { new KeySchemaElement(table.KeyName, KeyType.HASH) },
-                        new List<AttributeDefinition> { new AttributeDefinition(table.KeyName, table.KeyType) },
-                        new ProvisionedThroughput(3, 3));
-                    _ = dynamoDb.CreateTableAsync(request).GetAwaiter().GetResult();
+
+
+                    var keySchema = new List<KeySchemaElement> { new KeySchemaElement(table.KeyName, KeyType.HASH) };
+                    var attributes = new List<AttributeDefinition> { new AttributeDefinition(table.KeyName, table.KeyType) };
+
+                    var indexKey = table.GlobalSecondaryIndexes.SelectMany(x => x.KeySchema).FirstOrDefault(y => y.KeyType == KeyType.HASH);
+                    if (null != indexKey)
+                        attributes.Add(new AttributeDefinition(indexKey.AttributeName, ScalarAttributeType.S));
+                    var update = new CreateTableRequest(table.Name,
+                        keySchema,
+                        attributes,
+                        new ProvisionedThroughput(3, 3))
+                    {
+                        GlobalSecondaryIndexes = table.GlobalSecondaryIndexes
+                    };
+                    _ = dynamoDb.CreateTableAsync(update).GetAwaiter().GetResult();
+
+
                 }
+
                 catch (ResourceInUseException)
                 {
                     // It already exists :-)

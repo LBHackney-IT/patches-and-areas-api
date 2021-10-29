@@ -147,6 +147,7 @@ namespace PatchesApi
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetPatchByIdUseCase, GetPatchByIdUseCase>();
+            services.AddScoped<IGetPatchByParentIdUseCase, GetPatchByParentIdUseCase>();
 
         }
 

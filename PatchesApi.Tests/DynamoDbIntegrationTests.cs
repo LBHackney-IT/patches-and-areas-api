@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.Model;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using System;
@@ -14,6 +15,7 @@ namespace PatchesApi.Tests
         public HttpClient Client { get; private set; }
         public IDynamoDBContext DynamoDbContext => _factory?.DynamoDbContext;
 
+        public static string[] PatchByParentId { get; private set; }
 
         private readonly DynamoDbMockWebApplicationFactory<TStartup> _factory;
 
@@ -22,7 +24,25 @@ namespace PatchesApi.Tests
             new TableDef {
                 Name = "Patches",
                 KeyName = "id",
-                KeyType = ScalarAttributeType.S
+                KeyType = ScalarAttributeType.S,
+
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>(new[]
+                {
+                    new GlobalSecondaryIndex
+                    {
+                        IndexName = "PatchByParentId",
+                        KeySchema = new List<KeySchemaElement>(new[]
+                        {
+                            new KeySchemaElement("parentId", KeyType.HASH)
+                        }),
+                        ProvisionedThroughput = new ProvisionedThroughput
+                        {
+                            ReadCapacityUnits = 10,
+                            WriteCapacityUnits = 10
+                        },
+                        Projection = new Projection { ProjectionType = ProjectionType.ALL }
+                    }
+                })
             }
         };
 
@@ -68,6 +88,10 @@ namespace PatchesApi.Tests
         public string Name { get; set; }
         public string KeyName { get; set; }
         public ScalarAttributeType KeyType { get; set; }
+        public string RangeKeyName { get; set; }
+        public ScalarAttributeType RangeKeyType { get; set; }
+        public List<GlobalSecondaryIndex> GlobalSecondaryIndexes { get; set; } = new List<GlobalSecondaryIndex>();
+
     }
 
 

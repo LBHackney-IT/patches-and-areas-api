@@ -16,6 +16,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using System.Collections.Generic;
 
 namespace PatchesApi.Tests.V1.Controllers
 {
@@ -24,6 +25,7 @@ namespace PatchesApi.Tests.V1.Controllers
     {
         private PatchesApiController _classUnderTest;
         private Mock<IGetPatchByIdUseCase> _mockGetByIdUseCase;
+        private Mock<IGetPatchByParentIdUseCase> _mockGetByParentIdUseCase;
         private readonly Fixture _fixture = new Fixture();
 
 
@@ -33,7 +35,8 @@ namespace PatchesApi.Tests.V1.Controllers
             var controllerContext = new ControllerContext(new ActionContext(stubHttpContext, new RouteData(), new ControllerActionDescriptor()));
 
             _mockGetByIdUseCase = new Mock<IGetPatchByIdUseCase>();
-            _classUnderTest = new PatchesApiController(_mockGetByIdUseCase.Object);
+            _mockGetByParentIdUseCase = new Mock<IGetPatchByParentIdUseCase>();
+            _classUnderTest = new PatchesApiController(_mockGetByIdUseCase.Object, _mockGetByParentIdUseCase.Object);
             _classUnderTest.ControllerContext = controllerContext;
 
         }
@@ -41,6 +44,11 @@ namespace PatchesApi.Tests.V1.Controllers
         private PatchesQueryObject ConstructQuery()
         {
             return new PatchesQueryObject() { Id = Guid.NewGuid() };
+        }
+
+        private GetPatchByParentIdQuery ConstructQueryParameter()
+        {
+            return new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
         }
 
         [Fact]
@@ -91,5 +99,49 @@ namespace PatchesApi.Tests.V1.Controllers
             func.Should().Throw<ApplicationException>().WithMessage(exception.Message);
         }
 
+        [Fact]
+        public async Task GetPatchByParentIdNotFoundReturnsNotFound()
+        {
+            var queryParam = ConstructQueryParameter();
+            _mockGetByParentIdUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync((List<PatchEntity>) null);
+
+            // Act
+            var response = await _classUnderTest.GetByParentIdAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(NotFoundObjectResult));
+            (response as NotFoundObjectResult).Value.Should().Be(queryParam.ParentId);
+        }
+
+        [Fact]
+        public async Task GetPatchByParentIdFoundReturnsResponse()
+        {
+            // Arrange
+            var queryParam = ConstructQueryParameter();
+            var patchResponseList = _fixture.Create<List<PatchEntity>>();
+            _mockGetByParentIdUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync(patchResponseList);
+
+            // Act
+            var response = await _classUnderTest.GetByParentIdAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(OkObjectResult));
+            (response as OkObjectResult).Value.Should().BeEquivalentTo(patchResponseList.ToResponse());
+        }
+
+        [Fact]
+        public void GetPatchByParentIdExceptionIsThrown()
+        {
+            // Arrange
+            var queryParam = ConstructQueryParameter();
+            var exception = new ApplicationException("Test exception");
+            _mockGetByParentIdUseCase.Setup(x => x.ExecuteAsync(queryParam)).ThrowsAsync(exception);
+
+            // Act
+            Func<Task<IActionResult>> func = async () => await _classUnderTest.GetByParentIdAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            func.Should().Throw<ApplicationException>().WithMessage(exception.Message);
+        }
     }
 }

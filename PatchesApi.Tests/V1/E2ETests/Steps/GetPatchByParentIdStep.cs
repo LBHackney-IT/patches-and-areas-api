@@ -11,14 +11,14 @@ using System.Threading.Tasks;
 
 namespace PatchesApi.Tests.V1.E2ETests.Steps
 {
-    public class GetPatchByIdStep : BaseSteps
+    public class GetPatchByParentIdStep : BaseSteps
     {
-        public GetPatchByIdStep(HttpClient httpClient) : base(httpClient)
+        public GetPatchByParentIdStep(HttpClient httpClient) : base(httpClient)
         { }
 
-        public async Task WhenPatchDetailsAreRequested(string id)
+        public async Task WhenPatchDetailsAreRequested(string parentId)
         {
-            var uri = new Uri($"api/v1/patch/{id}", UriKind.Relative);
+            var uri = new Uri($"api/v1/patch?parentId={parentId}", UriKind.Relative);
             _lastResponse = await _httpClient.GetAsync(uri).ConfigureAwait(false);
         }
 
@@ -46,6 +46,5 @@ namespace PatchesApi.Tests.V1.E2ETests.Steps
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
-
     }
 }
