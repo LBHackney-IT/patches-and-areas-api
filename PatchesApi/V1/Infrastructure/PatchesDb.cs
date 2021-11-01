@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Hackney.Core.DynamoDb.Converters;
 using PatchesApi.V1.Domain;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PatchesApi.V1.Infrastructure
@@ -24,8 +25,8 @@ namespace PatchesApi.V1.Infrastructure
         [DynamoDBProperty]
         public string Domain { get; set; }
 
-        [DynamoDBProperty(Converter = typeof(DynamoDbObjectConverter<ResponsibleEntities>))]
-        public ResponsibleEntities ResponsibleEntities { get; set; }
+        [DynamoDBProperty(Converter = typeof(DynamoDbObjectListConverter<ResponsibleEntities>))]
+        public List<ResponsibleEntities> ResponsibleEntities { get; set; }
 
         [DynamoDBVersion]
         public int? VersionNumber { get; set; }

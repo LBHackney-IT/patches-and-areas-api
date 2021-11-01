@@ -5,9 +5,7 @@ using System.Threading.Tasks;
 
 namespace PatchesApi.V1.Infrastructure
 {
-    public static class HeaderConstants
+    public class UpdateEntityResult
     {
-        public const string ETag = "ETag";
-        public const string IfMatch = "If-Match";
     }
 }

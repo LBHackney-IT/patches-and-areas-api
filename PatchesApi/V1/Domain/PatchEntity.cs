@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace PatchesApi.V1.Domain
 {
@@ -9,7 +10,7 @@ namespace PatchesApi.V1.Domain
         public string Name { get; set; }
         public PatchType PatchType { get; set; }
         public string Domain { get; set; }
-        public ResponsibleEntities ResponsibleEntities { get; set; }
+        public List<ResponsibleEntities> ResponsibleEntities { get; set; }
         public int? VersionNumber { get; set; }
 
     }
