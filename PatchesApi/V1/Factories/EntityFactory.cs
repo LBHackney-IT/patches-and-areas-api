@@ -1,7 +1,5 @@
 using PatchesApi.V1.Domain;
 using PatchesApi.V1.Infrastructure;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace PatchesApi.V1.Factories
 {
@@ -22,12 +20,6 @@ namespace PatchesApi.V1.Factories
             };
         }
 
-        public static List<PatchEntity> ToDomain(this IEnumerable<PatchesDb> databaseEntity)
-        {
-            return databaseEntity.Select(p => p.ToDomain())
-                                 .ToList();
-        }
-
         public static PatchesDb ToDatabase(this PatchEntity entity)
         {
 
@@ -42,13 +34,5 @@ namespace PatchesApi.V1.Factories
                 VersionNumber = entity.VersionNumber
             };
         }
-
-        public static List<PatchesDb> ToDatabase(this IEnumerable<PatchEntity> domain)
-        {
-            return domain.Select(p => p.ToDatabase())
-                                 .ToList();
-        }
-
-
     }
 }
