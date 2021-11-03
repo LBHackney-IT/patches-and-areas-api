@@ -148,34 +148,6 @@ namespace PatchesApi.Tests.V1.Gateways
             load.ResponsibleEntities.Except(load.ResponsibleEntities.Where(x => x.Id == query.ResponsibileEntityId)).Should().BeEmpty();
         }
 
-        [Fact]
-        public async Task UpdateExistingResponsibilityInPatchSuccessfullyUpdates()
-        {
-            var entity = _fixture.Build<PatchEntity>()
-                                 .With(x => x.VersionNumber, (int?) null)
-                                 .Create();
-            ;
-            var dbEntity = entity.ToDatabase();
-
-            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
-            dbEntity.VersionNumber = 0;
-
-            var query = ConstructUpdateQuery(entity.Id, entity.ResponsibleEntities.First().Id);
-            var request = ConstructUpdateNameRequest();
-            var result = await _classUnderTest.UpdatePatchResponsibilities(query, request, 0).ConfigureAwait(false);
-
-            var load = await _dynamoDb.LoadAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false);
-            _cleanup.Add(async () => await _dynamoDb.DeleteAsync<PatchesDb>(load.Id).ConfigureAwait(false));
-
-            result.Should().BeEquivalentTo(load, config => config.Excluding(y => y.VersionNumber));
-
-
-
-            load.ResponsibleEntities.First(x => x.Id == query.ResponsibileEntityId).Name.Should().Be(request.Name);
-            load.VersionNumber.Should().Be(1);
-
-        }
-
         [Theory]
         [InlineData(null)]
         [InlineData(5)]

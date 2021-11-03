@@ -50,8 +50,7 @@ namespace PatchesApi.V1.Gateways
             var responsibleEntity = patch.ResponsibleEntities.FirstOrDefault(x => x.Id == query.ResponsibileEntityId);
             if (responsibleEntity is null)
             {
-                responsibleEntity = new ResponsibleEntities();
-                patch.ResponsibleEntities.Add(responsibleEntity);
+                throw new ResponsibilityEntityException(query.ResponsibileEntityId); 
             }
             responsibleEntity.Name = requestObject.Name;
             responsibleEntity.ResponsibleType = requestObject.ResponsibleType;

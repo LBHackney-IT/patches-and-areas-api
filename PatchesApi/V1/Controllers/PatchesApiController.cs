@@ -82,14 +82,18 @@ namespace PatchesApi.V1.Controllers
                 // whereas the request object has all possible updateable fields defined.
                 // The implementation will use the raw body text to identify which fields to update and the request object is specified here so that its
                 // associated validation will be executed by the MVC pipeline before we even get to this point.
-                var tenure = await _updatePatchResponsibilities.ExecuteAsync(query, requestObject, ifMatch)
+                var patch = await _updatePatchResponsibilities.ExecuteAsync(query, requestObject, ifMatch)
                                                                 .ConfigureAwait(false);
-                if (tenure == null) return NotFound(query.Id);
+                if (patch == null) return NotFound(query.Id);
                 return NoContent();
             }
             catch (VersionNumberConflictException vncErr)
             {
                 return Conflict(vncErr.Message);
+            }
+            catch(ResponsibilityEntityException reErr)
+            {
+                return Conflict(reErr.Message);
             }
         }
 
