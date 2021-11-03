@@ -10,6 +10,7 @@ using PatchesApi.V1.Boundary.Response;
 using PatchesApi.V1.Boundary.Request;
 using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Linq;
+using System;
 
 namespace PatchesApi.V1.Gateways
 {
@@ -44,17 +45,15 @@ namespace PatchesApi.V1.Gateways
             if (patch == null) return null;
             if (ifMatch != patch.VersionNumber)
                 throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);
-
-
-
-            var responsibleEntity = patch.ResponsibleEntities.FirstOrDefault(x => x.Id == query.ResponsibileEntityId);
-            if (responsibleEntity is null)
+            var responsibleEntity = new ResponsibleEntities()
             {
-                throw new ResponsibilityEntityException(query.ResponsibileEntityId); 
-            }
-            responsibleEntity.Name = requestObject.Name;
-            responsibleEntity.ResponsibleType = requestObject.ResponsibleType;
-            responsibleEntity.Id = requestObject.Id;
+                Id = query.ResponsibileEntityId,
+                Name = requestObject.Name,
+                ResponsibleType = requestObject.ResponsibleType
+            };
+            patch.ResponsibleEntities.Add(responsibleEntity);
+
+
 
 
             await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);

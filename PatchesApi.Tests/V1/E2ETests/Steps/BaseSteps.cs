@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 namespace PatchesApi.Tests.V1.E2ETests.Steps
 {
-    public class BaseSteps
+    public class BaseSteps : IDisposable
     {
         protected readonly HttpClient _httpClient;
 
         protected HttpResponseMessage _lastResponse;
         protected readonly JsonSerializerOptions _jsonOptions;
+        protected readonly List<Action> _cleanup = new List<Action>();
+
 
         public BaseSteps(HttpClient httpClient)
         {
@@ -21,6 +23,23 @@ namespace PatchesApi.Tests.V1.E2ETests.Steps
             _jsonOptions = CreateJsonOptions();
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected bool _disposed;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing && !_disposed)
+            {
+                foreach (var action in _cleanup)
+                    action();
+
+                _disposed = true;
+            }
+        }
         protected JsonSerializerOptions CreateJsonOptions()
         {
             var options = new JsonSerializerOptions

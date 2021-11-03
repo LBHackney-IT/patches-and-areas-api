@@ -62,22 +62,16 @@ namespace PatchesApi.Tests.V1.Gateways
         {
             return new UpdatePatchesResponsibilityRequest() { Id = id, ResponsibileEntityId = responsibilityId };
         }
-        private UpdatePatchesResponsibilitiesRequestObject ConstructUpdateRequest()
+        private UpdatePatchesResponsibilitiesRequestObject ConstructUpdateRequest(Guid responsibilityId)
         {
-            var request = _fixture.Create<UpdatePatchesResponsibilitiesRequestObject>();
+            var request = _fixture.Build<UpdatePatchesResponsibilitiesRequestObject>()
+                                  .With(x => x.Id, responsibilityId).Create();
             return request;
         }
 
 
 
-        private UpdatePatchesResponsibilitiesRequestObject ConstructUpdateNameRequest()
-        {
-            var request = new UpdatePatchesResponsibilitiesRequestObject()
-            {
-                Name = "Update"
-            };
-            return request;
-        }
+
 
         [Fact]
 
@@ -115,7 +109,6 @@ namespace PatchesApi.Tests.V1.Gateways
         public async Task UpdatePatchWithNewResponsibileEntitySuccessfullyUpdates()
         {
             var entity = _fixture.Build<PatchEntity>()
-                                 .Without(x => x.ResponsibleEntities)
                                  .With(x => x.VersionNumber, (int?) null)
                                  .Create();
             var dbEntity = entity.ToDatabase();
@@ -123,7 +116,7 @@ namespace PatchesApi.Tests.V1.Gateways
 
 
             var query = ConstructUpdateQuery(entity.Id, Guid.NewGuid());
-            var request = ConstructUpdateRequest();
+            var request = ConstructUpdateRequest(query.ResponsibileEntityId);
             dbEntity.VersionNumber = 0;
 
             var result = await _classUnderTest.UpdatePatchResponsibilities(query, request, 0).ConfigureAwait(false);
@@ -139,14 +132,15 @@ namespace PatchesApi.Tests.V1.Gateways
 
             var expected = new ResponsibleEntities()
             {
-                Id = query.Id,
+                Id = query.ResponsibileEntityId,
                 Name = request.Name,
                 ResponsibleType = request.ResponsibleType
 
             };
             load.ResponsibleEntities.Should().ContainEquivalentOf(expected);
-            load.ResponsibleEntities.Except(load.ResponsibleEntities.Where(x => x.Id == query.ResponsibileEntityId)).Should().BeEmpty();
         }
+
+
 
         [Theory]
         [InlineData(null)]
@@ -154,7 +148,9 @@ namespace PatchesApi.Tests.V1.Gateways
         public async Task UpdateTenureForPersonThrowsExceptionOnVersionConflict(int? ifMatch)
         {
             // Arrange
-            var entity = _fixture.Create<PatchEntity>();
+            var entity = _fixture.Build<PatchEntity>()
+                                 .With(x => x.VersionNumber, (int?) null)
+                                 .Create();
 
             var query = ConstructUpdateQuery(entity.Id, entity.ResponsibleEntities.First().Id);
             var dbEntity = entity.ToDatabase();
@@ -162,7 +158,7 @@ namespace PatchesApi.Tests.V1.Gateways
             await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
             entity.VersionNumber = 0;
 
-            var constructRequest = ConstructUpdateRequest();
+            var constructRequest = ConstructUpdateRequest(query.ResponsibileEntityId);
 
             //Act
             Func<Task<PatchesDb>> func = async () => await _classUnderTest.UpdatePatchResponsibilities(query, constructRequest, ifMatch)

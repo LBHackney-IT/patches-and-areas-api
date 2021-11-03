@@ -91,10 +91,7 @@ namespace PatchesApi.V1.Controllers
             {
                 return Conflict(vncErr.Message);
             }
-            catch(ResponsibilityEntityException reErr)
-            {
-                return Conflict(reErr.Message);
-            }
+
         }
 
         private int? GetIfMatchFromHeader()
