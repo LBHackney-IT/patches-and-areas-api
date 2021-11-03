@@ -12,6 +12,7 @@ using Xunit;
 using System.Collections.Generic;
 using PatchesApi.V1.Infrastructure;
 using PatchesApi.V1.Factories;
+using System.Threading;
 
 namespace PatchesApi.Tests.V1.Gateways
 {
@@ -92,6 +93,7 @@ namespace PatchesApi.Tests.V1.Gateways
         public async Task GetByParentIdReturnsEmptyIfNoRecords()
         {
             var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
+            Thread.Sleep(5000);
             var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
             response.Should().BeEmpty();
 
@@ -107,7 +109,7 @@ namespace PatchesApi.Tests.V1.Gateways
             patches.AddRange(_fixture.Build<PatchesDb>()
                                   .With(x => x.ParentId, parentid)
                                   .CreateMany(5));
-            InsertListDatatoDynamoDB(patches);
+            await InsertListDatatoDynamoDB(patches).ConfigureAwait(false);
 
             var query = new GetPatchByParentIdQuery() { ParentId = parentid };
             var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
@@ -123,12 +125,14 @@ namespace PatchesApi.Tests.V1.Gateways
             _cleanup.Add(async () => await _dynamoDb.DeleteAsync(dbEntity).ConfigureAwait(false));
         }
 
-        private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
+        private async Task InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
         {
             foreach (var patch in dbEntity)
             {
-                _dynamoDb.SaveAsync(patch);
+                await _dynamoDb.SaveAsync(patch).ConfigureAwait(false);
                 _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
+                //Thread.Sleep(5000);
+
             }
         }
 

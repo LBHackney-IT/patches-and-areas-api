@@ -25,7 +25,8 @@ namespace PatchesApi.Tests
                 Name = "Patches",
                 KeyName = "id",
                 KeyType = ScalarAttributeType.S,
-
+                //RangeKeyName = "parentId",
+                //RangeKeyType = ScalarAttributeType.S,
                 GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>(new[]
                 {
                     new GlobalSecondaryIndex
@@ -33,7 +34,8 @@ namespace PatchesApi.Tests
                         IndexName = "PatchByParentId",
                         KeySchema = new List<KeySchemaElement>(new[]
                         {
-                            new KeySchemaElement("parentId", KeyType.HASH)
+                            new KeySchemaElement("id", KeyType.HASH),
+                            new KeySchemaElement("parentId", KeyType.RANGE)
                         }),
                         ProvisionedThroughput = new ProvisionedThroughput
                         {

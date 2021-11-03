@@ -10,6 +10,7 @@ using PatchesApi.V1.Boundary.Response;
 using PatchesApi.V1.Boundary.Request;
 using Amazon.DynamoDBv2.DocumentModel;
 using System.Linq;
+using System.Threading;
 
 namespace PatchesApi.V1.Gateways
 {

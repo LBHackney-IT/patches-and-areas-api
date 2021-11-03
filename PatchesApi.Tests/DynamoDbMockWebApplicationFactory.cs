@@ -58,8 +58,12 @@ namespace PatchesApi.Tests
 
                     var keySchema = new List<KeySchemaElement> { new KeySchemaElement(table.KeyName, KeyType.HASH) };
                     var attributes = new List<AttributeDefinition> { new AttributeDefinition(table.KeyName, table.KeyType) };
-
-                    var indexKey = table.GlobalSecondaryIndexes.SelectMany(x => x.KeySchema).FirstOrDefault(y => y.KeyType == KeyType.HASH);
+                    //if (!string.IsNullOrEmpty(table.RangeKeyName))
+                    //{
+                    //    keySchema.Add(new KeySchemaElement(table.RangeKeyName, KeyType.RANGE));
+                    //    attributes.Add(new AttributeDefinition(table.RangeKeyName, table.RangeKeyType));
+                    //}
+                    var indexKey = table.GlobalSecondaryIndexes.SelectMany(x => x.KeySchema).FirstOrDefault(y => y.KeyType == KeyType.RANGE);
                     if (null != indexKey)
                         attributes.Add(new AttributeDefinition(indexKey.AttributeName, ScalarAttributeType.S));
                     var update = new CreateTableRequest(table.Name,

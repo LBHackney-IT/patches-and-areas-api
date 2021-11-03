@@ -12,6 +12,7 @@ namespace PatchesApi.V1.Infrastructure
         [DynamoDBHashKey]
         public Guid Id { get; set; }
 
+        //[DynamoDBRangeKey]
         [DynamoDBGlobalSecondaryIndexHashKey]
         public Guid ParentId { get; set; }
 
