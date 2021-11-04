@@ -19,6 +19,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
         public string InvalidId { get; private set; }
         public Guid ResponsibleId { get; private set; }
 
+
         public UpdatePatchesResponsibilitiesRequestObject UpdateResponsibleRequestObject
         { get; private set; }
 
@@ -96,10 +97,15 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
             }
         }
 
+
+
         public void GivenAnUpdatePatchWithNewResponsibleEntityRequestWithValidationError()
         {
             var request = new UpdatePatchesResponsibilitiesRequestObject();
+            Id = Guid.Empty;
             UpdateResponsibleRequestObject = request;
         }
+
+
     }
 }
