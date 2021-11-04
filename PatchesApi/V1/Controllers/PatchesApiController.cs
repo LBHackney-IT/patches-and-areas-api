@@ -71,7 +71,8 @@ namespace PatchesApi.V1.Controllers
         public async Task<IActionResult> GetByParentIdAsync([FromQuery] GetPatchByParentIdQuery query)
         {
             var patch = await _getPatchByParentIdUseCase.ExecuteAsync(query).ConfigureAwait(false);
-            if (patch == null) return NotFound(query.ParentId);
+            if (patch == null || patch.Count == 0) return NotFound(query.ParentId);
+
 
             return Ok(patch);
         }

@@ -4,6 +4,7 @@ using PatchesApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PatchesApi.Tests.V1.E2ETests.Fixtures
@@ -13,6 +14,8 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
         private readonly Fixture _fixture = new Fixture();
         public readonly IDynamoDBContext _dbContext;
         public PatchesDb PatchesDb { get; private set; }
+
+        public List<PatchesDb> PatchesDbList { get; private set; }
 
         public Guid Id { get; private set; }
         public Guid ParentId { get; private set; }
@@ -57,6 +60,25 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
             }
         }
 
+        public void GivenAPatchListAlreadyExists()
+        {
+            var parentid = Guid.NewGuid();
+            var patches = new List<PatchesDb>();
+
+            patches.AddRange(_fixture.Build<PatchesDb>()
+                                  .With(x => x.ParentId, parentid)
+                                  .With(x => x.VersionNumber, (int?) null)
+
+                                  .CreateMany(5));
+
+            foreach (var patch in patches)
+            {
+                _dbContext.SaveAsync(patch).GetAwaiter().GetResult();
+                Thread.Sleep(1000);
+            }
+            PatchesDbList = patches;
+            ParentId = parentid;
+        }
         public void GivenAPatchDoesNotExist()
         {
             Id = Guid.NewGuid();

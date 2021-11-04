@@ -22,18 +22,14 @@ namespace PatchesApi.Tests.V1.E2ETests.Steps
             _lastResponse = await _httpClient.GetAsync(uri).ConfigureAwait(false);
         }
 
-        public async Task ThenThePatchDetailsAreReturned(PatchesDb patchesDb)
+        public async Task ThenThePatchDetailsAreReturned(List<PatchesDb> patchesDb)
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             var responseContent = await _lastResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var apiPatch = JsonSerializer.Deserialize<PatchesResponseObject>(responseContent, CreateJsonOptions());
+            var apiPatch = JsonSerializer.Deserialize<List<PatchesResponseObject>>(responseContent, CreateJsonOptions());
 
-            apiPatch.Should().BeEquivalentTo(patchesDb, config => config.Excluding(y => y.VersionNumber));
-            var expectedEtagValue = $"\"{patchesDb.VersionNumber}\"";
-            _lastResponse.Headers.ETag.Tag.Should().Be(expectedEtagValue);
-            var eTagHeaders = _lastResponse.Headers.GetValues(HeaderConstants.ETag);
-            eTagHeaders.Count().Should().Be(1);
-            eTagHeaders.First().Should().Be(expectedEtagValue);
+            apiPatch.Should().BeEquivalentTo(patchesDb, config => config.Excluding(x => x.VersionNumber));
+
         }
 
 

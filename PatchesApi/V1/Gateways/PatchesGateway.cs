@@ -56,7 +56,7 @@ namespace PatchesApi.V1.Gateways
             {
                 IndexName = GETPATCHBYPARENTIDINDEX,
                 BackwardSearch = true,
-                ConsistentRead = true,
+                ConsistentRead = false,
                 Limit = int.MaxValue,
                 FilterExpression = filterExpression,
                 KeyExpression = keyExpression,
@@ -76,7 +76,7 @@ namespace PatchesApi.V1.Gateways
 
 
 
-            return (List<PatchEntity>) patchDb.Select(x => x.ToDomain());
+            return (List<PatchEntity>) patchDb.Select(x => x.ToDomain()).ToList();
         }
     }
 }

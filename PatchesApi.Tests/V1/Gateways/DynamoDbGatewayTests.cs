@@ -108,8 +108,10 @@ namespace PatchesApi.Tests.V1.Gateways
 
             patches.AddRange(_fixture.Build<PatchesDb>()
                                   .With(x => x.ParentId, parentid)
+                                  .With(x => x.VersionNumber, (int?) null)
+
                                   .CreateMany(5));
-            await InsertListDatatoDynamoDB(patches).ConfigureAwait(false);
+            InsertListDatatoDynamoDB(patches);
 
             var query = new GetPatchByParentIdQuery() { ParentId = parentid };
             var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
@@ -125,17 +127,17 @@ namespace PatchesApi.Tests.V1.Gateways
             _cleanup.Add(async () => await _dynamoDb.DeleteAsync(dbEntity).ConfigureAwait(false));
         }
 
-        private async Task InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
+        private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
         {
             foreach (var patch in dbEntity)
             {
-                await _dynamoDb.SaveAsync(patch).ConfigureAwait(false);
+                _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
+                Thread.Sleep(1000);
                 _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
-                //Thread.Sleep(5000);
 
             }
         }
 
-        
+
     }
 }

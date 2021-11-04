@@ -47,9 +47,9 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
         [Fact]
         public void ServiceReturnsTheRequestedPatch()
         {
-            this.Given(g => _patchFixtures.GivenAPatchAlreadyExists())
+            this.Given(g => _patchFixtures.GivenAPatchListAlreadyExists())
                 .When(w => _steps.WhenPatchDetailsAreRequested(_patchFixtures.ParentId.ToString()))
-                .Then(t => _steps.ThenThePatchDetailsAreReturned(_patchFixtures.PatchesDb))
+                .Then(t => _steps.ThenThePatchDetailsAreReturned(_patchFixtures.PatchesDbList))
                 .BDDfy();
         }
 
