@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using PatchesApi.V1.Infrastructure;
 using PatchesApi.V1.Factories;
 using System.Threading;
+using Amazon.DynamoDBv2.DocumentModel;
 
 namespace PatchesApi.Tests.V1.Gateways
 {
@@ -108,6 +109,7 @@ namespace PatchesApi.Tests.V1.Gateways
 
             patches.AddRange(_fixture.Build<PatchesDb>()
                                   .With(x => x.ParentId, parentid)
+                                  .With(x => x.VersionNumber,(int?)null)
                                   .CreateMany(5));
             await InsertListDatatoDynamoDB(patches).ConfigureAwait(false);
 
@@ -130,9 +132,9 @@ namespace PatchesApi.Tests.V1.Gateways
             foreach (var patch in dbEntity)
             {
                 await _dynamoDb.SaveAsync(patch).ConfigureAwait(false);
-                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
-                //Thread.Sleep(5000);
 
+                Thread.Sleep(1000);
+                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
             }
         }
 
