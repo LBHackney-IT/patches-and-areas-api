@@ -1,11 +1,11 @@
 version: "3.2"
 
 services:
-  patches-api:
-    image: patches-api
+  patches-and-areas-api:
+    image: patches-and-areas-api
     build:
       context: .
-      dockerfile: PatchesApi/Dockerfile
+      dockerfile: PatchesAndAreasApi/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     ports:
@@ -19,11 +19,11 @@ services:
     links:
       - dynamodb-database
 
-  patches-api-test:
-    image: patches-api-test
+  patches-and-areas-api-test:
+    image: patches-and-areas-api-test
     build:
       context: .
-      dockerfile: PatchesApi.Tests/Dockerfile
+      dockerfile: PatchesAndAreasApi.Tests/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     environment:

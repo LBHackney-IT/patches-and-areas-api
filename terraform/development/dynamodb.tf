@@ -1,4 +1,4 @@
-resource "aws_dynamodb_table" "patchesapi_dynamodb_table" {
+resource "aws_dynamodb_table" "PatchesAndAreasApi_dynamodb_table" {
   name           = "Patches"
   billing_mode   = "PROVISIONED"
   read_capacity  = 10
