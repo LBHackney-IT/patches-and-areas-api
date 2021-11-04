@@ -136,19 +136,6 @@ namespace PatchesApi.Tests.V1.Gateways
             }
         }
 
-        //private List<PatchesDb> AddPatchByParentIdtoDb(PatchesDb patchesDb)
-        //{
-        //    var patches = new List<PatchesDb>();
-
-
-
-        //    foreach (var patch in patches)
-        //    {
-        //        _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
-        //        _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch, default).ConfigureAwait(false));
-        //    }
-
-        //    return patches;
-        //}
+        
     }
 }
