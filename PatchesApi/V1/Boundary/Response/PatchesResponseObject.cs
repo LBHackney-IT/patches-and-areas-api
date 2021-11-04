@@ -1,5 +1,6 @@
 using PatchesApi.V1.Domain;
 using System;
+using System.Collections.Generic;
 
 namespace PatchesApi.V1.Boundary.Response
 {
@@ -10,7 +11,7 @@ namespace PatchesApi.V1.Boundary.Response
         public string Name { get; set; }
         public PatchType PatchType { get; set; }
         public string Domain { get; set; }
-        public ResponsibleEntities ResponsibleEntities { get; set; }
+        public List<ResponsibleEntities> ResponsibleEntities { get; set; }
 
     }
 }

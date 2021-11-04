@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using PatchesApi.V1.Factories;
 using System.Net.Http.Headers;
 using PatchesApi.V1.Infrastructure;
+using PatchesApi.V1.Infrastructure.Exceptions;
 
 namespace PatchesApi.V1.Controllers
 {
@@ -19,9 +20,11 @@ namespace PatchesApi.V1.Controllers
     public class PatchesApiController : BaseController
     {
         private readonly IGetPatchByIdUseCase _getByIdUseCase;
-        public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase)
+        private readonly IDeleteResponsibilityFromPatchUseCase _deleteResponsibilityFromPatchUseCase;
+        public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase)
         {
             _getByIdUseCase = getByIdUseCase;
+            _deleteResponsibilityFromPatchUseCase = deleteResponsibilityFromPatchUseCase;
         }
 
 
@@ -51,6 +54,30 @@ namespace PatchesApi.V1.Controllers
             HttpContext.Response.Headers.Add(HeaderConstants.ETag, EntityTagHeaderValue.Parse($"\"{eTag}\"").Tag);
 
             return Ok(patch.ToResponse());
+        }
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpDelete]
+        [Route("{id}/responsibleEntity/{responsibileEntityId}")]
+        [LogCall(LogLevel.Information)]
+        public async Task<IActionResult> DeleteResponsibilityFromPatch([FromRoute] DeleteResponsibilityFromPatchRequest query)
+        {
+            try
+            {
+                await _deleteResponsibilityFromPatchUseCase.Execute(query).ConfigureAwait(false);
+                return NoContent();
+            }
+            catch (PatchNotFoundException)
+            {
+                return NotFound(query.Id);
+            }
+            catch (ResponsibileIdNotFoundInPatchException)
+            {
+                return NotFound(query.ResponsibileEntityId);
+            }
         }
     }
 }

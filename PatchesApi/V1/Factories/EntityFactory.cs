@@ -30,7 +30,7 @@ namespace PatchesApi.V1.Factories
                 Name = entity.Name,
                 Domain = entity.Domain,
                 PatchType = entity.PatchType,
-                ResponsibleEntities = entity.ResponsibleEntities,
+                ResponsibleEntities = entity.ResponsibleEntities.ToListOrEmpty(),
                 VersionNumber = entity.VersionNumber
             };
         }

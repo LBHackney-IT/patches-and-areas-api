@@ -16,6 +16,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using PatchesApi.V1.Infrastructure.Exceptions;
 
 namespace PatchesApi.Tests.V1.Controllers
 {
@@ -24,6 +25,7 @@ namespace PatchesApi.Tests.V1.Controllers
     {
         private PatchesApiController _classUnderTest;
         private Mock<IGetPatchByIdUseCase> _mockGetByIdUseCase;
+        private Mock<IDeleteResponsibilityFromPatchUseCase> _mockDeleteResponsibilityFromPatchUseCase;
         private readonly Fixture _fixture = new Fixture();
 
 
@@ -33,7 +35,8 @@ namespace PatchesApi.Tests.V1.Controllers
             var controllerContext = new ControllerContext(new ActionContext(stubHttpContext, new RouteData(), new ControllerActionDescriptor()));
 
             _mockGetByIdUseCase = new Mock<IGetPatchByIdUseCase>();
-            _classUnderTest = new PatchesApiController(_mockGetByIdUseCase.Object);
+            _mockDeleteResponsibilityFromPatchUseCase = new Mock<IDeleteResponsibilityFromPatchUseCase>();
+            _classUnderTest = new PatchesApiController(_mockGetByIdUseCase.Object, _mockDeleteResponsibilityFromPatchUseCase.Object);
             _classUnderTest.ControllerContext = controllerContext;
 
         }
@@ -89,6 +92,59 @@ namespace PatchesApi.Tests.V1.Controllers
 
             // Assert
             func.Should().Throw<ApplicationException>().WithMessage(exception.Message);
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatchDoesntExistReturnsNotFound()
+        {
+            // Arrange
+            var mockQuery = _fixture.Create<DeleteResponsibilityFromPatchRequest>();
+
+            var exception = new PatchNotFoundException();
+
+            _mockDeleteResponsibilityFromPatchUseCase
+                .Setup(x => x.Execute(It.IsAny<DeleteResponsibilityFromPatchRequest>()))
+                .ThrowsAsync(exception);
+
+            // Act
+            var result = await _classUnderTest.DeleteResponsibilityFromPatch(mockQuery).ConfigureAwait(false);
+
+            // Assert
+            result.Should().BeOfType(typeof(NotFoundObjectResult));
+            (result as NotFoundObjectResult).Value.Should().Be(mockQuery.Id);
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatcheWhenResponsibilityDoesntExistInPatchReturnsNotFound()
+        {
+            // Arrange
+            var mockQuery = _fixture.Create<DeleteResponsibilityFromPatchRequest>();
+
+            var exception = new ResponsibileIdNotFoundInPatchException();
+
+            _mockDeleteResponsibilityFromPatchUseCase
+                .Setup(x => x.Execute(It.IsAny<DeleteResponsibilityFromPatchRequest>()))
+                .ThrowsAsync(exception);
+
+            // Act
+            var result = await _classUnderTest.DeleteResponsibilityFromPatch(mockQuery).ConfigureAwait(false);
+
+            // Assert
+            result.Should().BeOfType(typeof(NotFoundObjectResult));
+            (result as NotFoundObjectResult).Value.Should().Be(mockQuery.ResponsibileEntityId);
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatchWhenResponsibilityExistsReturnsNoContentResponseAsync()
+        {
+            // Arrange
+            var mockQuery = _fixture.Create<DeleteResponsibilityFromPatchRequest>();
+
+            // Act
+            var result = await _classUnderTest.DeleteResponsibilityFromPatch(mockQuery).ConfigureAwait(false);
+
+            // Assert
+            result.Should().BeOfType(typeof(NoContentResult));
         }
 
     }

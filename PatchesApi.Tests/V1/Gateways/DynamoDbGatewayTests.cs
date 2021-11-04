@@ -12,6 +12,8 @@ using Xunit;
 using System.Collections.Generic;
 using PatchesApi.V1.Infrastructure;
 using PatchesApi.V1.Factories;
+using PatchesApi.V1.Infrastructure.Exceptions;
+using System.Linq;
 
 namespace PatchesApi.Tests.V1.Gateways
 {
@@ -22,6 +24,8 @@ namespace PatchesApi.Tests.V1.Gateways
         private readonly IDynamoDBContext _dynamoDb;
         private PatchesGateway _classUnderTest;
         private readonly List<Action> _cleanup = new List<Action>();
+        private readonly Random _random = new Random();
+
 
 
         private Mock<ILogger<PatchesGateway>> _logger;
@@ -86,6 +90,80 @@ namespace PatchesApi.Tests.V1.Gateways
             var result = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
             result.Should().BeEquivalentTo(dbEntity, config => config.Excluding(y => y.VersionNumber));
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatchWhenPatchDoesntExistThrowsException()
+        {
+            // Arrange
+            var mockRequest = _fixture.Create<DeleteResponsibilityFromPatchRequest>();
+
+            // Act
+            Func<Task> func = async () => await _classUnderTest.DeleteResponsibilityFromPatch(mockRequest).ConfigureAwait(false);
+
+            // Assert
+            await func.Should().ThrowAsync<PatchNotFoundException>().ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatchWhenResponsibilityNotInPatchThrowsException()
+        {
+            // Arrange
+            var mockPatch = _fixture.Build<PatchEntity>()
+                .With(x => x.ResponsibleEntities, new List<ResponsibleEntities>()) // empty list
+                .With(x => x.VersionNumber, (int?) null)
+                .Create();
+            var dbPatch = mockPatch.ToDatabase();
+
+            await InsertDatatoDynamoDB(dbPatch).ConfigureAwait(false);
+
+            var mockRequest = new DeleteResponsibilityFromPatchRequest
+            {
+                Id = mockPatch.Id,
+                ResponsibileEntityId = _fixture.Create<Guid>()
+            };
+
+            // Act
+            Func<Task> func = async () => await _classUnderTest.DeleteResponsibilityFromPatch(mockRequest).ConfigureAwait(false);
+
+            // Assert
+            await func.Should().ThrowAsync<ResponsibileIdNotFoundInPatchException>().ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatchWhenCalledRemovesSuccessfully()
+        {
+            // Arrange
+            var numberOfResponsibilities = _random.Next(2, 5);
+            var mockResponsibileEntity = _fixture.Build<ResponsibleEntities>().CreateMany(numberOfResponsibilities);
+
+            var mockPatch = _fixture.Build<PatchEntity>()
+                .With(x => x.ResponsibleEntities, mockResponsibileEntity)
+                .With(x => x.VersionNumber, (int?) null)
+                .Create();
+
+            var responsibilityToRemove = mockResponsibileEntity.First();
+            var dbEntity = mockPatch.ToDatabase();
+            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+
+            var mockRequest = new DeleteResponsibilityFromPatchRequest
+            {
+                Id = mockPatch.Id,
+                ResponsibileEntityId = responsibilityToRemove.Id
+            };
+
+            // Act
+            Func<Task> func = async () => await _classUnderTest.DeleteResponsibilityFromPatch(mockRequest).ConfigureAwait(false);
+
+            // Assert
+            // no exception of any kind thrown
+            await func.Should().NotThrowAsync<Exception>().ConfigureAwait(false);
+
+            // check database
+            var databaseResponse = await _dynamoDb.LoadAsync<PatchesDb>(mockPatch.Id).ConfigureAwait(false);
+            databaseResponse.ResponsibleEntities.Should().HaveCount(numberOfResponsibilities - 1);
+
+            databaseResponse.ResponsibleEntities.Should().NotContain(x => x.Id == responsibilityToRemove.Id);
         }
 
         private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
