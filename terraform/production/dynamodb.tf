@@ -9,6 +9,18 @@ resource "aws_dynamodb_table" "patchesapi_dynamodb_table" {
     name = "id"
     type = "S"
   }
+  
+  attribute {
+    name = "parentId"
+    type = "S"
+  }
+  global_secondary_index {
+    name               = "PatchByParentId"
+    hash_key           = "parentId"
+    write_capacity     = 10
+    read_capacity      = 10
+    projection_type    = "ALL"
+  }
 
   tags = merge(
     local.default_tags,

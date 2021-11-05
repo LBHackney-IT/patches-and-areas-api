@@ -12,6 +12,7 @@ using Xunit;
 using System.Collections.Generic;
 using PatchesApi.V1.Infrastructure;
 using PatchesApi.V1.Factories;
+using System.Threading;
 
 namespace PatchesApi.Tests.V1.Gateways
 {
@@ -88,10 +89,54 @@ namespace PatchesApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
         }
 
+        [Fact]
+        public async Task GetByParentIdReturnsEmptyIfNoRecords()
+        {
+            var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
+            Thread.Sleep(5000);
+            var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
+            response.Should().BeEmpty();
+
+            _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
+        }
+
+        [Fact]
+        public async Task GetByParentIdReturnsRecords()
+        {
+            var parentid = Guid.NewGuid();
+            var patches = new List<PatchesDb>();
+
+            patches.AddRange(_fixture.Build<PatchesDb>()
+                                  .With(x => x.ParentId, parentid)
+                                  .With(x => x.VersionNumber, (int?) null)
+
+                                  .CreateMany(5));
+            InsertListDatatoDynamoDB(patches);
+
+            var query = new GetPatchByParentIdQuery() { ParentId = parentid };
+            var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
+            response.Should().NotBeNull();
+            response.Should().BeEquivalentTo(patches);
+
+            _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
+        }
+
         private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
         {
             await _dynamoDb.SaveAsync<PatchesDb>(dbEntity).ConfigureAwait(false);
             _cleanup.Add(async () => await _dynamoDb.DeleteAsync(dbEntity).ConfigureAwait(false));
         }
+
+        private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
+        {
+            foreach (var patch in dbEntity)
+            {
+                _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
+                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
+
+            }
+        }
+
+
     }
 }

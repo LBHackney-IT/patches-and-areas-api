@@ -4,6 +4,7 @@ using PatchesApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PatchesApi.Tests.V1.E2ETests.Fixtures
@@ -14,8 +15,12 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
         public readonly IDynamoDBContext _dbContext;
         public PatchesDb PatchesDb { get; private set; }
 
+        public List<PatchesDb> PatchesDbList { get; private set; }
+
         public Guid Id { get; private set; }
+        public Guid ParentId { get; private set; }
         public string InvalidId { get; private set; }
+        public string InvalidParentId { get; private set; }
 
         public PatchesFixtures(IDynamoDBContext dbContext)
         {
@@ -51,17 +56,39 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
                 _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
                 PatchesDb = patch;
                 Id = patch.Id;
+                ParentId = patch.ParentId;
             }
         }
 
+        public void GivenAPatchListAlreadyExists()
+        {
+            var parentid = Guid.NewGuid();
+            var patches = new List<PatchesDb>();
+
+            patches.AddRange(_fixture.Build<PatchesDb>()
+                                  .With(x => x.ParentId, parentid)
+                                  .With(x => x.VersionNumber, (int?) null)
+
+                                  .CreateMany(5));
+
+            foreach (var patch in patches)
+            {
+                _dbContext.SaveAsync(patch).GetAwaiter().GetResult();
+                Thread.Sleep(1000);
+            }
+            PatchesDbList = patches;
+            ParentId = parentid;
+        }
         public void GivenAPatchDoesNotExist()
         {
             Id = Guid.NewGuid();
+            ParentId = Guid.NewGuid();
         }
 
         public void GivenAnInvalidId()
         {
             InvalidId = "1234567";
+            InvalidParentId = "1234567890";
         }
 
 
