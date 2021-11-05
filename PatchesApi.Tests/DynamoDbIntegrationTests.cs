@@ -87,8 +87,6 @@ namespace PatchesApi.Tests
         public string Name { get; set; }
         public string KeyName { get; set; }
         public ScalarAttributeType KeyType { get; set; }
-        public string RangeKeyName { get; set; }
-        public ScalarAttributeType RangeKeyType { get; set; }
         public List<GlobalSecondaryIndex> GlobalSecondaryIndexes { get; set; } = new List<GlobalSecondaryIndex>();
 
     }

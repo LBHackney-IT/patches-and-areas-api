@@ -40,8 +40,6 @@ namespace PatchesApi.V1.Gateways
         [LogCall]
         public async Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query)
         {
-
-
             var patchDb = new List<PatchesDb>();
 
             var filterExpression = new Expression();
@@ -73,10 +71,7 @@ namespace PatchesApi.V1.Gateways
                     patchDb.AddRange(_dynamoDbContext.FromDocuments<PatchesDb>(resultsSet));
                 }
             }
-
-
-
-            return (List<PatchEntity>) patchDb.Select(x => x.ToDomain()).ToList();
+            return patchDb.Select(x => x.ToDomain()).ToList();
         }
     }
 }

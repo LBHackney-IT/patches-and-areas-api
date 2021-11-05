@@ -132,7 +132,6 @@ namespace PatchesApi.Tests.V1.Gateways
             foreach (var patch in dbEntity)
             {
                 _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
-                Thread.Sleep(1000);
                 _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
 
             }
