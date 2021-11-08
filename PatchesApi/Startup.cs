@@ -160,6 +160,7 @@ namespace PatchesApi
         {
             services.AddScoped<IGetPatchByIdUseCase, GetPatchByIdUseCase>();
             services.AddScoped<IUpdatePatchResponsibilitiesUseCase, UpdatePatchResponsibilitiesUseCase>();
+            services.AddScoped<IGetPatchByParentIdUseCase, GetPatchByParentIdUseCase>();
 
         }
 

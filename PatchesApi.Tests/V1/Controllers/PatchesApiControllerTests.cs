@@ -21,6 +21,7 @@ using PatchesApi.V1.Boundary.Response;
 using PatchesApi.V1.Infrastructure.Exceptions;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
 
 namespace PatchesApi.Tests.V1.Controllers
 {
@@ -37,6 +38,7 @@ namespace PatchesApi.Tests.V1.Controllers
 
         private PatchesApiController _classUnderTest;
 
+        private Mock<IGetPatchByParentIdUseCase> _mockGetByParentIdUseCase;
         private readonly Fixture _fixture = new Fixture();
 
 
@@ -67,6 +69,8 @@ namespace PatchesApi.Tests.V1.Controllers
 
 
             var controllerContext = new ControllerContext(new ActionContext(mockHttpContext.Object, new RouteData(), new ControllerActionDescriptor()));
+            _mockGetByParentIdUseCase = new Mock<IGetPatchByParentIdUseCase>();
+            _classUnderTest = new PatchesApiController(_mockGetByIdUseCase.Object, _mockGetByParentIdUseCase.Object);
             _classUnderTest.ControllerContext = controllerContext;
 
         }
@@ -80,11 +84,16 @@ namespace PatchesApi.Tests.V1.Controllers
         {
             return new UpdatePatchesResponsibilityRequest() { Id = Guid.NewGuid(), ResponsibileEntityId = Guid.NewGuid() };
         }
+      
         private UpdatePatchesResponsibilitiesRequestObject ConstructUpdateRequest()
         {
             var request = _fixture.Create<UpdatePatchesResponsibilitiesRequestObject>();
 
             return request;
+          
+        private GetPatchByParentIdQuery ConstructQueryParameter()
+        {
+            return new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
         }
 
         [Fact]
@@ -157,7 +166,7 @@ namespace PatchesApi.Tests.V1.Controllers
         }
 
         [Fact]
-        public async Task UpdateTenureForPersonAsyncNotFoundReturnsNotFound()
+        public async Task UpdatePatchByResponsibilityAsyncNotFoundReturnsNotFound()
         {
             // Arrange
             var query = ConstructUpdateQuery();
@@ -174,7 +183,7 @@ namespace PatchesApi.Tests.V1.Controllers
         }
 
         [Fact]
-        public void UpdateTenureForPersonAsyncExceptionIsThrown()
+        public void UpdatePatchByResponsibilityAsyncExceptionIsThrown()
         {
             // Arrange
             var query = ConstructUpdateQuery();
@@ -185,6 +194,45 @@ namespace PatchesApi.Tests.V1.Controllers
             // Act
             Func<Task<IActionResult>> func = async () => await _classUnderTest.UpdatePatchForResponsibility(query, new UpdatePatchesResponsibilitiesRequestObject())
                 .ConfigureAwait(false);
+        public async Task GetPatchByParentIdNotFoundReturnsNotFound()
+        {
+            var queryParam = ConstructQueryParameter();
+            _mockGetByParentIdUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync((List<PatchEntity>) null);
+
+            // Act
+            var response = await _classUnderTest.GetByParentIdAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(NotFoundObjectResult));
+            (response as NotFoundObjectResult).Value.Should().Be(queryParam.ParentId);
+        }
+
+        [Fact]
+        public async Task GetPatchByParentIdFoundReturnsResponse()
+        {
+            // Arrange
+            var queryParam = ConstructQueryParameter();
+            var patchResponseList = _fixture.Create<List<PatchEntity>>();
+            _mockGetByParentIdUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync(patchResponseList);
+
+            // Act
+            var response = await _classUnderTest.GetByParentIdAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(OkObjectResult));
+            (response as OkObjectResult).Value.Should().BeEquivalentTo(patchResponseList.ToResponse());
+        }
+
+        [Fact]
+        public void GetPatchByParentIdExceptionIsThrown()
+        {
+            // Arrange
+            var queryParam = ConstructQueryParameter();
+            var exception = new ApplicationException("Test exception");
+            _mockGetByParentIdUseCase.Setup(x => x.ExecuteAsync(queryParam)).ThrowsAsync(exception);
+
+            // Act
+            Func<Task<IActionResult>> func = async () => await _classUnderTest.GetByParentIdAsync(queryParam).ConfigureAwait(false);
 
             // Assert
             func.Should().Throw<ApplicationException>().WithMessage(exception.Message);
@@ -213,6 +261,5 @@ namespace PatchesApi.Tests.V1.Controllers
             result.Should().BeOfType(typeof(ConflictObjectResult));
             (result as ConflictObjectResult).Value.Should().BeEquivalentTo(exception.Message);
         }
-
     }
 }

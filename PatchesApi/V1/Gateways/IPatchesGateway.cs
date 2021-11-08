@@ -14,6 +14,8 @@ namespace PatchesApi.V1.Gateways
         Task<PatchEntity> GetPatchByIdAsync(PatchesQueryObject query);
         Task<PatchesDb> UpdatePatchResponsibilities(UpdatePatchesResponsibilityRequest query, UpdatePatchesResponsibilitiesRequestObject requestObject,
                                                                                          int? ifMatch);
+        Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query);
+
 
     }
 }
