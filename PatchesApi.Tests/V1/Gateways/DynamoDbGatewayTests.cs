@@ -14,8 +14,6 @@ using PatchesApi.V1.Infrastructure;
 using PatchesApi.V1.Factories;
 using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Linq;
-using System.Linq;
-using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Threading;
 
 namespace PatchesApi.Tests.V1.Gateways
@@ -185,9 +183,9 @@ namespace PatchesApi.Tests.V1.Gateways
             databaseResponse.ResponsibleEntities.Should().HaveCount(numberOfResponsibilities - 1);
 
             databaseResponse.ResponsibleEntities.Should().NotContain(x => x.Id == responsibilityToRemove.Id);
-      
-      [Fact]
-      public async Task UpdatePatchWithNewResponsibileEntitySuccessfullyUpdates()
+        }
+        [Fact]
+        public async Task UpdatePatchWithNewResponsibileEntitySuccessfullyUpdates()
         {
             //Arrange
             var entity = _fixture.Build<PatchEntity>()

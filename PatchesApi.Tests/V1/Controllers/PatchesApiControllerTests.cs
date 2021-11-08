@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using PatchesApi.V1.Infrastructure.Exceptions;
 using Hackney.Core.Http;
 using PatchesApi.V1.Boundary.Response;
-using PatchesApi.V1.Infrastructure.Exceptions;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -205,6 +204,7 @@ namespace PatchesApi.Tests.V1.Controllers
             result.Should().BeOfType(typeof(NoContentResult));
         }
 
+        [Fact]
         public async Task UpdatePatchByResponsibilityAsyncFoundReturnsFound()
         {
             // Arrange

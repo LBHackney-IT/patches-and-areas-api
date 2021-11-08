@@ -14,7 +14,6 @@ using Hackney.Core.Http;
 using Hackney.Core.JWT;
 using Hackney.Core.Middleware;
 using HeaderConstants = PatchesApi.V1.Infrastructure.HeaderConstants;
-using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Collections.Generic;
 
 namespace PatchesApi.V1.Controllers
@@ -32,7 +31,7 @@ namespace PatchesApi.V1.Controllers
         private readonly IHttpContextWrapper _contextWrapper;
 
         public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IUpdatePatchResponsibilitiesUseCase updatePatchResponsibilities,
-            IGetPatchByParentIdUseCase getPatchByParentIdUseCase,IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
+            IGetPatchByParentIdUseCase getPatchByParentIdUseCase, IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
             IHttpContextWrapper contextWrapper)
         {
             _getByIdUseCase = getByIdUseCase;
@@ -92,7 +91,7 @@ namespace PatchesApi.V1.Controllers
             {
                 return NotFound(query.ResponsibileEntityId);
             }
-
+        }
         [HttpPatch]
         [Route("{id}/responsibleEntity/{responsibileEntityId}")]
         [LogCall(LogLevel.Information)]

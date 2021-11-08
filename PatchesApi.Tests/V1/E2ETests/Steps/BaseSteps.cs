@@ -28,13 +28,6 @@ namespace PatchesApi.Tests.V1.E2ETests.Steps
             GC.SuppressFinalize(this);
         }
 
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected bool _disposed;
         protected virtual void Dispose(bool disposing)
         {
