@@ -14,6 +14,9 @@ using PatchesApi.V1.Infrastructure;
 using PatchesApi.V1.Factories;
 using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Linq;
+using System.Linq;
+using PatchesApi.V1.Infrastructure.Exceptions;
+using System.Threading;
 
 namespace PatchesApi.Tests.V1.Gateways
 {
@@ -60,16 +63,31 @@ namespace PatchesApi.Tests.V1.Gateways
             return new PatchesQueryObject() { Id = id };
         }
 
+        private UpdatePatchesResponsibilityRequest ConstructUpdateQuery(Guid id, Guid responsibilityId)
+        {
+            return new UpdatePatchesResponsibilityRequest() { Id = id, ResponsibileEntityId = responsibilityId };
+        }
+        private UpdatePatchesResponsibilitiesRequestObject ConstructUpdateRequest(Guid responsibilityId)
+        {
+            var request = _fixture.Build<UpdatePatchesResponsibilitiesRequestObject>()
+                                  .With(x => x.Id, responsibilityId).Create();
+            return request;
+        }
+
+
         [Fact]
 
         public async Task GetPatchByIdReturnsNullIfEntityDoesntExist()
         {
+            //Arrange
             var entity = _fixture.Build<PatchEntity>()
                                  .With(x => x.VersionNumber, (int?) null)
                                  .Create();
             var query = ConstructQuery(entity.Id);
+            //Act
             var response = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
 
+            //Assert
             response.Should().BeNull();
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
 
@@ -78,6 +96,7 @@ namespace PatchesApi.Tests.V1.Gateways
         [Fact]
         public async Task GetPatchByIdReturnsThePatchIfItExists()
         {
+            //Arrange
             var entity = _fixture.Build<PatchEntity>()
                                  .With(x => x.VersionNumber, (int?) null)
                                  .Create();
@@ -86,8 +105,10 @@ namespace PatchesApi.Tests.V1.Gateways
             await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
 
             var query = ConstructQuery(entity.Id);
-
+            //Act
             var result = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
+
+            //Assert
             result.Should().BeEquivalentTo(dbEntity, config => config.Excluding(y => y.VersionNumber));
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
         }
@@ -164,12 +185,121 @@ namespace PatchesApi.Tests.V1.Gateways
             databaseResponse.ResponsibleEntities.Should().HaveCount(numberOfResponsibilities - 1);
 
             databaseResponse.ResponsibleEntities.Should().NotContain(x => x.Id == responsibilityToRemove.Id);
+      
+      [Fact]
+      public async Task UpdatePatchWithNewResponsibileEntitySuccessfullyUpdates()
+        {
+            //Arrange
+            var entity = _fixture.Build<PatchEntity>()
+                                 .With(x => x.VersionNumber, (int?) null)
+                                 .Create();
+            var dbEntity = entity.ToDatabase();
+            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+
+
+            var query = ConstructUpdateQuery(entity.Id, Guid.NewGuid());
+            var request = ConstructUpdateRequest(query.ResponsibileEntityId);
+            dbEntity.VersionNumber = 0;
+
+            //Act
+            var result = await _classUnderTest.UpdatePatchResponsibilities(query, request, 0).ConfigureAwait(false);
+
+            //Assert
+            var load = await _dynamoDb.LoadAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false);
+            _cleanup.Add(async () => await _dynamoDb.DeleteAsync<PatchesDb>(load.Id).ConfigureAwait(false));
+
+            //Updated tenure with new Household Member
+            result.Should().BeEquivalentTo(load, config => config.Excluding(y => y.VersionNumber));
+
+
+            load.VersionNumber.Should().Be(1);
+
+            var expected = new ResponsibleEntities()
+            {
+                Id = query.ResponsibileEntityId,
+                Name = request.Name,
+                ResponsibleType = request.ResponsibleType
+
+            };
+            load.ResponsibleEntities.Should().ContainEquivalentOf(expected);
+        }
+
+
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(5)]
+        public async Task UpdateTenureForPersonThrowsExceptionOnVersionConflict(int? ifMatch)
+        {
+            // Arrange
+            var entity = _fixture.Build<PatchEntity>()
+                                 .With(x => x.VersionNumber, (int?) null)
+                                 .Create();
+
+            var query = ConstructUpdateQuery(entity.Id, entity.ResponsibleEntities.First().Id);
+            var dbEntity = entity.ToDatabase();
+
+            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+            entity.VersionNumber = 0;
+
+            var constructRequest = ConstructUpdateRequest(query.ResponsibileEntityId);
+
+            //Act
+            Func<Task<PatchesDb>> func = async () => await _classUnderTest.UpdatePatchResponsibilities(query, constructRequest, ifMatch)
+                                                                                                   .ConfigureAwait(false);
+
+            // Assert
+            func.Should().Throw<VersionNumberConflictException>()
+                         .Where(x => (x.IncomingVersionNumber == ifMatch) && (x.ExpectedVersionNumber == 0));
+            _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
+        }
+
+        [Fact]
+        public async Task GetByParentIdReturnsEmptyIfNoRecords()
+        {
+            var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
+            Thread.Sleep(5000);
+            var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
+            response.Should().BeEmpty();
+
+            _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
+        }
+
+        [Fact]
+        public async Task GetByParentIdReturnsRecords()
+        {
+            var parentid = Guid.NewGuid();
+            var patches = new List<PatchesDb>();
+
+            patches.AddRange(_fixture.Build<PatchesDb>()
+                                  .With(x => x.ParentId, parentid)
+                                  .With(x => x.VersionNumber, (int?) null)
+
+                                  .CreateMany(5));
+            InsertListDatatoDynamoDB(patches);
+
+            var query = new GetPatchByParentIdQuery() { ParentId = parentid };
+            var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
+            response.Should().NotBeNull();
+            response.Should().BeEquivalentTo(patches);
+
+            _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
         private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
         {
             await _dynamoDb.SaveAsync<PatchesDb>(dbEntity).ConfigureAwait(false);
             _cleanup.Add(async () => await _dynamoDb.DeleteAsync(dbEntity).ConfigureAwait(false));
+        }
+
+        private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
+        {
+            foreach (var patch in dbEntity)
+            {
+                _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
+                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
+
+            }
         }
     }
 }

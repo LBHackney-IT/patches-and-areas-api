@@ -21,16 +21,22 @@ namespace PatchesApi.Tests.V1.Boundary.Validation
         [Fact]
         public void RequestShouldErrorWithNullId()
         {
+            //Arrange
             var query = new PatchesQueryObject();
+            //Act
             var result = _classUnderTest.TestValidate(query);
+            //Assert
             result.ShouldHaveValidationErrorFor(x => x.Id);
         }
 
         [Fact]
         public void RequestShouldErrorWithEmptyId()
         {
+            //Arrange
             var query = new PatchesQueryObject() { Id = Guid.Empty };
+            //Act
             var result = _classUnderTest.TestValidate(query);
+            //Assert
             result.ShouldHaveValidationErrorFor(x => x.Id);
         }
     }

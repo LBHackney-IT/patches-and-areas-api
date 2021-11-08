@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PatchesApi.Tests.V1.E2ETests.Steps
 {
-    public class BaseSteps
+    public class BaseSteps : IDisposable
     {
         protected readonly HttpClient _httpClient;
 
@@ -22,6 +22,13 @@ namespace PatchesApi.Tests.V1.E2ETests.Steps
             _httpClient = httpClient;
             _jsonOptions = CreateJsonOptions();
         }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+
         public void Dispose()
         {
             Dispose(true);

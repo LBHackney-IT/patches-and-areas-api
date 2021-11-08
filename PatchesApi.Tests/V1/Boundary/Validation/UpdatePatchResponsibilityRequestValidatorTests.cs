@@ -23,8 +23,11 @@ namespace PatchesApi.Tests.V1.Boundary.Validation
         [Fact]
         public void RequestShouldErrorWithTagsInName()
         {
+            //Arrange
             var model = new UpdatePatchesResponsibilitiesRequestObject() { Name = StringWithTags };
+            //Act
             var result = _classUnderTest.TestValidate(model);
+            //Assert
             result.ShouldHaveValidationErrorFor(x => x.Name)
                   .WithErrorCode(ErrorCodes.XssCheckFailure);
         }
@@ -32,9 +35,12 @@ namespace PatchesApi.Tests.V1.Boundary.Validation
         [Fact]
         public void RequestShouldNotErrorWithValidName()
         {
+            //Arrange
             string name = "name12345";
             var model = new UpdatePatchesResponsibilitiesRequestObject() { Name = name };
+            //Act
             var result = _classUnderTest.TestValidate(model);
+            //Assert
             result.ShouldNotHaveValidationErrorFor(x => x.Name);
         }
     }
