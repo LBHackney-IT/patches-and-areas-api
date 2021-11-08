@@ -12,7 +12,6 @@ using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Linq;
 using System;
 using Amazon.DynamoDBv2.DocumentModel;
-using System.Linq;
 using System.Threading;
 
 namespace PatchesApi.V1.Gateways
@@ -60,7 +59,7 @@ namespace PatchesApi.V1.Gateways
             await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
 
             return patch;
-
+        }
         [LogCall]
         public async Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query)
         {

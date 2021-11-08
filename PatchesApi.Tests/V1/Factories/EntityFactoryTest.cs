@@ -26,7 +26,7 @@ namespace PatchesApi.Tests.V1.Factories
             databaseEntity.ResponsibleEntities.Should().BeEquivalentTo(entity.ResponsibleEntities);
         }
 
-       
+
         [Fact]
         public void CanMapADomainEntityToADatabaseObject()
         {

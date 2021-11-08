@@ -175,8 +175,10 @@ namespace PatchesApi.Tests.V1.Gateways
             func.Should().Throw<VersionNumberConflictException>()
                          .Where(x => (x.IncomingVersionNumber == ifMatch) && (x.ExpectedVersionNumber == 0));
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
-      [Fact]
-      public async Task GetByParentIdReturnsEmptyIfNoRecords()
+        }
+
+        [Fact]
+        public async Task GetByParentIdReturnsEmptyIfNoRecords()
         {
             var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
             Thread.Sleep(5000);

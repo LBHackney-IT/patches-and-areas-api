@@ -27,3 +27,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>", Scope = "member", Target = "~M:PatchesApi.Tests.V1.UseCase.GetPatchByParentIdUseCaseTests.ConstructQueryParameter~PatchesApi.V1.Boundary.Request.GetPatchByParentIdQuery")]
 [assembly: SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "<Pending>", Scope = "member", Target = "~P:PatchesApi.Tests.DynamoDbIntegrationTests`1.PatchByParentId")]
 [assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "<Pending>", Scope = "member", Target = "~P:PatchesApi.Tests.DynamoDbIntegrationTests`1.PatchByParentId")]
+[assembly: SuppressMessage("Usage", "CA2213:Disposable fields should be disposed", Justification = "<Pending>", Scope = "member", Target = "~F:PatchesApi.Tests.V1.E2ETests.Stories.GetPatchByParentIdTests._steps")]

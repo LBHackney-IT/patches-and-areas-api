@@ -34,6 +34,7 @@ namespace PatchesApi.V1.Controllers
             _getByIdUseCase = getByIdUseCase;
             _updatePatchResponsibilities = updatePatchResponsibilities;
             _contextWrapper = contextWrapper;
+        }
         private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
         public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IGetPatchByParentIdUseCase getPatchByParentIdUseCase)
         {
@@ -118,7 +119,7 @@ namespace PatchesApi.V1.Controllers
                 return numericValue;
 
             return null;
-
+        }
         /// <summary>
         /// Retrieves all patch for the supplied parentId.
         /// </summary>

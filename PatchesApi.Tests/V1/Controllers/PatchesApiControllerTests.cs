@@ -84,13 +84,13 @@ namespace PatchesApi.Tests.V1.Controllers
         {
             return new UpdatePatchesResponsibilityRequest() { Id = Guid.NewGuid(), ResponsibileEntityId = Guid.NewGuid() };
         }
-      
+
         private UpdatePatchesResponsibilitiesRequestObject ConstructUpdateRequest()
         {
             var request = _fixture.Create<UpdatePatchesResponsibilitiesRequestObject>();
 
             return request;
-          
+        }
         private GetPatchByParentIdQuery ConstructQueryParameter()
         {
             return new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
@@ -183,17 +183,6 @@ namespace PatchesApi.Tests.V1.Controllers
         }
 
         [Fact]
-        public void UpdatePatchByResponsibilityAsyncExceptionIsThrown()
-        {
-            // Arrange
-            var query = ConstructUpdateQuery();
-            var exception = new ApplicationException("Test exception");
-            _mockPatchResponsibilitiesUseCase.Setup(x => x.ExecuteAsync(query, It.IsAny<UpdatePatchesResponsibilitiesRequestObject>(), It.IsAny<int?>()))
-                                    .ThrowsAsync(exception);
-
-            // Act
-            Func<Task<IActionResult>> func = async () => await _classUnderTest.UpdatePatchForResponsibility(query, new UpdatePatchesResponsibilitiesRequestObject())
-                .ConfigureAwait(false);
         public async Task GetPatchByParentIdNotFoundReturnsNotFound()
         {
             var queryParam = ConstructQueryParameter();
