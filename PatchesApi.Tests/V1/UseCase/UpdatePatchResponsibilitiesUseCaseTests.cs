@@ -51,13 +51,15 @@ namespace PatchesApi.Tests.V1.UseCase
         [InlineData(3)]
         public async Task UpdatePatchByResponsibilitiesUseCaseReturnsResult(int? ifMatch)
         {
+            //Arrange
             var request = ConstructUpdateRequest();
             var query = ConstructQuery();
             var gatewayResponse = ConstructUpdateResponse(query.Id);
 
-
             _mockGateway.Setup(x => x.UpdatePatchResponsibilities(query, request, ifMatch)).ReturnsAsync(gatewayResponse);
+            //Act
             var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch).ConfigureAwait(false);
+            //Assert
             response.Should().BeEquivalentTo(gatewayResponse.ToDomain().ToResponse());
 
         }
@@ -67,11 +69,15 @@ namespace PatchesApi.Tests.V1.UseCase
         [InlineData(3)]
         public async Task UpdatePatchByResponsibiltiesUseCaseReturnsNull(int? ifMatch)
         {
+            //Arrange
             var request = ConstructUpdateRequest();
             var query = ConstructQuery();
 
             _mockGateway.Setup(x => x.UpdatePatchResponsibilities(query, request, ifMatch)).ReturnsAsync((PatchesDb) null);
+            //Act
             var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch).ConfigureAwait(false);
+
+            //Assert
             response.Should().BeNull();
 
         }

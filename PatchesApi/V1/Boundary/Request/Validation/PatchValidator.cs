@@ -19,8 +19,6 @@ namespace PatchesApi.V1.Boundary.Request.Validation
             RuleFor(x => x.Domain).NotXssString()
                          .WithErrorCode(ErrorCodes.XssCheckFailure);
             RuleForEach(x => x.ResponsibleEntities).SetValidator(new ResponsibleEntitiesValidator());
-
-
         }
     }
 }

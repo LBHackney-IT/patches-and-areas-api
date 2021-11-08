@@ -77,12 +77,15 @@ namespace PatchesApi.Tests.V1.Gateways
 
         public async Task GetPatchByIdReturnsNullIfEntityDoesntExist()
         {
+            //Arrange
             var entity = _fixture.Build<PatchEntity>()
                                  .With(x => x.VersionNumber, (int?) null)
                                  .Create();
             var query = ConstructQuery(entity.Id);
+            //Act
             var response = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
 
+            //Assert
             response.Should().BeNull();
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
 
@@ -91,6 +94,7 @@ namespace PatchesApi.Tests.V1.Gateways
         [Fact]
         public async Task GetPatchByIdReturnsThePatchIfItExists()
         {
+            //Arrange
             var entity = _fixture.Build<PatchEntity>()
                                  .With(x => x.VersionNumber, (int?) null)
                                  .Create();
@@ -99,8 +103,10 @@ namespace PatchesApi.Tests.V1.Gateways
             await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
 
             var query = ConstructQuery(entity.Id);
-
+            //Act
             var result = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
+
+            //Assert
             result.Should().BeEquivalentTo(dbEntity, config => config.Excluding(y => y.VersionNumber));
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
         }
@@ -108,6 +114,7 @@ namespace PatchesApi.Tests.V1.Gateways
         [Fact]
         public async Task UpdatePatchWithNewResponsibileEntitySuccessfullyUpdates()
         {
+            //Arrange
             var entity = _fixture.Build<PatchEntity>()
                                  .With(x => x.VersionNumber, (int?) null)
                                  .Create();
@@ -119,8 +126,10 @@ namespace PatchesApi.Tests.V1.Gateways
             var request = ConstructUpdateRequest(query.ResponsibileEntityId);
             dbEntity.VersionNumber = 0;
 
+            //Act
             var result = await _classUnderTest.UpdatePatchResponsibilities(query, request, 0).ConfigureAwait(false);
 
+            //Assert
             var load = await _dynamoDb.LoadAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false);
             _cleanup.Add(async () => await _dynamoDb.DeleteAsync<PatchesDb>(load.Id).ConfigureAwait(false));
 

@@ -28,7 +28,6 @@ namespace PatchesApi.V1.UseCase
             var updateResult = await _gateway.UpdatePatchResponsibilities(query, updateRequestObject, ifMatch).ConfigureAwait(false);
             if (updateResult == null) return null;
 
-
             return updateResult.ToDomain().ToResponse();
         }
     }

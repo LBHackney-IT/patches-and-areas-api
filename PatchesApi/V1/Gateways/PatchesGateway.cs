@@ -53,15 +53,9 @@ namespace PatchesApi.V1.Gateways
             };
             patch.ResponsibleEntities.Add(responsibleEntity);
 
-
-
-
             await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
-
-
 
             return patch;
         }
-
     }
 }
