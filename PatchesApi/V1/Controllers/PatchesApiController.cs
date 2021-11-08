@@ -26,22 +26,17 @@ namespace PatchesApi.V1.Controllers
     {
         private readonly IGetPatchByIdUseCase _getByIdUseCase;
         private readonly IUpdatePatchResponsibilitiesUseCase _updatePatchResponsibilities;
+        private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
         private readonly IHttpContextWrapper _contextWrapper;
 
         public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IUpdatePatchResponsibilitiesUseCase updatePatchResponsibilities,
-            IHttpContextWrapper contextWrapper)
-        {
-            _getByIdUseCase = getByIdUseCase;
-            _updatePatchResponsibilities = updatePatchResponsibilities;
-            _contextWrapper = contextWrapper;
-        }
-        private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
-        public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IGetPatchByParentIdUseCase getPatchByParentIdUseCase)
+            IGetPatchByParentIdUseCase getPatchByParentIdUseCase, IHttpContextWrapper contextWrapper)
         {
             _getByIdUseCase = getByIdUseCase;
             _getPatchByParentIdUseCase = getPatchByParentIdUseCase;
+            _updatePatchResponsibilities = updatePatchResponsibilities;
+            _contextWrapper = contextWrapper;
         }
-
 
         /// <summary>
         /// Retrives the Patch record corresponding to the supplied id

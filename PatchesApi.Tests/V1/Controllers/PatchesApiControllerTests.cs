@@ -45,6 +45,7 @@ namespace PatchesApi.Tests.V1.Controllers
         public PatchesApiControllerTests()
         {
             _mockGetByIdUseCase = new Mock<IGetPatchByIdUseCase>();
+            _mockGetByParentIdUseCase = new Mock<IGetPatchByParentIdUseCase>();
             _mockPatchResponsibilitiesUseCase = new Mock<IUpdatePatchResponsibilitiesUseCase>();
 
             _mockContextWrapper = new Mock<IHttpContextWrapper>();
@@ -54,6 +55,7 @@ namespace PatchesApi.Tests.V1.Controllers
             _classUnderTest = new PatchesApiController(
                 _mockGetByIdUseCase.Object,
                 _mockPatchResponsibilitiesUseCase.Object,
+                _mockGetByParentIdUseCase.Object,
                 _mockContextWrapper.Object);
 
             _requestHeaders = new HeaderDictionary();
@@ -69,8 +71,6 @@ namespace PatchesApi.Tests.V1.Controllers
 
 
             var controllerContext = new ControllerContext(new ActionContext(mockHttpContext.Object, new RouteData(), new ControllerActionDescriptor()));
-            _mockGetByParentIdUseCase = new Mock<IGetPatchByParentIdUseCase>();
-            _classUnderTest = new PatchesApiController(_mockGetByIdUseCase.Object, _mockGetByParentIdUseCase.Object);
             _classUnderTest.ControllerContext = controllerContext;
 
         }
