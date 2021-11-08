@@ -8,8 +8,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using PatchesApi.V1.Boundary.Response;
 using PatchesApi.V1.Boundary.Request;
-using Amazon.DynamoDBv2.DocumentModel;
+using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Linq;
+using System;
+using Amazon.DynamoDBv2.DocumentModel;
 using System.Threading;
 
 namespace PatchesApi.V1.Gateways
@@ -37,6 +39,27 @@ namespace PatchesApi.V1.Gateways
             return result?.ToDomain();
         }
 
+        [LogCall]
+        public async Task<PatchesDb> UpdatePatchResponsibilities(UpdatePatchesResponsibilityRequest query, UpdatePatchesResponsibilitiesRequestObject requestObject,
+                                                                                         int? ifMatch)
+        {
+            _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id {query.Id} and then IDynamoDBContext.SaveAsync");
+            var patch = await _dynamoDbContext.LoadAsync<PatchesDb>(query.Id).ConfigureAwait(false);
+            if (patch == null) return null;
+            if (ifMatch != patch.VersionNumber)
+                throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);
+            var responsibleEntity = new ResponsibleEntities()
+            {
+                Id = query.ResponsibileEntityId,
+                Name = requestObject.Name,
+                ResponsibleType = requestObject.ResponsibleType
+            };
+            patch.ResponsibleEntities.Add(responsibleEntity);
+
+            await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
+
+            return patch;
+        }
         [LogCall]
         public async Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query)
         {

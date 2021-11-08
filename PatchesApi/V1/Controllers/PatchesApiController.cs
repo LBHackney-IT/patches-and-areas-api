@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 using PatchesApi.V1.Factories;
 using System.Net.Http.Headers;
 using PatchesApi.V1.Infrastructure;
+using Hackney.Core.Http;
+using Hackney.Core.JWT;
+using Hackney.Core.Middleware;
+using HeaderConstants = PatchesApi.V1.Infrastructure.HeaderConstants;
+using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Collections.Generic;
 
 namespace PatchesApi.V1.Controllers
@@ -20,13 +25,18 @@ namespace PatchesApi.V1.Controllers
     public class PatchesApiController : BaseController
     {
         private readonly IGetPatchByIdUseCase _getByIdUseCase;
+        private readonly IUpdatePatchResponsibilitiesUseCase _updatePatchResponsibilities;
         private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
-        public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IGetPatchByParentIdUseCase getPatchByParentIdUseCase)
+        private readonly IHttpContextWrapper _contextWrapper;
+
+        public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IUpdatePatchResponsibilitiesUseCase updatePatchResponsibilities,
+            IGetPatchByParentIdUseCase getPatchByParentIdUseCase, IHttpContextWrapper contextWrapper)
         {
             _getByIdUseCase = getByIdUseCase;
             _getPatchByParentIdUseCase = getPatchByParentIdUseCase;
+            _updatePatchResponsibilities = updatePatchResponsibilities;
+            _contextWrapper = contextWrapper;
         }
-
 
         /// <summary>
         /// Retrives the Patch record corresponding to the supplied id
@@ -56,6 +66,55 @@ namespace PatchesApi.V1.Controllers
             return Ok(patch.ToResponse());
         }
 
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPatch]
+        [Route("{id}/responsibleEntity/{responsibileEntityId}")]
+        [LogCall(LogLevel.Information)]
+        public async Task<IActionResult> UpdatePatchForResponsibility([FromRoute] UpdatePatchesResponsibilityRequest query, [FromBody] UpdatePatchesResponsibilitiesRequestObject requestObject)
+        {
+            var contextHeaders = _contextWrapper.GetContextRequestHeaders(HttpContext);
+            var ifMatch = GetIfMatchFromHeader();
+
+            try
+            {
+                // We use a request object AND the raw request body text because the incoming request will only contain the fields that changed
+                // whereas the request object has all possible updateable fields defined.
+                // The implementation will use the raw body text to identify which fields to update and the request object is specified here so that its
+                // associated validation will be executed by the MVC pipeline before we even get to this point.
+                var patch = await _updatePatchResponsibilities.ExecuteAsync(query, requestObject, ifMatch)
+                                                                .ConfigureAwait(false);
+                if (patch == null) return NotFound(query.Id);
+                return NoContent();
+            }
+            catch (VersionNumberConflictException vncErr)
+            {
+                return Conflict(vncErr.Message);
+            }
+
+        }
+
+        private int? GetIfMatchFromHeader()
+        {
+            var header = HttpContext.Request.Headers.GetHeaderValue(HeaderConstants.IfMatch);
+
+            if (header == null)
+                return null;
+
+            _ = EntityTagHeaderValue.TryParse(header, out var entityTagHeaderValue);
+
+            if (entityTagHeaderValue == null)
+                return null;
+
+            var version = entityTagHeaderValue.Tag.Replace("\"", string.Empty);
+
+            if (int.TryParse(version, out var numericValue))
+                return numericValue;
+
+            return null;
+        }
         /// <summary>
         /// Retrieves all patch for the supplied parentId.
         /// </summary>

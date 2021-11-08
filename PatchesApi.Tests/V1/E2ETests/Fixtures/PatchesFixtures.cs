@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 using AutoFixture;
+using PatchesApi.V1.Boundary.Request;
 using PatchesApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,11 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
         public Guid Id { get; private set; }
         public Guid ParentId { get; private set; }
         public string InvalidId { get; private set; }
+        public Guid ResponsibleId { get; private set; }
+
+
+        public UpdatePatchesResponsibilitiesRequestObject UpdateResponsibleRequestObject
+        { get; private set; }
         public string InvalidParentId { get; private set; }
 
         public PatchesFixtures(IDynamoDBContext dbContext)
@@ -85,10 +91,46 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
             ParentId = Guid.NewGuid();
         }
 
+        public void GivenAPatchUpdateRequestDoesNotExist()
+        {
+            Id = Guid.NewGuid();
+            var request = _fixture.Create<UpdatePatchesResponsibilitiesRequestObject>();
+            UpdateResponsibleRequestObject = request;
+            ResponsibleId = request.Id;
+        }
+
         public void GivenAnInvalidId()
         {
             InvalidId = "1234567";
             InvalidParentId = "1234567890";
+        }
+
+        public void GivenAnUpdatePatchWithNewResponsibleEntityRequest()
+        {
+            if (null == PatchesDb)
+            {
+                var patch = _fixture.Build<PatchesDb>()
+                                    .With(x => x.VersionNumber, (int?) null)
+                                    .Create();
+
+                _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
+                PatchesDb = patch;
+                Id = patch.Id;
+
+                var request = _fixture.Create<UpdatePatchesResponsibilitiesRequestObject>();
+                UpdateResponsibleRequestObject = request;
+                ResponsibleId = request.Id;
+
+            }
+        }
+
+
+
+        public void GivenAnUpdatePatchWithNewResponsibleEntityRequestWithValidationError()
+        {
+            var request = new UpdatePatchesResponsibilitiesRequestObject();
+            Id = Guid.Empty;
+            UpdateResponsibleRequestObject = request;
         }
 
 

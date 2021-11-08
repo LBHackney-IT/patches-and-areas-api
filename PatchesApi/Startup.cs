@@ -33,6 +33,8 @@ using Hackney.Core.DynamoDb;
 using Hackney.Core.Middleware.Exception;
 using Hackney.Core.JWT;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Hackney.Core.Sns;
+using Hackney.Core.Http;
 
 namespace PatchesApi
 {
@@ -132,8 +134,18 @@ namespace PatchesApi
             services.AddTokenFactory();
             services.ConfigureDynamoDB();
 
+
             RegisterGateways(services);
             RegisterUseCases(services);
+
+            ConfigureHackneyCoreDI(services);
+
+        }
+
+        private static void ConfigureHackneyCoreDI(IServiceCollection services)
+        {
+            services.AddSnsGateway()
+                .AddHttpContextWrapper();
         }
 
 
@@ -147,6 +159,7 @@ namespace PatchesApi
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetPatchByIdUseCase, GetPatchByIdUseCase>();
+            services.AddScoped<IUpdatePatchResponsibilitiesUseCase, UpdatePatchResponsibilitiesUseCase>();
             services.AddScoped<IGetPatchByParentIdUseCase, GetPatchByParentIdUseCase>();
 
         }
