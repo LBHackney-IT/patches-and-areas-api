@@ -32,7 +32,7 @@ functions:
             origin: '*'
             headers:
               - Content-Type
-              - If-Match
+              - ETag
               - X-Amz-Date
               - Authorization
               - X-Api-Key
