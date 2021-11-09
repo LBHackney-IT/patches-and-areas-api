@@ -227,7 +227,7 @@ namespace PatchesApi.Tests.V1.Gateways
         [Theory(Skip = "Skip for now")]
         [InlineData(null)]
         [InlineData(5)]
-        public async Task UpdateTenureForPersonThrowsExceptionOnVersionConflict(int? ifMatch)
+        public async Task UpdatePatchWithNewResponsibilityEntityThrowsExceptionOnVersionConflict(int? ifMatch)
         {
             // Arrange
             var entity = _fixture.Build<PatchEntity>()
@@ -252,7 +252,7 @@ namespace PatchesApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public async Task GetByParentIdReturnsEmptyIfNoRecords()
         {
             var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
@@ -263,7 +263,7 @@ namespace PatchesApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public async Task GetByParentIdReturnsRecords()
         {
             var parentid = Guid.NewGuid();
