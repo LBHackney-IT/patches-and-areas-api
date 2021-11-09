@@ -252,18 +252,17 @@ namespace PatchesApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public async Task GetByParentIdReturnsEmptyIfNoRecords()
         {
             var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
-            Thread.Sleep(5000);
             var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
             response.Should().BeEmpty();
 
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public async Task GetByParentIdReturnsRecords()
         {
             var parentid = Guid.NewGuid();
