@@ -38,6 +38,8 @@ using Hackney.Core.Http;
 using System.Text.Json.Serialization;
 using Amazon.XRay.Recorder.Core;
 using Amazon;
+using PatchesApi.V1.Boundary.Request.Validation;
+using Hackney.Core.Validation.AspNet;
 
 namespace PatchesApi
 {
@@ -67,6 +69,10 @@ namespace PatchesApi
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            services.AddFluentValidation(Assembly.GetAssembly(typeof(PatchValidator)));
+
+
             services.AddApiVersioning(o =>
             {
                 o.DefaultApiVersion = new ApiVersion(1, 0);
@@ -184,9 +190,6 @@ namespace PatchesApi
                   .AllowAnyMethod()
                   .WithExposedHeaders("ETag", "If-Match", "x-correlation-id"));
 
-            app.UseCorrelationId();
-            app.UseLoggingScope();
-            app.UseCustomExceptionHandler(logger);
 
             if (env.IsDevelopment())
             {
@@ -197,6 +200,9 @@ namespace PatchesApi
                 app.UseHsts();
             }
 
+            app.UseCorrelationId();
+            app.UseLoggingScope();
+            app.UseCustomExceptionHandler(logger);
             app.UseXRay("patches-api");
 
 
