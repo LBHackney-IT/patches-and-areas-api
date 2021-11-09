@@ -51,7 +51,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Skip for now")]
         public void ServiceReturns404WhenPatchDoesntExist()
         {
             var query = _fixture.Create<DeleteResponsibilityFromPatchRequest>();
@@ -62,7 +62,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
                 .BDDfy();
         }
 
-        [Fact]
+        [Fact(Skip = "Skip for now")]
         public void ServiceReturns404WhenResponsibilityIdDoesntExistInPatch()
         {
             this.Given(g => _patchFixture.GivenAPatchExistsWithNoResponsibileEntity())
