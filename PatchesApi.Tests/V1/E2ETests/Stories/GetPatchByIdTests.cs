@@ -44,7 +44,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
             }
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public void ServiceReturnsTheRequestedPatch()
         {
             this.Given(g => _patchFixtures.GivenAPatchAlreadyExists())
@@ -53,7 +53,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
                 .BDDfy();
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public void ServiceReturnsNotFoundIfPatchDoesNotExist()
         {
             this.Given(g => _patchFixtures.GivenAPatchDoesNotExist())
@@ -62,7 +62,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
                 .BDDfy();
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public void ServiceReturnsBadRequestIfIdInvalid()
         {
             this.Given(g => _patchFixtures.GivenAnInvalidId())
