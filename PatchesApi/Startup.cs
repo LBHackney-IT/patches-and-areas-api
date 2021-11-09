@@ -146,8 +146,8 @@ namespace PatchesApi
             AWSXRayRecorder.InitializeInstance(Configuration);
             AWSXRayRecorder.RegisterLogger(LoggingOptions.SystemDiagnostics);
 
-            services.AddLogCallAspect();
             services.ConfigureDynamoDB();
+            services.AddLogCallAspect();
 
 
             RegisterGateways(services);
