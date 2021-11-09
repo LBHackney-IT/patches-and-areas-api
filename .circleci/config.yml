@@ -79,13 +79,13 @@ commands:
       - run:
           name: Build lambda
           command: |
-            cd ./PatchesApi/
+            cd ./PatchesAndAreasApi/
             chmod +x ./build.sh
             ./build.sh
       - run:
           name: Deploy lambda
           command: |
-            cd ./PatchesApi/
+            cd ./PatchesAndAreasApi/
             sls deploy --stage <<parameters.stage>> --account <<parameters.aws-account>> --conceal
 
 jobs:
@@ -106,10 +106,10 @@ jobs:
       - setup_remote_docker
       - run:
           name: build
-          command: docker-compose build patches-api-test
+          command: docker-compose build patches-and-areas-api-test
       - run:
           name: Run tests
-          command: docker-compose run patches-api-test
+          command: docker-compose run patches-and-areas-api-test
   assume-role-development:
     executor: docker-python
     steps:

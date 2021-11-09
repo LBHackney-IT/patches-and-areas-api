@@ -27,7 +27,7 @@ data "aws_region" "current" {}
 locals {
   parameter_store = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter"
   default_tags = {
-    Name              = "patches-api-${var.environment_name}"
+    Name              = "patches-and-areas-api-${var.environment_name}"
     Environment       = var.environment_name
     terraform-managed = true
     project_name      = var.project_name
@@ -40,6 +40,6 @@ terraform {
     bucket  = "terraform-state-housing-staging"
     encrypt = true
     region  = "eu-west-2"
-    key     = "services/patches-api/state"
+    key     = "services/patches-and-areas-api/state"
   }
 }
