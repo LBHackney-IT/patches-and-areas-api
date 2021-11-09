@@ -47,7 +47,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
             }
         }
 
-        [Theory(Skip = "Skip for now")]
+        [Theory]
         [InlineData(null)]
         [InlineData(5)]
         public void ServiceReturnsConflictWhenIncorrectVersionNumber(int? versionNumber)
@@ -58,7 +58,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
                 .BDDfy();
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public void ServiceUpdateTheRequestedPatchWithNewResponsibleEntity()
 
         {
@@ -70,7 +70,7 @@ namespace PatchesApi.Tests.V1.E2ETests.Stories
         }
 
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public void ServiceReturnsNotFoundIfPatchNotExist()
         {
             this.Given(g => _patchFixture.GivenAPatchUpdateRequestDoesNotExist())
