@@ -1,4 +1,4 @@
-# LBH Patches API
+# LBH Patches and Areas API
 
 
 ## Stack
