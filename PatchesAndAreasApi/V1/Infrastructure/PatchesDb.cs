@@ -7,13 +7,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PatchesAndAreasApi.V1.Infrastructure
 {
-    [DynamoDBTable("Patches", LowerCamelCaseProperties = true)]
+    [DynamoDBTable("PatchesAndAreas", LowerCamelCaseProperties = true)]
     public class PatchesDb
     {
         [DynamoDBHashKey]
         public Guid Id { get; set; }
 
-        //[DynamoDBRangeKey]
         [DynamoDBGlobalSecondaryIndexHashKey]
         public Guid ParentId { get; set; }
 
