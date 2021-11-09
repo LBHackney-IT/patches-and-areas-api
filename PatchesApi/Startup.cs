@@ -181,8 +181,8 @@ namespace PatchesApi
             app.UseCors(builder => builder
                   .AllowAnyOrigin()
                   .AllowAnyHeader()
-                  .AllowAnyMethod());
-                  //.WithExposedHeaders("ETag", "x-correlation-id"));
+                  .AllowAnyMethod()
+                  .WithExposedHeaders("ETag", "x-correlation-id"));
 
             app.UseCorrelationId();
             app.UseLoggingScope();
