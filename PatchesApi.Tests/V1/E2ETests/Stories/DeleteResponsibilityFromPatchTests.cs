@@ -11,8 +11,6 @@ using Xunit;
 
 namespace PatchesApi.Tests.V1.E2ETests.Stories
 {
-
-
     [Story(
        AsA = "Internal Hackney user (such as a Housing Officer or Area housing Manager)",
        IWant = "the ability to delete a responsibility from a patch/area",
