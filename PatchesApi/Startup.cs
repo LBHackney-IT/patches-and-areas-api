@@ -141,7 +141,6 @@ namespace PatchesApi
             AWSXRayRecorder.RegisterLogger(LoggingOptions.SystemDiagnostics);
 
             services.AddLogCallAspect();
-            services.AddTokenFactory();
             services.ConfigureDynamoDB();
 
 
@@ -155,6 +154,7 @@ namespace PatchesApi
         private static void ConfigureHackneyCoreDI(IServiceCollection services)
         {
             services.AddSnsGateway()
+                .AddTokenFactory()
                 .AddHttpContextWrapper();
         }
 
