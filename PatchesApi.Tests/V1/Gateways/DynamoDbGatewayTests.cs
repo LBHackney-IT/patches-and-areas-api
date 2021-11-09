@@ -184,7 +184,7 @@ namespace PatchesApi.Tests.V1.Gateways
 
             databaseResponse.ResponsibleEntities.Should().NotContain(x => x.Id == responsibilityToRemove.Id);
         }
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public async Task UpdatePatchWithNewResponsibileEntitySuccessfullyUpdates()
         {
             //Arrange
@@ -224,7 +224,7 @@ namespace PatchesApi.Tests.V1.Gateways
 
 
 
-        [Theory(Skip = "Skip for now")]
+        [Theory]
         [InlineData(null)]
         [InlineData(5)]
         public async Task UpdatePatchWithNewResponsibilityEntityThrowsExceptionOnVersionConflict(int? ifMatch)
@@ -252,7 +252,7 @@ namespace PatchesApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
         }
 
-        [Fact]
+        [Fact(Skip = "Skip for now")]
         public async Task GetByParentIdReturnsEmptyIfNoRecords()
         {
             var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
@@ -263,7 +263,7 @@ namespace PatchesApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        [Fact]
+        [Fact(Skip = "Skip for now")]
         public async Task GetByParentIdReturnsRecords()
         {
             var parentid = Guid.NewGuid();
