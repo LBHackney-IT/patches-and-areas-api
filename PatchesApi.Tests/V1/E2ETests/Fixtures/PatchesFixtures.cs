@@ -84,7 +84,6 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
             foreach (var patch in patches)
             {
                 _dbContext.SaveAsync(patch).GetAwaiter().GetResult();
-                Thread.Sleep(1000);
             }
             PatchesDbList = patches;
             ParentId = parentid;
