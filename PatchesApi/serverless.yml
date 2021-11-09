@@ -32,7 +32,6 @@ functions:
             origin: '*'
             headers:
               - Content-Type
-              - ETag
               - X-Amz-Date
               - Authorization
               - X-Api-Key
