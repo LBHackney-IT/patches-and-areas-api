@@ -294,7 +294,7 @@ namespace PatchesApi.Tests.V1.Gateways
             foreach (var patch in dbEntity)
             {
                 _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
-                _cleanup.Add(async () => await _dynamoDb.DeleteAsync<List<PatchesDb>>(patch.ParentId).ConfigureAwait(false));
+                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch, default).ConfigureAwait(false));
 
             }
         }
