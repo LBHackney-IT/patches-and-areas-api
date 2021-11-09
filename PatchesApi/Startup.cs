@@ -35,6 +35,11 @@ using Hackney.Core.JWT;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Hackney.Core.Sns;
 using Hackney.Core.Http;
+using System.Text.Json.Serialization;
+using Amazon.XRay.Recorder.Core;
+using Amazon;
+using PatchesApi.V1.Boundary.Request.Validation;
+using Hackney.Core.Validation.AspNet;
 
 namespace PatchesApi
 {
@@ -59,7 +64,15 @@ namespace PatchesApi
 
             services
                 .AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            services.AddFluentValidation(Assembly.GetAssembly(typeof(PatchValidator)));
+
+
             services.AddApiVersioning(o =>
             {
                 o.DefaultApiVersion = new ApiVersion(1, 0);
@@ -130,9 +143,11 @@ namespace PatchesApi
 
             services.ConfigureLambdaLogging(Configuration);
 
-            services.AddLogCallAspect();
-            services.AddTokenFactory();
+            AWSXRayRecorder.InitializeInstance(Configuration);
+            AWSXRayRecorder.RegisterLogger(LoggingOptions.SystemDiagnostics);
+
             services.ConfigureDynamoDB();
+            services.AddLogCallAspect();
 
 
             RegisterGateways(services);
@@ -145,6 +160,7 @@ namespace PatchesApi
         private static void ConfigureHackneyCoreDI(IServiceCollection services)
         {
             services.AddSnsGateway()
+                .AddTokenFactory()
                 .AddHttpContextWrapper();
         }
 
@@ -159,6 +175,7 @@ namespace PatchesApi
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetPatchByIdUseCase, GetPatchByIdUseCase>();
+            services.AddScoped<IDeleteResponsibilityFromPatchUseCase, DeleteResponsibilityFromPatchUseCase>();
             services.AddScoped<IUpdatePatchResponsibilitiesUseCase, UpdatePatchResponsibilitiesUseCase>();
             services.AddScoped<IGetPatchByParentIdUseCase, GetPatchByParentIdUseCase>();
 
@@ -171,11 +188,8 @@ namespace PatchesApi
                   .AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .WithExposedHeaders("ETag", "x-correlation-id"));
+                  .WithExposedHeaders("ETag", "If-Match", "x-correlation-id"));
 
-            app.UseCorrelationId();
-            app.UseLoggingScope();
-            app.UseCustomExceptionHandler(logger);
 
             if (env.IsDevelopment())
             {
@@ -186,6 +200,9 @@ namespace PatchesApi
                 app.UseHsts();
             }
 
+            app.UseCorrelationId();
+            app.UseLoggingScope();
+            app.UseCustomExceptionHandler(logger);
             app.UseXRay("patches-api");
 
 

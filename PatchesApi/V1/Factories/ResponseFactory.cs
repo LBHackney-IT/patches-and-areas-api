@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PatchesApi.V1.Boundary.Response;
 using PatchesApi.V1.Domain;
+using PatchesApi.V1.Infrastructure;
 
 namespace PatchesApi.V1.Factories
 {
@@ -16,7 +17,7 @@ namespace PatchesApi.V1.Factories
                 Name = domain.Name,
                 Domain = domain.Domain,
                 PatchType = domain.PatchType,
-                ResponsibleEntities = domain.ResponsibleEntities
+                ResponsibleEntities = domain.ResponsibleEntities.ToListOrEmpty()
             };
         }
 

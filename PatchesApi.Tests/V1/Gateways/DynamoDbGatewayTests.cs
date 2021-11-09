@@ -12,8 +12,8 @@ using Xunit;
 using System.Collections.Generic;
 using PatchesApi.V1.Infrastructure;
 using PatchesApi.V1.Factories;
-using System.Linq;
 using PatchesApi.V1.Infrastructure.Exceptions;
+using System.Linq;
 using System.Threading;
 
 namespace PatchesApi.Tests.V1.Gateways
@@ -25,6 +25,8 @@ namespace PatchesApi.Tests.V1.Gateways
         private readonly IDynamoDBContext _dynamoDb;
         private PatchesGateway _classUnderTest;
         private readonly List<Action> _cleanup = new List<Action>();
+        private readonly Random _random = new Random();
+
 
 
         private Mock<ILogger<PatchesGateway>> _logger;
@@ -110,6 +112,79 @@ namespace PatchesApi.Tests.V1.Gateways
         }
 
         [Fact]
+        public async Task DeleteResponsibilityFromPatchWhenPatchDoesntExistThrowsException()
+        {
+            // Arrange
+            var mockRequest = _fixture.Create<DeleteResponsibilityFromPatchRequest>();
+
+            // Act
+            Func<Task> func = async () => await _classUnderTest.DeleteResponsibilityFromPatch(mockRequest).ConfigureAwait(false);
+
+            // Assert
+            await func.Should().ThrowAsync<PatchNotFoundException>().ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatchWhenResponsibilityNotInPatchThrowsException()
+        {
+            // Arrange
+            var mockPatch = _fixture.Build<PatchEntity>()
+                .With(x => x.ResponsibleEntities, new List<ResponsibleEntities>()) // empty list
+                .With(x => x.VersionNumber, (int?) null)
+                .Create();
+            var dbPatch = mockPatch.ToDatabase();
+
+            await InsertDatatoDynamoDB(dbPatch).ConfigureAwait(false);
+
+            var mockRequest = new DeleteResponsibilityFromPatchRequest
+            {
+                Id = mockPatch.Id,
+                ResponsibileEntityId = _fixture.Create<Guid>()
+            };
+
+            // Act
+            Func<Task> func = async () => await _classUnderTest.DeleteResponsibilityFromPatch(mockRequest).ConfigureAwait(false);
+
+            // Assert
+            await func.Should().ThrowAsync<ResponsibileIdNotFoundInPatchException>().ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task DeleteResponsibilityFromPatchWhenCalledRemovesSuccessfully()
+        {
+            // Arrange
+            var numberOfResponsibilities = _random.Next(2, 5);
+            var mockResponsibileEntity = _fixture.Build<ResponsibleEntities>().CreateMany(numberOfResponsibilities);
+
+            var mockPatch = _fixture.Build<PatchEntity>()
+                .With(x => x.ResponsibleEntities, mockResponsibileEntity)
+                .With(x => x.VersionNumber, (int?) null)
+                .Create();
+
+            var responsibilityToRemove = mockResponsibileEntity.First();
+            var dbEntity = mockPatch.ToDatabase();
+            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+
+            var mockRequest = new DeleteResponsibilityFromPatchRequest
+            {
+                Id = mockPatch.Id,
+                ResponsibileEntityId = responsibilityToRemove.Id
+            };
+
+            // Act
+            Func<Task> func = async () => await _classUnderTest.DeleteResponsibilityFromPatch(mockRequest).ConfigureAwait(false);
+
+            // Assert
+            // no exception of any kind thrown
+            await func.Should().NotThrowAsync<Exception>().ConfigureAwait(false);
+
+            // check database
+            var databaseResponse = await _dynamoDb.LoadAsync<PatchesDb>(mockPatch.Id).ConfigureAwait(false);
+            databaseResponse.ResponsibleEntities.Should().HaveCount(numberOfResponsibilities - 1);
+
+            databaseResponse.ResponsibleEntities.Should().NotContain(x => x.Id == responsibilityToRemove.Id);
+        }
+        [Fact]
         public async Task UpdatePatchWithNewResponsibileEntitySuccessfullyUpdates()
         {
             //Arrange
@@ -152,7 +227,7 @@ namespace PatchesApi.Tests.V1.Gateways
         [Theory]
         [InlineData(null)]
         [InlineData(5)]
-        public async Task UpdateTenureForPersonThrowsExceptionOnVersionConflict(int? ifMatch)
+        public async Task UpdatePatchWithNewResponsibilityEntityThrowsExceptionOnVersionConflict(int? ifMatch)
         {
             // Arrange
             var entity = _fixture.Build<PatchEntity>()
@@ -181,7 +256,6 @@ namespace PatchesApi.Tests.V1.Gateways
         public async Task GetByParentIdReturnsEmptyIfNoRecords()
         {
             var query = new GetPatchByParentIdQuery() { ParentId = Guid.NewGuid() };
-            Thread.Sleep(5000);
             var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
             response.Should().BeEmpty();
 
@@ -212,7 +286,7 @@ namespace PatchesApi.Tests.V1.Gateways
         private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
         {
             await _dynamoDb.SaveAsync<PatchesDb>(dbEntity).ConfigureAwait(false);
-            _cleanup.Add(async () => await _dynamoDb.DeleteAsync(dbEntity).ConfigureAwait(false));
+            _cleanup.Add(async () => await _dynamoDb.DeleteAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false));
         }
 
         private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
@@ -220,7 +294,7 @@ namespace PatchesApi.Tests.V1.Gateways
             foreach (var patch in dbEntity)
             {
                 _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
-                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
+                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch, default).ConfigureAwait(false));
 
             }
         }

@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 using PatchesApi.V1.Factories;
 using System.Net.Http.Headers;
 using PatchesApi.V1.Infrastructure;
+using PatchesApi.V1.Infrastructure.Exceptions;
 using Hackney.Core.Http;
 using Hackney.Core.JWT;
 using Hackney.Core.Middleware;
 using HeaderConstants = PatchesApi.V1.Infrastructure.HeaderConstants;
-using PatchesApi.V1.Infrastructure.Exceptions;
 using System.Collections.Generic;
 
 namespace PatchesApi.V1.Controllers
@@ -25,16 +25,19 @@ namespace PatchesApi.V1.Controllers
     public class PatchesApiController : BaseController
     {
         private readonly IGetPatchByIdUseCase _getByIdUseCase;
+        private readonly IDeleteResponsibilityFromPatchUseCase _deleteResponsibilityFromPatchUseCase;
         private readonly IUpdatePatchResponsibilitiesUseCase _updatePatchResponsibilities;
         private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
         private readonly IHttpContextWrapper _contextWrapper;
 
         public PatchesApiController(IGetPatchByIdUseCase getByIdUseCase, IUpdatePatchResponsibilitiesUseCase updatePatchResponsibilities,
-            IGetPatchByParentIdUseCase getPatchByParentIdUseCase, IHttpContextWrapper contextWrapper)
+            IGetPatchByParentIdUseCase getPatchByParentIdUseCase, IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
+            IHttpContextWrapper contextWrapper)
         {
             _getByIdUseCase = getByIdUseCase;
             _getPatchByParentIdUseCase = getPatchByParentIdUseCase;
             _updatePatchResponsibilities = updatePatchResponsibilities;
+            _deleteResponsibilityFromPatchUseCase = deleteResponsibilityFromPatchUseCase;
             _contextWrapper = contextWrapper;
         }
 
@@ -70,6 +73,25 @@ namespace PatchesApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpDelete]
+        [Route("{id}/responsibleEntity/{responsibileEntityId}")]
+        [LogCall(LogLevel.Information)]
+        public async Task<IActionResult> DeleteResponsibilityFromPatch([FromRoute] DeleteResponsibilityFromPatchRequest query)
+        {
+            try
+            {
+                await _deleteResponsibilityFromPatchUseCase.Execute(query).ConfigureAwait(false);
+                return NoContent();
+            }
+            catch (PatchNotFoundException)
+            {
+                return NotFound(query.Id);
+            }
+            catch (ResponsibileIdNotFoundInPatchException)
+            {
+                return NotFound(query.ResponsibileEntityId);
+            }
+        }
         [HttpPatch]
         [Route("{id}/responsibleEntity/{responsibileEntityId}")]
         [LogCall(LogLevel.Information)]

@@ -1,5 +1,7 @@
 using Amazon.DynamoDBv2.DataModel;
 using AutoFixture;
+using PatchesApi.V1.Domain;
+using PatchesApi.V1.Factories;
 using PatchesApi.V1.Boundary.Request;
 using PatchesApi.V1.Infrastructure;
 using System;
@@ -13,9 +15,11 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
     public class PatchesFixtures : IDisposable
     {
         private readonly Fixture _fixture = new Fixture();
+        private readonly Random _random = new Random();
         public readonly IDynamoDBContext _dbContext;
         public PatchesDb PatchesDb { get; private set; }
 
+        public PatchEntity ExistingPatch { get; private set; }
         public List<PatchesDb> PatchesDbList { get; private set; }
 
         public Guid Id { get; private set; }
@@ -80,7 +84,6 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
             foreach (var patch in patches)
             {
                 _dbContext.SaveAsync(patch).GetAwaiter().GetResult();
-                Thread.Sleep(1000);
             }
             PatchesDbList = patches;
             ParentId = parentid;
@@ -131,6 +134,37 @@ namespace PatchesApi.Tests.V1.E2ETests.Fixtures
             var request = new UpdatePatchesResponsibilitiesRequestObject();
             Id = Guid.Empty;
             UpdateResponsibleRequestObject = request;
+        }
+
+        public void GivenAPatchExistsWithNoResponsibileEntity()
+        {
+            var entity = _fixture.Build<PatchesDb>()
+                .With(x => x.ResponsibleEntities, new List<ResponsibleEntities>())
+                .With(x => x.VersionNumber, (int?) null)
+                .Create();
+
+            _dbContext.SaveAsync(entity).GetAwaiter().GetResult();
+
+            ExistingPatch = entity.ToDomain();
+            PatchesDb = entity;
+            Id = entity.Id;
+        }
+
+        public void GivenAPatchExistsWithManyResponsibility()
+        {
+            var numberOfResponsibilities = _random.Next(2, 5);
+            var responsibileEntities = _fixture.CreateMany<ResponsibleEntities>(numberOfResponsibilities).ToList();
+
+            var entity = _fixture.Build<PatchesDb>()
+                          .With(x => x.ResponsibleEntities, responsibileEntities)
+                          .With(x => x.VersionNumber, (int?) null)
+                          .Create();
+
+            _dbContext.SaveAsync(entity).GetAwaiter().GetResult();
+
+            ExistingPatch = entity.ToDomain();
+            PatchesDb = entity;
+            Id = entity.Id;
         }
 
 

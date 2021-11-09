@@ -22,7 +22,6 @@ namespace PatchesApi.Tests.V1.E2ETests.Steps
             _httpClient = httpClient;
             _jsonOptions = CreateJsonOptions();
         }
-
         public void Dispose()
         {
             Dispose(true);
