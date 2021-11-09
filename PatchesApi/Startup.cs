@@ -35,6 +35,9 @@ using Hackney.Core.JWT;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Hackney.Core.Sns;
 using Hackney.Core.Http;
+using System.Text.Json.Serialization;
+using Amazon.XRay.Recorder.Core;
+using Amazon;
 
 namespace PatchesApi
 {
@@ -59,6 +62,10 @@ namespace PatchesApi
 
             services
                 .AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddApiVersioning(o =>
             {
@@ -129,6 +136,9 @@ namespace PatchesApi
             });
 
             services.ConfigureLambdaLogging(Configuration);
+
+            AWSXRayRecorder.InitializeInstance(Configuration);
+            AWSXRayRecorder.RegisterLogger(LoggingOptions.SystemDiagnostics);
 
             services.AddLogCallAspect();
             services.AddTokenFactory();
