@@ -262,7 +262,7 @@ namespace PatchesApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        [Fact(Skip = "Skip for now")]
+        [Fact]
         public async Task GetByParentIdReturnsRecords()
         {
             var parentid = Guid.NewGuid();
