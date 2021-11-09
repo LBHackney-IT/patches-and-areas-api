@@ -287,7 +287,7 @@ namespace PatchesApi.Tests.V1.Gateways
         private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
         {
             await _dynamoDb.SaveAsync<PatchesDb>(dbEntity).ConfigureAwait(false);
-            _cleanup.Add(async () => await _dynamoDb.DeleteAsync(dbEntity).ConfigureAwait(false));
+            _cleanup.Add(async () => await _dynamoDb.DeleteAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false));
         }
 
         private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
@@ -295,7 +295,7 @@ namespace PatchesApi.Tests.V1.Gateways
             foreach (var patch in dbEntity)
             {
                 _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
-                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch).ConfigureAwait(false));
+                _cleanup.Add(async () => await _dynamoDb.DeleteAsync<List<PatchesDb>>(patch.Id).ConfigureAwait(false));
 
             }
         }
