@@ -1,5 +1,5 @@
-resource "aws_dynamodb_table" "patchesapi_dynamodb_table" {
-  name           = "Patches"
+resource "aws_dynamodb_table" "PatchesAndAreasApi_dynamodb_table" {
+  name           = "PatchesAndAreas"
   billing_mode   = "PROVISIONED"
   read_capacity  = 10
   write_capacity = 10
@@ -8,6 +8,19 @@ resource "aws_dynamodb_table" "patchesapi_dynamodb_table" {
   attribute {
     name = "id"
     type = "S"
+  }
+
+  attribute {
+    name = "parentId"
+    type = "S"
+  }
+  
+  global_secondary_index {
+    name               = "PatchByParentId"
+    hash_key           = "parentId"
+    write_capacity     = 10
+    read_capacity      = 10
+    projection_type    = "ALL"
   }
 
   tags = merge(
