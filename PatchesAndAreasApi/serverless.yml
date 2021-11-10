@@ -144,7 +144,7 @@ resources:
       Type: AWS::Synthetics::Canary
       Condition: CreateCanary
       Properties: 
-        Name: patches-and-areas-health #Update name accordingly, max 21 characters
+        Name: patches-areas-health #Update name accordingly, max 21 characters
         Code:
           Handler: pageLoadBlueprint.handler
           S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}
