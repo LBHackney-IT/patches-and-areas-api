@@ -1,24 +1,20 @@
 using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
-using Amazon.SimpleNotificationService;
-using Amazon.SimpleNotificationService.Model;
+using Hackney.Core.DynamoDb;
+using Hackney.Core.Testing.DynamoDb;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using Xunit;
 
 namespace PatchesAndAreasApi.Tests
 {
-    public class DynamoDbIntegrationTests<TStartup> : IDisposable where TStartup : class
+    public class MockWebApplicationFactory<TStartup>
+        : WebApplicationFactory<TStartup> where TStartup : class
     {
-        public HttpClient Client { get; private set; }
-        public IDynamoDBContext DynamoDbContext => _factory?.DynamoDbContext;
-
-        public static string[] PatchByParentId { get; private set; }
-
-        private readonly DynamoDbMockWebApplicationFactory<TStartup> _factory;
-
         private readonly List<TableDef> _tables = new List<TableDef>
         {
             new TableDef {
@@ -45,30 +41,30 @@ namespace PatchesAndAreasApi.Tests
             }
         };
 
-        public DynamoDbIntegrationTests()
+        public HttpClient Client { get; private set; }
+        public IDynamoDbFixture DynamoDbFixture { get; private set; }
+
+        public MockWebApplicationFactory()
         {
             EnsureEnvVarConfigured("DynamoDb_LocalMode", "true");
             EnsureEnvVarConfigured("DynamoDb_LocalServiceUrl", "http://localhost:8000");
 
-            _factory = new DynamoDbMockWebApplicationFactory<TStartup>(_tables);
-
-            Client = _factory.CreateClient();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            Client = CreateClient();
         }
 
         private bool _disposed;
-        protected virtual void Dispose(bool disposing)
+
+        protected override void Dispose(bool disposing)
         {
             if (disposing && !_disposed)
             {
+                if (null != DynamoDbFixture)
+                    (DynamoDbFixture as DynamoDbFixture).Dispose();
+                if (null != Client)
+                    Client.Dispose();
 
-                if (null != _factory)
-                    _factory.Dispose();
+                base.Dispose(true);
+
                 _disposed = true;
             }
         }
@@ -79,24 +75,20 @@ namespace PatchesAndAreasApi.Tests
                 Environment.SetEnvironmentVariable(name, defaultValue);
         }
 
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.ConfigureAppConfiguration(b => b.AddEnvironmentVariables())
+                .UseStartup<Startup>();
+            builder.ConfigureServices(services =>
+            {
+                services.ConfigureDynamoDB();
+                services.ConfigureDynamoDbFixture();
 
-    }
+                var serviceProvider = services.BuildServiceProvider();
 
-    public class TableDef
-    {
-        public string Name { get; set; }
-        public string KeyName { get; set; }
-        public ScalarAttributeType KeyType { get; set; }
-        public List<GlobalSecondaryIndex> GlobalSecondaryIndexes { get; set; } = new List<GlobalSecondaryIndex>();
-
-    }
-
-
-    [CollectionDefinition("DynamoDb collection", DisableParallelization = true)]
-    public class AwsCollection : ICollectionFixture<DynamoDbIntegrationTests<Startup>>
-    {
-        // This class has no code, and is never created. Its purpose is simply
-        // to be the place to apply [CollectionDefinition] and all the
-        // ICollectionFixture<> interfaces.
+                DynamoDbFixture = serviceProvider.GetRequiredService<IDynamoDbFixture>();
+                DynamoDbFixture.EnsureTablesExist(_tables);
+            });
+        }
     }
 }

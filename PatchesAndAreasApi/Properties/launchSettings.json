@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "base_api": {
+    "patches_and_areas_api": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/v1/healthcheck/ping",

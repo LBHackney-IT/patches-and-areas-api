@@ -1,11 +1,10 @@
 using AutoFixture;
+using Hackney.Core.Testing.DynamoDb;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
 using PatchesAndAreasApi.V1.Boundary.Request;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using TestStack.BDDfy;
 using Xunit;
 
@@ -16,20 +15,20 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
        IWant = "the ability to delete a responsibility from a patch/area",
        SoThat = " can end their relationship to the patch/area"
    )]
-    [Collection("DynamoDb collection")]
+    [Collection("AppTest collection")]
     public class DeleteResponsibilityFromPatchTests : IDisposable
     {
-        private readonly DynamoDbIntegrationTests<Startup> _dbFixture;
+        private readonly IDynamoDbFixture _dbFixture;
 
         private readonly PatchesFixtures _patchFixture;
         private readonly DeleteResponsibilityFromPatchStep _steps;
         private readonly Fixture _fixture = new Fixture();
 
-        public DeleteResponsibilityFromPatchTests(DynamoDbIntegrationTests<Startup> dbFixture)
+        public DeleteResponsibilityFromPatchTests(MockWebApplicationFactory<Startup> appFactory)
         {
-            _dbFixture = dbFixture;
+            _dbFixture = appFactory.DynamoDbFixture;
             _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext);
-            _steps = new DeleteResponsibilityFromPatchStep(_dbFixture.Client);
+            _steps = new DeleteResponsibilityFromPatchStep(appFactory.Client);
         }
 
         public void Dispose()
