@@ -1,41 +1,38 @@
-using Amazon.DynamoDBv2.DataModel;
 using AutoFixture;
-using PatchesAndAreasApi.V1.Domain;
-using PatchesAndAreasApi.V1.Gateways;
 using FluentAssertions;
+using Hackney.Core.Testing.DynamoDb;
+using Hackney.Core.Testing.Shared;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Threading.Tasks;
 using PatchesAndAreasApi.V1.Boundary.Request;
-using Xunit;
-using System.Collections.Generic;
-using PatchesAndAreasApi.V1.Infrastructure;
+using PatchesAndAreasApi.V1.Domain;
 using PatchesAndAreasApi.V1.Factories;
+using PatchesAndAreasApi.V1.Gateways;
+using PatchesAndAreasApi.V1.Infrastructure;
 using PatchesAndAreasApi.V1.Infrastructure.Exceptions;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace PatchesAndAreasApi.Tests.V1.Gateways
 {
-    [Collection("DynamoDb collection")]
+    [Collection("AppTest collection")]
     public class DynamoDbGatewayTests : IDisposable
     {
         private readonly Fixture _fixture = new Fixture();
-        private readonly IDynamoDBContext _dynamoDb;
-        private PatchesGateway _classUnderTest;
-        private readonly List<Action> _cleanup = new List<Action>();
+        private readonly IDynamoDbFixture _dbFixture;
+        private readonly PatchesGateway _classUnderTest;
         private readonly Random _random = new Random();
 
+        private readonly Mock<ILogger<PatchesGateway>> _logger;
 
-
-        private Mock<ILogger<PatchesGateway>> _logger;
-
-        public DynamoDbGatewayTests(DynamoDbIntegrationTests<Startup> dbTestFixture)
+        public DynamoDbGatewayTests(MockWebApplicationFactory<Startup> appFactory)
         {
-            _dynamoDb = dbTestFixture.DynamoDbContext;
+            _dbFixture = appFactory.DynamoDbFixture;
             _logger = new Mock<ILogger<PatchesGateway>>();
-            _classUnderTest = new PatchesGateway(_dynamoDb, _logger.Object);
+            _classUnderTest = new PatchesGateway(_dbFixture.DynamoDbContext, _logger.Object);
         }
 
         public void Dispose()
@@ -49,9 +46,6 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         {
             if (disposing && !_disposed)
             {
-                foreach (var action in _cleanup)
-                    action();
-
                 _disposed = true;
             }
         }
@@ -179,7 +173,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             await func.Should().NotThrowAsync<Exception>().ConfigureAwait(false);
 
             // check database
-            var databaseResponse = await _dynamoDb.LoadAsync<PatchesDb>(mockPatch.Id).ConfigureAwait(false);
+            var databaseResponse = await _dbFixture.DynamoDbContext.LoadAsync<PatchesDb>(mockPatch.Id).ConfigureAwait(false);
             databaseResponse.ResponsibleEntities.Should().HaveCount(numberOfResponsibilities - 1);
 
             databaseResponse.ResponsibleEntities.Should().NotContain(x => x.Id == responsibilityToRemove.Id);
@@ -203,8 +197,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             var result = await _classUnderTest.UpdatePatchResponsibilities(query, request, 0).ConfigureAwait(false);
 
             //Assert
-            var load = await _dynamoDb.LoadAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false);
-            _cleanup.Add(async () => await _dynamoDb.DeleteAsync<PatchesDb>(load.Id).ConfigureAwait(false));
+            var load = await _dbFixture.DynamoDbContext.LoadAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false);
 
             //Updated tenure with new Household Member
             result.Should().BeEquivalentTo(load, config => config.Excluding(y => y.VersionNumber));
@@ -285,17 +278,14 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
 
         private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
         {
-            await _dynamoDb.SaveAsync<PatchesDb>(dbEntity).ConfigureAwait(false);
-            _cleanup.Add(async () => await _dynamoDb.DeleteAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false));
+            await _dbFixture.SaveEntityAsync(dbEntity).ConfigureAwait(false);
         }
 
         private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
         {
             foreach (var patch in dbEntity)
             {
-                _dynamoDb.SaveAsync(patch).GetAwaiter().GetResult();
-                _cleanup.Add(async () => await _dynamoDb.DeleteAsync(patch, default).ConfigureAwait(false));
-
+                _dbFixture.SaveEntityAsync(patch).GetAwaiter().GetResult();
             }
         }
     }

@@ -1,9 +1,7 @@
+using Hackney.Core.Testing.DynamoDb;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TestStack.BDDfy;
 using Xunit;
 
@@ -13,18 +11,18 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
           AsA = "Service",
           IWant = "an endpoint to return patch details",
           SoThat = "it is possible to view the details of a patch")]
-    [Collection("DynamoDb collection")]
+    [Collection("AppTest collection")]
     public class GetPatchByParentIdTests : IDisposable
     {
-        private readonly DynamoDbIntegrationTests<Startup> _dbFixture;
+        private readonly IDynamoDbFixture _dbFixture;
         private readonly PatchesFixtures _patchFixtures;
         private readonly GetPatchByParentIdStep _steps;
 
-        public GetPatchByParentIdTests(DynamoDbIntegrationTests<Startup> dbFixture)
+        public GetPatchByParentIdTests(MockWebApplicationFactory<Startup> appFactory)
         {
-            _dbFixture = dbFixture;
+            _dbFixture = appFactory.DynamoDbFixture;
             _patchFixtures = new PatchesFixtures(_dbFixture.DynamoDbContext);
-            _steps = new GetPatchByParentIdStep(_dbFixture.Client);
+            _steps = new GetPatchByParentIdStep(appFactory.Client);
         }
         public void Dispose()
         {
