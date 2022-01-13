@@ -7,24 +7,23 @@
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <NoWarn>CA1051;CA1822;CA2000;CA1816;CA2213;CA1000;CA1819;S3881</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.17.0" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Hackney.Core.DynamoDb" Version="1.51.0" />
-    <PackageReference Include="Hackney.Core.HealthCheck" Version="1.30.0" />
-    <PackageReference Include="Hackney.Core.JWT" Version="1.49.0" />
-    <PackageReference Include="Hackney.Core.Logging" Version="1.30.0" />
-    <PackageReference Include="Hackney.Core.Middleware" Version="1.49.0" />
+    <PackageReference Include="Hackney.Core.Testing.DynamoDb" Version="1.55.0" />
     <PackageReference Include="Hackney.Core.Testing.Shared" Version="1.54.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0" />
+      <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="Bogus" Version="33.0.2" />
     <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.3" />
     <PackageReference Include="TestStack.BDDfy" Version="4.3.2" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">

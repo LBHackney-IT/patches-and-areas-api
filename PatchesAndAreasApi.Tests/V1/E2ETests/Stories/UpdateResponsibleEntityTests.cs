@@ -1,9 +1,7 @@
+using Hackney.Core.Testing.DynamoDb;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TestStack.BDDfy;
 using Xunit;
 
@@ -13,18 +11,18 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
        AsA = "Internal Hackney user (such as a Housing Officer or Area housing Manager)",
        IWant = "the ability to add new responsible entity",
        SoThat = "I can update a patch/area")]
-    [Collection("DynamoDb collection")]
+    [Collection("AppTest collection")]
     public class UpdateResponsibleEntityTests : IDisposable
     {
-        private readonly DynamoDbIntegrationTests<Startup> _dbFixture;
+        private readonly IDynamoDbFixture _dbFixture;
         private readonly PatchesFixtures _patchFixture;
         private readonly UpdatePatchResponsibilityStep _steps;
 
-        public UpdateResponsibleEntityTests(DynamoDbIntegrationTests<Startup> dbFixture)
+        public UpdateResponsibleEntityTests(MockWebApplicationFactory<Startup> appFactory)
         {
-            _dbFixture = dbFixture;
+            _dbFixture = appFactory.DynamoDbFixture;
             _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext);
-            _steps = new UpdatePatchResponsibilityStep(_dbFixture.Client);
+            _steps = new UpdatePatchResponsibilityStep(appFactory.Client);
         }
 
         public void Dispose()
