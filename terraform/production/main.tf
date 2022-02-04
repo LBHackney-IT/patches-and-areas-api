@@ -1,6 +1,6 @@
-# INSTRUCTIONS: 
-# 1) ENSURE YOU POPULATE THE LOCALS 
-# 2) ENSURE YOU REPLACE ALL INPUT PARAMETERS, THAT CURRENTLY STATE 'ENTER VALUE', WITH VALID VALUES 
+# INSTRUCTIONS:
+# 1) ENSURE YOU POPULATE THE LOCALS
+# 2) ENSURE YOU REPLACE ALL INPUT PARAMETERS, THAT CURRENTLY STATE 'ENTER VALUE', WITH VALID VALUES
 # 3) YOUR CODE WOULD NOT COMPILE IF STEP NUMBER 2 IS NOT PERFORMED!
 # 4) ENSURE YOU CREATE A BUCKET FOR YOUR STATE FILE AND YOU ADD THE NAME BELOW - MAINTAINING THE STATE OF THE INFRASTRUCTURE YOU CREATE IS ESSENTIAL - FOR APIS, THE BUCKETS ALREADY EXIST
 # 5) THE VALUES OF THE COMMON COMPONENTS THAT YOU WILL NEED ARE PROVIDED IN THE COMMENTS
@@ -42,4 +42,17 @@ terraform {
     region  = "eu-west-2"
     key     = "services/patches-and-areas-api/state"
   }
+}
+
+data "aws_ssm_parameter" "cloudwatch_topic_arn" {
+  name = "/housing-tl/${var.environment_name}/cloudwatch-alarms-topic-arn"
+}
+
+module "api-alarm" {
+  source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/cloudwatch/api-alarm"
+  environment_name = var.environment_name
+  api_name         = "patches-and-areas-api"
+  alarm_period     = "300"
+  error_threshold  = "1"
+  sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 }
