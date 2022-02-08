@@ -177,7 +177,7 @@ resources:
           DurationInSeconds: 0
 custom:
   associateWaf:
-    name: PatchesAndAreasApiWafAcl
+    name: Platform_APIs_Web_ACL
     version: V2
   hostname:
     Fn::Join:
