@@ -10,6 +10,9 @@ provider:
   stage: ${opt:stage}
   region: eu-west-2
 
+plugins:
+  - serverless-associate-waf
+
 package:
   artifact: ./bin/release/netcoreapp3.1/patches-and-areas-api.zip
 
@@ -173,6 +176,9 @@ resources:
           Expression: rate(5 minutes)
           DurationInSeconds: 0
 custom:
+  associateWaf:
+    name: PatchesAndAreasApiWafAcl
+    version: V2
   hostname:
     Fn::Join:
       - '.'
