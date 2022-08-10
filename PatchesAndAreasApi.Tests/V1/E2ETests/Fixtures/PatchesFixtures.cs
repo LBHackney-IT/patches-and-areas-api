@@ -1,9 +1,9 @@
 using Amazon.DynamoDBv2.DataModel;
 using AutoFixture;
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Domain;
-using PatchesAndAreas.Factories;
-using PatchesAndAreas.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Factories;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

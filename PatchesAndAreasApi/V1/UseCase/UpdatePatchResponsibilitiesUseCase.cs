@@ -1,9 +1,9 @@
 using Hackney.Core.JWT;
 using Hackney.Core.Logging;
 using Hackney.Core.Sns;
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Boundary.Response;
-using PatchesAndAreas.Factories;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Boundary.Response;
+using Hackney.Shared.PatchesAndAreas.Factories;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase.Interfaces;
 using System;

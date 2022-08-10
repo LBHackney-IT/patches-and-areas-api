@@ -7,11 +7,11 @@ using System.Linq;
 using System;
 using Amazon.DynamoDBv2.DocumentModel;
 using System.Threading;
-using PatchesAndAreas.Domain;
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Infrastructure;
-using PatchesAndAreas.Infrastructure.Exceptions;
-using PatchesAndAreas.Factories;
+using Hackney.Shared.PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
+using Hackney.Shared.PatchesAndAreas.Factories;
 
 namespace PatchesAndAreasApi.V1.Gateways
 {

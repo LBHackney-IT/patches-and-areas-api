@@ -6,8 +6,8 @@ using System;
 using System.Threading.Tasks;
 using FluentAssertions;
 using AutoFixture;
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
 
 namespace PatchesAndAreasApi.Tests.V1.UseCase
 {

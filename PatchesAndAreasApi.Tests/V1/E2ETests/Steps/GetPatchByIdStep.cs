@@ -1,7 +1,7 @@
 using FluentAssertions;
-using PatchesAndAreas.Boundary.Response;
-using PatchesAndAreas.Infrastructure;
-using PatchesAndAreas.Infrastructure.Constants;
+using Hackney.Shared.PatchesAndAreas.Boundary.Response;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;

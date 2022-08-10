@@ -1,6 +1,6 @@
 using AutoFixture;
 using Hackney.Core.Testing.DynamoDb;
-using PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
 using System;

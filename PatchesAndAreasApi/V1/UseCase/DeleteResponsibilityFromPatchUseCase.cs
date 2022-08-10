@@ -1,5 +1,5 @@
 using Hackney.Core.Logging;
-using PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;

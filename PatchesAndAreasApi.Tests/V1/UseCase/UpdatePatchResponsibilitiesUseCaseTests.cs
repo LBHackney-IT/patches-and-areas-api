@@ -1,10 +1,10 @@
 using AutoFixture;
 using FluentAssertions;
 using Moq;
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Boundary.Response;
-using PatchesAndAreas.Factories;
-using PatchesAndAreas.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Boundary.Response;
+using Hackney.Shared.PatchesAndAreas.Factories;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase;
 using System;

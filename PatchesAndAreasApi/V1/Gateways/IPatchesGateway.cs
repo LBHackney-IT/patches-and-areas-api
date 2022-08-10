@@ -1,6 +1,6 @@
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Domain;
-using PatchesAndAreas.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

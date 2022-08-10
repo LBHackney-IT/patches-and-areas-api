@@ -1,4 +1,4 @@
-using PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;

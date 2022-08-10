@@ -1,8 +1,8 @@
 using AutoFixture;
 using FluentAssertions;
 using Moq;
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase;
 using System;

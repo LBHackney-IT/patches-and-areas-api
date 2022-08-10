@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Hackney.Core.Http;
 using System.Collections.Generic;
-using PatchesAndAreas.Boundary.Response;
-using PatchesAndAreas.Boundary.Request;
-using PatchesAndAreas.Infrastructure.Exceptions;
-using PatchesAndAreas.Factories;
-using PatchesAndAreas.Infrastructure.Constants;
+using Hackney.Shared.PatchesAndAreas.Boundary.Response;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
+using Hackney.Shared.PatchesAndAreas.Factories;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using Hackney.Core.Middleware;
-using HeaderConstants = PatchesAndAreas.Infrastructure.Constants.HeaderConstants;
+using HeaderConstants = Hackney.Shared.PatchesAndAreas.Infrastructure.Constants.HeaderConstants;
 
 namespace PatchesAndAreasApi.V1.Controllers
 {
