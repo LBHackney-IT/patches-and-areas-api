@@ -1,10 +1,7 @@
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Boundary.Response;
-using PatchesAndAreasApi.V1.Domain;
-using PatchesAndAreasApi.V1.Infrastructure;
-using System;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Domain;
+using PatchesAndAreas.Infrastructure;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PatchesAndAreasApi.V1.Gateways

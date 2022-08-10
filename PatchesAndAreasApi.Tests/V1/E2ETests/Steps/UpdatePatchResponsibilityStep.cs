@@ -1,10 +1,11 @@
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Domain;
+using PatchesAndAreas.Infrastructure;
+using PatchesAndAreas.Infrastructure.Constants;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Domain;
-using PatchesAndAreasApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

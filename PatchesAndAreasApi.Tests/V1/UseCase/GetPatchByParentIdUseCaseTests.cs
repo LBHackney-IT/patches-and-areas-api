@@ -1,8 +1,8 @@
 using AutoFixture;
 using FluentAssertions;
 using Moq;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Domain;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Domain;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase;
 using System;

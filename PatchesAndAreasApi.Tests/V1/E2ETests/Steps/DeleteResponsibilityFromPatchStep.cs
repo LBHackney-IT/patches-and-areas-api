@@ -1,7 +1,7 @@
 using FluentAssertions;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Infrastructure;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

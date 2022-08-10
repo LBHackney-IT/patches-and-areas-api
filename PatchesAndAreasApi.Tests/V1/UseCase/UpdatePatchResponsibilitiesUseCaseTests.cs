@@ -1,15 +1,13 @@
 using AutoFixture;
 using FluentAssertions;
 using Moq;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Boundary.Response;
-using PatchesAndAreasApi.V1.Factories;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Boundary.Response;
+using PatchesAndAreas.Factories;
+using PatchesAndAreas.Infrastructure;
 using PatchesAndAreasApi.V1.Gateways;
-using PatchesAndAreasApi.V1.Infrastructure;
 using PatchesAndAreasApi.V1.UseCase;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 

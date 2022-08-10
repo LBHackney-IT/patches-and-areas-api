@@ -3,25 +3,25 @@ using PatchesAndAreasApi.V1.Controllers;
 using PatchesAndAreasApi.V1.UseCase.Interfaces;
 using Moq;
 using Xunit;
-using PatchesAndAreasApi.V1.Boundary.Request;
 using System;
 using System.Threading.Tasks;
-using PatchesAndAreasApi.V1.Domain;
 using Microsoft.AspNetCore.Mvc;
 using FluentAssertions;
-using PatchesAndAreasApi.V1.Factories;
-using PatchesAndAreasApi.V1.Infrastructure;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using PatchesAndAreasApi.V1.Infrastructure.Exceptions;
 using Hackney.Core.Http;
-using PatchesAndAreasApi.V1.Boundary.Response;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Domain;
+using PatchesAndAreas.Infrastructure.Exceptions;
+using PatchesAndAreas.Factories;
+using PatchesAndAreas.Infrastructure.Constants;
+using PatchesAndAreas.Boundary.Response;
 
 namespace PatchesAndAreasApi.Tests.V1.Controllers
 {

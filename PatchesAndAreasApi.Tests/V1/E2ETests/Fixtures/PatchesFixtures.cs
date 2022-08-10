@@ -1,9 +1,9 @@
 using Amazon.DynamoDBv2.DataModel;
 using AutoFixture;
-using PatchesAndAreasApi.V1.Domain;
-using PatchesAndAreasApi.V1.Factories;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Infrastructure;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Domain;
+using PatchesAndAreas.Factories;
+using PatchesAndAreas.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

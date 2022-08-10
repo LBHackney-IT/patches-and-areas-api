@@ -1,6 +1,6 @@
 using Hackney.Core.Logging;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Domain;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Domain;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase.Interfaces;
 using System;

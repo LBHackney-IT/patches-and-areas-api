@@ -1,5 +1,5 @@
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Domain;
+using PatchesAndAreas.Boundary.Request;
+using PatchesAndAreas.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;

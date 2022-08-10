@@ -9,6 +9,12 @@
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <NoWarn>CA1051;CA1822;CA2000;CA1816;CA2213;CA1000;CA1819;S3881</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="V1\Domain\**" />
+    <Content Remove="V1\Domain\**" />
+    <EmbeddedResource Remove="V1\Domain\**" />
+    <None Remove="V1\Domain\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.17.0" />
@@ -16,6 +22,7 @@
     <PackageReference Include="Hackney.Core.DynamoDb" Version="1.51.0" />
     <PackageReference Include="Hackney.Core.Testing.DynamoDb" Version="1.55.0" />
     <PackageReference Include="Hackney.Core.Testing.Shared" Version="1.54.0" />
+    <PackageReference Include="Hackney.Shared.PatchesAndAreas" Version="0.4.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,10 +41,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PatchesAndAreasApi\PatchesAndAreasApi.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="V1\Domain\" />
   </ItemGroup>
 
 </Project>
