@@ -1,20 +1,19 @@
-using PatchesAndAreasApi.V1.Boundary.Response;
 using Hackney.Core.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PatchesAndAreasApi.V1.UseCase.Interfaces;
-using PatchesAndAreasApi.V1.Boundary.Request;
 using System.Threading.Tasks;
-using PatchesAndAreasApi.V1.Factories;
 using System.Net.Http.Headers;
-using PatchesAndAreasApi.V1.Infrastructure;
-using PatchesAndAreasApi.V1.Infrastructure.Exceptions;
 using Hackney.Core.Http;
-using Hackney.Core.JWT;
-using Hackney.Core.Middleware;
-using HeaderConstants = PatchesAndAreasApi.V1.Infrastructure.HeaderConstants;
 using System.Collections.Generic;
+using Hackney.Shared.PatchesAndAreas.Boundary.Response;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
+using Hackney.Shared.PatchesAndAreas.Factories;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
+using Hackney.Core.Middleware;
+using HeaderConstants = Hackney.Shared.PatchesAndAreas.Infrastructure.Constants.HeaderConstants;
 
 namespace PatchesAndAreasApi.V1.Controllers
 {

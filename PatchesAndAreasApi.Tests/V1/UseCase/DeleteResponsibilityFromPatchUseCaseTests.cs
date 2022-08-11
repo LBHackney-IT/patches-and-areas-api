@@ -1,6 +1,6 @@
 using AutoFixture;
 using Moq;
-using PatchesAndAreasApi.V1.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase;
 using System;

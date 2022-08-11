@@ -1,10 +1,11 @@
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Domain;
-using PatchesAndAreasApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

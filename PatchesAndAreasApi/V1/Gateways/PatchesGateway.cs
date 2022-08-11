@@ -1,18 +1,17 @@
 using Amazon.DynamoDBv2.DataModel;
-using PatchesAndAreasApi.V1.Domain;
-using PatchesAndAreasApi.V1.Factories;
-using PatchesAndAreasApi.V1.Infrastructure;
 using Hackney.Core.Logging;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PatchesAndAreasApi.V1.Boundary.Response;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Infrastructure.Exceptions;
 using System.Linq;
 using System;
 using Amazon.DynamoDBv2.DocumentModel;
 using System.Threading;
+using Hackney.Shared.PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
+using Hackney.Shared.PatchesAndAreas.Factories;
 
 namespace PatchesAndAreasApi.V1.Gateways
 {

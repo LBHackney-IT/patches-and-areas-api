@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using PatchesAndAreasApi.V1.Controllers;
-using PatchesAndAreasApi.V1.Infrastructure;
 using FluentAssertions;
 using Hackney.Core.Middleware;
 using Microsoft.AspNetCore.Http;

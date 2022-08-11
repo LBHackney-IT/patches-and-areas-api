@@ -1,5 +1,5 @@
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Domain;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;

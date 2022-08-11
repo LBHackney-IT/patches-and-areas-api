@@ -2,12 +2,12 @@ using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase;
 using Moq;
 using Xunit;
-using PatchesAndAreasApi.V1.Boundary.Request;
 using System;
 using System.Threading.Tasks;
-using PatchesAndAreasApi.V1.Domain;
 using FluentAssertions;
 using AutoFixture;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
 
 namespace PatchesAndAreasApi.Tests.V1.UseCase
 {
