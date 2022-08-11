@@ -1,7 +1,7 @@
 using FluentAssertions;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

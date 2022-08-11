@@ -1,10 +1,7 @@
-using PatchesAndAreasApi.V1.Boundary.Request;
-using PatchesAndAreasApi.V1.Boundary.Response;
-using PatchesAndAreasApi.V1.Domain;
-using PatchesAndAreasApi.V1.Infrastructure;
-using System;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using Hackney.Shared.PatchesAndAreas.Domain;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PatchesAndAreasApi.V1.Gateways

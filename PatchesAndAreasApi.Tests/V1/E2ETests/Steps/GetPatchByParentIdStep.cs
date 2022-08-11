@@ -1,6 +1,6 @@
 using FluentAssertions;
-using PatchesAndAreasApi.V1.Boundary.Response;
-using PatchesAndAreasApi.V1.Infrastructure;
+using Hackney.Shared.PatchesAndAreas.Boundary.Response;
+using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
