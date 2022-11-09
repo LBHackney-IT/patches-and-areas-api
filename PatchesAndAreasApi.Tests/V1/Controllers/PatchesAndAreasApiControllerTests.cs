@@ -137,7 +137,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             val.First().Should().Be(expectedEtagValue);
         }
         [Fact]
-        public void GetPatchByIdExceptionIsThrown()
+        public async Task GetPatchByIdExceptionIsThrown()
         {
             // Arrange
             var query = ConstructQuery();
@@ -148,7 +148,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             Func<Task<IActionResult>> func = async () => await _classUnderTest.GetPatchById(query).ConfigureAwait(false);
 
             // Assert
-            func.Should().Throw<ApplicationException>().WithMessage(exception.Message);
+            (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         }
 
         [Fact]
-        public void GetPatchByParentIdExceptionIsThrown()
+        public async Task GetPatchByParentIdExceptionIsThrown()
         {
             // Arrange
             var queryParam = ConstructQueryParameter();
@@ -280,7 +280,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             Func<Task<IActionResult>> func = async () => await _classUnderTest.GetByParentIdAsync(queryParam).ConfigureAwait(false);
 
             // Assert
-            func.Should().Throw<ApplicationException>().WithMessage(exception.Message);
+            (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);
         }
 
         [Theory]
