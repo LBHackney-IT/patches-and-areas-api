@@ -240,7 +240,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
                                                                                                    .ConfigureAwait(false);
 
             // Assert
-            func.Should().Throw<VersionNumberConflictException>()
+            (await func.Should().ThrowAsync<VersionNumberConflictException>())
                          .Where(x => (x.IncomingVersionNumber == ifMatch) && (x.ExpectedVersionNumber == 0));
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
         }
