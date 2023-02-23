@@ -64,7 +64,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public void GetPatchByIdAsyncExceptionIsThrown()
+        public async Task GetPatchByIdAsyncExceptionIsThrown()
         {
             // Arrange
             var query = ConstructQueryParameter();
@@ -75,7 +75,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
             Func<Task<List<PatchEntity>>> func = async () => await _classUnderTest.ExecuteAsync(query).ConfigureAwait(false);
 
             // Assert
-            func.Should().Throw<ApplicationException>().WithMessage(exception.Message);
+            (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);
         }
     }
 }
