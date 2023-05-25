@@ -53,7 +53,7 @@ namespace PatchesAndAreasApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [LogCall(LogLevel.Information)]
-        [Route("")]
+        [Route("all")]
         public async Task<IActionResult> GetAllPatches()
         {
             var allPatches = await _getAllPatchesUseCase.Execute().ConfigureAwait(false);
