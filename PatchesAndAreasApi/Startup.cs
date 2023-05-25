@@ -174,7 +174,7 @@ namespace PatchesAndAreasApi
             services.AddScoped<IDeleteResponsibilityFromPatchUseCase, DeleteResponsibilityFromPatchUseCase>();
             services.AddScoped<IUpdatePatchResponsibilitiesUseCase, UpdatePatchResponsibilitiesUseCase>();
             services.AddScoped<IGetPatchByParentIdUseCase, GetPatchByParentIdUseCase>();
-
+            services.AddScoped<IGetAllPatchesUseCase, GetAllPatchesUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
