@@ -277,36 +277,38 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        //[Fact]
-        //public async Task GetAllPatchesAsyncReturnsEmptyListIfNoPatchesExist()
-        //{
-        //    // Act
-        //    var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
+        [Fact]
+        public async Task GetAllPatchesAsyncReturnsEmptyListIfNoPatchesExist()
+        {
+            _dbFixture.DynamoDbContext.Dispose();
+            // Act
+            var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
 
-        //    // Assert
-        //    result.Should().BeEmpty();
-        //    _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
-        //}
+            // Assert
+            result.Should().BeEmpty();
+            _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
+        }
 
-        //[Fact]
-        //public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
-        //{
-        //    // Arrange
-        //    var patches = new List<PatchesDb>();
+        [Fact]
+        public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
+        {
+            _dbFixture.DynamoDbContext.Dispose();
+            // Arrange
+            var patches = new List<PatchesDb>();
 
-        //    patches.AddRange(_fixture.Build<PatchesDb>()
-        //                          .With(x => x.VersionNumber, (int?) null)
-        //                          .CreateMany(5));
+            patches.AddRange(_fixture.Build<PatchesDb>()
+                                  .With(x => x.VersionNumber, (int?) null)
+                                  .CreateMany(5));
 
-        //    InsertListDataToDynamoDB(patches);
+            InsertListDataToDynamoDB(patches);
 
-        //    // Act
-        //    var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
+            // Act
+            var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
 
-        //    // Assert
-        //    result.Should().BeEquivalentTo(patches);
-        //    _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
-        //}
+            // Assert
+            result.Should().BeEquivalentTo(patches);
+            _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
+        }
 
 
         private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
