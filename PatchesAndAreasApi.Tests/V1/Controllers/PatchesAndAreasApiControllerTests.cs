@@ -22,6 +22,8 @@ using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
 using Hackney.Shared.PatchesAndAreas.Factories;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
+using PatchesAndAreasApi.V1.UseCase;
+using System.Collections;
 
 namespace PatchesAndAreasApi.Tests.V1.Controllers
 {
@@ -31,6 +33,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         private Mock<IGetPatchByIdUseCase> _mockGetByIdUseCase;
         private Mock<IDeleteResponsibilityFromPatchUseCase> _mockDeleteResponsibilityFromPatchUseCase;
         private Mock<IUpdatePatchResponsibilitiesUseCase> _mockPatchResponsibilitiesUseCase;
+        private Mock<IGetAllPatchesUseCase> _mockGetAllPatchesUseCase;
 
         private readonly Mock<IHttpContextWrapper> _mockContextWrapper;
         private readonly Mock<HttpRequest> _mockHttpRequest;
@@ -49,6 +52,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             _mockDeleteResponsibilityFromPatchUseCase = new Mock<IDeleteResponsibilityFromPatchUseCase>();
             _mockGetByParentIdUseCase = new Mock<IGetPatchByParentIdUseCase>();
             _mockPatchResponsibilitiesUseCase = new Mock<IUpdatePatchResponsibilitiesUseCase>();
+            _mockGetAllPatchesUseCase = new Mock<IGetAllPatchesUseCase>();
 
             _mockContextWrapper = new Mock<IHttpContextWrapper>();
             _mockHttpRequest = new Mock<HttpRequest>();
@@ -59,6 +63,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
                 _mockPatchResponsibilitiesUseCase.Object,
                 _mockGetByParentIdUseCase.Object,
                 _mockDeleteResponsibilityFromPatchUseCase.Object,
+                _mockGetAllPatchesUseCase.Object,
                 _mockContextWrapper.Object);
 
             _requestHeaders = new HeaderDictionary();
@@ -305,6 +310,36 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             // Assert
             result.Should().BeOfType(typeof(ConflictObjectResult));
             (result as ConflictObjectResult).Value.Should().BeEquivalentTo(exception.Message);
+        }
+
+        [Fact]
+        public async void GetAllPatches_ReturnsOkResultWithPatches()
+        {
+            // Arrange
+            var patchesResponse = _fixture.Create<List<PatchEntity>>();
+
+            _mockGetAllPatchesUseCase.Setup(x => x.Execute()).ReturnsAsync(patchesResponse);
+
+            // Act
+            var result = await _classUnderTest.GetAllPatches().ConfigureAwait(false);
+
+            // Assert
+            var outcome = Assert.IsType<OkObjectResult>(result);
+            var resultPatches = Assert.IsType<List<PatchesResponseObject>>(outcome.Value);
+        }
+
+        [Fact]
+        public async Task GetAllPatchesExceptionIsThrown()
+        {
+            // Arrange
+            var exception = new ApplicationException("Test exception");
+            _mockGetAllPatchesUseCase.Setup(x => x.Execute()).ThrowsAsync(exception);
+
+            // Act
+            Func<Task<IActionResult>> func = async () => await _classUnderTest.GetAllPatches().ConfigureAwait(false);
+
+            // Assert
+            (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);
         }
     }
 }
