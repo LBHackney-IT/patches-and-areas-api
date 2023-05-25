@@ -38,7 +38,7 @@ namespace PatchesAndAreasApi.V1.Controllers
             _getPatchByParentIdUseCase = getPatchByParentIdUseCase;
             _updatePatchResponsibilities = updatePatchResponsibilities;
             _deleteResponsibilityFromPatchUseCase = deleteResponsibilityFromPatchUseCase;
-            _getAllPatchesUseCase= getAllPatchesUseCase;
+            _getAllPatchesUseCase = getAllPatchesUseCase;
             _contextWrapper = contextWrapper;
         }
 
