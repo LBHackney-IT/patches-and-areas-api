@@ -30,6 +30,17 @@ namespace PatchesAndAreasApi.V1.Gateways
         }
 
         [LogCall]
+        public async Task<List<PatchEntity>> GetAllPatchesAsync()
+        {
+            var scanConfig = new ScanOperationConfig();
+
+            var tableScan = await _dynamoDbContext.GetTargetTable<PatchesDb>().Scan(scanConfig).GetRemainingAsync().ConfigureAwait(false);
+            var result = _dynamoDbContext.FromDocuments<PatchesDb>(tableScan);
+
+            return result.Select(x => x.ToDomain()).ToList();
+        }
+
+        [LogCall]
         public async Task<PatchEntity> GetPatchByIdAsync(PatchesQueryObject query)
         {
             _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}");
