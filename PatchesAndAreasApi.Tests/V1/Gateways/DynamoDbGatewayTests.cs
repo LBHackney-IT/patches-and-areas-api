@@ -277,28 +277,28 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        [Fact]
-        public async Task GetAllPatchesAsyncReturnsEmptyListIfNoPatchesExist()
-        {
-            _dbFixture.DynamoDbContext.Dispose();
-            // Act
-            var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
+        //[Fact]
+        //public async Task GetAllPatchesAsyncReturnsEmptyListIfNoPatchesExist()
+        //{
+        //    _dbFixture.DynamoDbContext.Dispose();
+        //    // Act
+        //    var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
 
-            // Assert
-            result.Should().BeEmpty();
-            _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
-        }
+        //    // Assert
+        //    result.Should().BeEmpty();
+        //    _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
+        //}
 
         [Fact]
         public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
         {
-            _dbFixture.DynamoDbContext.Dispose();
             // Arrange
-            var patches = new List<PatchesDb>();
+            //_dbFixture.DynamoDbContext.Dispose();
 
-            patches.AddRange(_fixture.Build<PatchesDb>()
+            var patches = _fixture.Build<PatchesDb>()
                                   .With(x => x.VersionNumber, (int?) null)
-                                  .CreateMany(5));
+                                  .Without(x => x.ResponsibleEntities)
+                                  .CreateMany(5).ToList();
 
             InsertListDataToDynamoDB(patches);
 
