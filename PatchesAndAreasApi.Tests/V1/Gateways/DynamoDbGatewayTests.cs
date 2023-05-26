@@ -281,11 +281,9 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
         {
             // Arrange
-            var patches = new List<PatchesDb>();
-
-            patches.AddRange(_fixture.Build<PatchesDb>()
+            var patches = _fixture.Build<PatchesDb>()
                                   .With(x => x.VersionNumber, (int?) null)
-                                  .CreateMany(5));
+                                  .CreateMany(5).ToList();
 
             InsertListDataToDynamoDB(patches);
 
@@ -298,7 +296,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
                 results.Should().ContainEquivalentOf(patch.ToDomain());
             }
 
-            //_logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
+            _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
         }
 
 
