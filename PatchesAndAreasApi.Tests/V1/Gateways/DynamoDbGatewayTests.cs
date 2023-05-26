@@ -277,18 +277,6 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        //[Fact]
-        //public async Task GetAllPatchesAsyncReturnsEmptyListIfNoPatchesExist()
-        //{
-        //    _dbFixture.DynamoDbContext.Dispose();
-        //    // Act
-        //    var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
-
-        //    // Assert
-        //    result.Should().BeEmpty();
-        //    _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
-        //}
-
         [Fact]
         public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
         {
