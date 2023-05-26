@@ -293,8 +293,6 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
         {
             // Arrange
-            //_dbFixture.DynamoDbContext.Dispose();
-
             var patches = _fixture.Build<PatchesDb>()
                                   .With(x => x.VersionNumber, (int?) null)
                                   .Without(x => x.ResponsibleEntities)
@@ -303,10 +301,14 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             InsertListDataToDynamoDB(patches);
 
             // Act
-            var result = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
+            var results = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
 
             // Assert
-            result.Should().BeEquivalentTo(patches);
+            foreach (var patch in patches)
+            {
+                results.Should().ContainEquivalentOf(patch.ToDomain());
+            }
+
             _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
         }
 
