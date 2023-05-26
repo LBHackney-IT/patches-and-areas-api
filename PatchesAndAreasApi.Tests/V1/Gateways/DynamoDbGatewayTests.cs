@@ -277,28 +277,26 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        //[Fact]
-        //public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
-        //{
-        //    // Arrange
-        //    var patches = _fixture.Build<PatchesDb>()
-        //                          .With(x => x.VersionNumber, (int?) null)
-        //                          .Without(x => x.ResponsibleEntities)
-        //                          .CreateMany(5).ToList();
+        [Fact]
+        public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
+        {
+            // Arrange
+            var patches = _fixture.Build<PatchesDb>()
+                                  .CreateMany(5).ToList();
 
-        //    InsertListDataToDynamoDB(patches);
+            InsertListDataToDynamoDB(patches);
 
-        //    // Act
-        //    var results = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
+            // Act
+            var results = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
 
-        //    // Assert
-        //    foreach (var patch in patches)
-        //    {
-        //        results.Should().ContainEquivalentOf(patch.ToDomain());
-        //    }
+            // Assert
+            foreach (var patch in patches)
+            {
+                results.Should().ContainEquivalentOf(patch.ToDomain());
+            }
 
-        //    _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
-        //}
+            _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
+        }
 
 
         private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
