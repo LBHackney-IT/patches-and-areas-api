@@ -282,6 +282,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         {
             // Arrange
             var patches = _fixture.Build<PatchesDb>()
+                                  .With(x => x.VersionNumber, (int?) null)
                                   .CreateMany(5).ToList();
 
             InsertListDataToDynamoDB(patches);
