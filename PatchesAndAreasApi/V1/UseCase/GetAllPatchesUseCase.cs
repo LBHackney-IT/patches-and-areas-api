@@ -18,8 +18,7 @@ namespace PatchesAndAreasApi.V1.UseCase
         [LogCall]
         public async Task<List<PatchEntity>> Execute()
         {
-            var allPatches = await _gateway.GetAllPatchesAsync().ConfigureAwait(false);
-            return allPatches;
+            return await _gateway.GetAllPatchesAsync().ConfigureAwait(false);
         }
     }
 }
