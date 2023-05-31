@@ -27,17 +27,38 @@ namespace PatchesAndAreasApi.V1.Controllers
         private readonly IDeleteResponsibilityFromPatchUseCase _deleteResponsibilityFromPatchUseCase;
         private readonly IUpdatePatchResponsibilitiesUseCase _updatePatchResponsibilities;
         private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
+        private readonly IGetAllPatchesUseCase _getAllPatchesUseCase;
         private readonly IHttpContextWrapper _contextWrapper;
 
         public PatchesAndAreasApiController(IGetPatchByIdUseCase getByIdUseCase, IUpdatePatchResponsibilitiesUseCase updatePatchResponsibilities,
             IGetPatchByParentIdUseCase getPatchByParentIdUseCase, IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
-            IHttpContextWrapper contextWrapper)
+            IGetAllPatchesUseCase getAllPatchesUseCase, IHttpContextWrapper contextWrapper)
         {
             _getByIdUseCase = getByIdUseCase;
             _getPatchByParentIdUseCase = getPatchByParentIdUseCase;
             _updatePatchResponsibilities = updatePatchResponsibilities;
             _deleteResponsibilityFromPatchUseCase = deleteResponsibilityFromPatchUseCase;
+            _getAllPatchesUseCase = getAllPatchesUseCase;
             _contextWrapper = contextWrapper;
+        }
+
+        /// <summary>
+        /// Retrives all Patch records
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="500">Something went wrong</response>
+        [ProducesResponseType(typeof(PatchesResponseObject), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [LogCall(LogLevel.Information)]
+        [Route("all")]
+        public async Task<IActionResult> GetAllPatches()
+        {
+            var allPatches = await _getAllPatchesUseCase.Execute().ConfigureAwait(false);
+
+            return Ok(allPatches.ToResponse());
         }
 
         /// <summary>

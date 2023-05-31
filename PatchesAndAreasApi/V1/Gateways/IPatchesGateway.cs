@@ -8,12 +8,10 @@ namespace PatchesAndAreasApi.V1.Gateways
 {
     public interface IPatchesGateway
     {
+        Task<List<PatchEntity>> GetAllPatchesAsync();
         Task<PatchEntity> GetPatchByIdAsync(PatchesQueryObject query);
-        Task<PatchesDb> UpdatePatchResponsibilities(UpdatePatchesResponsibilityRequest query, UpdatePatchesResponsibilitiesRequestObject requestObject,
-                                                                                         int? ifMatch);
+        Task<PatchesDb> UpdatePatchResponsibilities(UpdatePatchesResponsibilityRequest query, UpdatePatchesResponsibilitiesRequestObject requestObject, int? ifMatch);
         Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query);
-
-
         Task<PatchesDb> DeleteResponsibilityFromPatch(DeleteResponsibilityFromPatchRequest query);
 
     }

@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace PatchesAndAreasApi.Tests.V1.Gateways
 {
@@ -94,7 +95,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
                                  .Create();
             var dbEntity = entity.ToDatabase();
 
-            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
 
             var query = ConstructQuery(entity.Id);
             //Act
@@ -128,7 +129,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
                 .Create();
             var dbPatch = mockPatch.ToDatabase();
 
-            await InsertDatatoDynamoDB(dbPatch).ConfigureAwait(false);
+            await InsertDataToDynamoDB(dbPatch).ConfigureAwait(false);
 
             var mockRequest = new DeleteResponsibilityFromPatchRequest
             {
@@ -157,7 +158,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
 
             var responsibilityToRemove = mockResponsibileEntity.First();
             var dbEntity = mockPatch.ToDatabase();
-            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
 
             var mockRequest = new DeleteResponsibilityFromPatchRequest
             {
@@ -186,7 +187,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
                                  .With(x => x.VersionNumber, (int?) null)
                                  .Create();
             var dbEntity = entity.ToDatabase();
-            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
 
 
             var query = ConstructUpdateQuery(entity.Id, Guid.NewGuid());
@@ -230,7 +231,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             var query = ConstructUpdateQuery(entity.Id, entity.ResponsibleEntities.First().Id);
             var dbEntity = entity.ToDatabase();
 
-            await InsertDatatoDynamoDB(dbEntity).ConfigureAwait(false);
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
             entity.VersionNumber = 0;
 
             var constructRequest = ConstructUpdateRequest(query.ResponsibileEntityId);
@@ -266,7 +267,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
                                   .With(x => x.VersionNumber, (int?) null)
 
                                   .CreateMany(5));
-            InsertListDatatoDynamoDB(patches);
+            InsertListDataToDynamoDB(patches);
 
             var query = new GetPatchByParentIdQuery() { ParentId = parentid };
             var response = await _classUnderTest.GetByParentIdAsync(query).ConfigureAwait(false);
@@ -276,12 +277,35 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByParentId index for parentId {query.ParentId}", Times.Once());
         }
 
-        private async Task InsertDatatoDynamoDB(PatchesDb dbEntity)
+        [Fact]
+        public async Task GetAllPatchesAsyncReturnsAllPatchesIfTheyExist()
+        {
+            // Arrange
+            var patches = _fixture.Build<PatchesDb>()
+                                  .With(x => x.VersionNumber, (int?) null)
+                                  .CreateMany(5).ToList();
+
+            InsertListDataToDynamoDB(patches);
+
+            // Act
+            var results = await _classUnderTest.GetAllPatchesAsync();
+
+            // Assert
+            foreach (var patch in patches)
+            {
+                results.Should().ContainEquivalentOf(patch.ToDomain());
+            }
+
+            _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
+        }
+
+
+        private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
         {
             await _dbFixture.SaveEntityAsync(dbEntity).ConfigureAwait(false);
         }
 
-        private void InsertListDatatoDynamoDB(List<PatchesDb> dbEntity)
+        private void InsertListDataToDynamoDB(List<PatchesDb> dbEntity)
         {
             foreach (var patch in dbEntity)
             {
