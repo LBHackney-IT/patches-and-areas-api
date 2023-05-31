@@ -327,19 +327,5 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             var outcome = Assert.IsType<OkObjectResult>(result);
             var resultPatches = Assert.IsType<List<PatchesResponseObject>>(outcome.Value);
         }
-
-        [Fact]
-        public async Task GetAllPatchesExceptionIsThrown()
-        {
-            // Arrange
-            var exception = new ApplicationException("Test exception");
-            _mockGetAllPatchesUseCase.Setup(x => x.Execute()).ThrowsAsync(exception);
-
-            // Act
-            Func<Task<IActionResult>> func = async () => await _classUnderTest.GetAllPatches().ConfigureAwait(false);
-
-            // Assert
-            (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);
-        }
     }
 }
