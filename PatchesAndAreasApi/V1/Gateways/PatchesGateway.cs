@@ -12,6 +12,7 @@ using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
 using Hackney.Shared.PatchesAndAreas.Factories;
+using System.Collections;
 
 namespace PatchesAndAreasApi.V1.Gateways
 {
@@ -27,6 +28,19 @@ namespace PatchesAndAreasApi.V1.Gateways
         {
             _dynamoDbContext = dynamoDbContext;
             _logger = logger;
+        }
+
+        [LogCall]
+        public async Task<List<PatchEntity>> GetAllPatchesAsync()
+        {
+            _logger.LogDebug($"Calling IDynamoDBContext.ScanAsync for all PatchEntity records");
+
+            var scanConfig = new ScanOperationConfig();
+
+            var tableScan = await _dynamoDbContext.GetTargetTable<PatchesDb>().Scan(scanConfig).GetRemainingAsync().ConfigureAwait(false);
+            var result = _dynamoDbContext.FromDocuments<PatchesDb>(tableScan);
+
+            return result.Select(x => x.ToDomain()).ToList();
         }
 
         [LogCall]
