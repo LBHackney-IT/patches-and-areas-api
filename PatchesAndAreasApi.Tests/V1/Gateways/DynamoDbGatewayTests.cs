@@ -67,6 +67,16 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             return request;
         }
 
+        private PatchEntity CreateEntityWithResponsibleEntities(List<ResponsibleEntities> responsibleEntityList)
+        {
+
+            var entity = _fixture.Build<PatchEntity>()
+                                 .With(x => x.ResponsibleEntities, responsibleEntityList)
+                                 .Without(x => x.VersionNumber)
+                                 .Create();
+            return entity;
+        }
+
 
         [Fact]
 
@@ -264,7 +274,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
 
             patches.AddRange(_fixture.Build<PatchesDb>()
                                   .With(x => x.ParentId, parentid)
-                                  .With(x => x.VersionNumber, (int?) null)
+                                  .Without(x => x.VersionNumber)
 
                                   .CreateMany(5));
             InsertListDataToDynamoDB(patches);
@@ -282,7 +292,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         {
             // Arrange
             var patches = _fixture.Build<PatchesDb>()
-                                  .With(x => x.VersionNumber, (int?) null)
+                                  .Without(x => x.VersionNumber)
                                   .CreateMany(5).ToList();
 
             InsertListDataToDynamoDB(patches);
@@ -298,6 +308,107 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
 
             _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
         }
+
+        [Fact]
+        public async Task ReplacePatchResponsibleEntitiesWithNewResponsibleEntitySuccessfullyUpdates()
+        {
+            //Arrange
+            var responsibleEntityList = new List<ResponsibleEntities> { };
+            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
+
+            var entity = CreateEntityWithResponsibleEntities(responsibleEntityList);
+
+            var dbEntity = entity.ToDatabase();
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
+
+
+            var query = ConstructQuery(entity.Id);
+            var newResponsibleEntity = _fixture.Create<ResponsibleEntities>();
+            responsibleEntityList.Add(newResponsibleEntity);
+
+
+            dbEntity.VersionNumber = 0;
+
+            //Act
+            var result = await _classUnderTest.ReplacePatchResponsibleEntities(query, responsibleEntityList, 0).ConfigureAwait(false);
+
+            //Assert
+            var load = await _dbFixture.DynamoDbContext.LoadAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false);
+
+            //Everything same except for ResponsibleEntity and Version Number
+            result.Should().BeEquivalentTo(load, config => config.Excluding(y => y.VersionNumber).Excluding(x => x.ResponsibleEntities));
+
+
+            load.VersionNumber.Should().Be(1);
+            load.ResponsibleEntities.Should().BeEquivalentTo(responsibleEntityList);
+        }
+
+        [Fact]
+        public async Task ReplacePatchResponsibleEntitiesWithRemovingResponsibleEntitySuccessfullyUpdates()
+        {
+            //Arrange
+            var responsibleEntityList = new List<ResponsibleEntities> { };
+            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
+
+            var toBeDeletedResponsibleEntity = _fixture.Create<ResponsibleEntities>();
+            responsibleEntityList.Add(toBeDeletedResponsibleEntity);
+
+            var entity = CreateEntityWithResponsibleEntities(responsibleEntityList);
+
+            var dbEntity = entity.ToDatabase();
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
+
+
+            var query = ConstructQuery(entity.Id);
+            responsibleEntityList.Remove(toBeDeletedResponsibleEntity);
+
+            dbEntity.VersionNumber = 0;
+
+            //Act
+            var result = await _classUnderTest.ReplacePatchResponsibleEntities(query, responsibleEntityList, 0).ConfigureAwait(false);
+
+            //Assert
+            var load = await _dbFixture.DynamoDbContext.LoadAsync<PatchesDb>(dbEntity.Id).ConfigureAwait(false);
+
+            //Everything same except for ResponsibleEntity and Version Number
+            result.Should().BeEquivalentTo(load, config => config.Excluding(y => y.VersionNumber).Excluding(x => x.ResponsibleEntities));
+
+
+            load.VersionNumber.Should().Be(1);
+            load.ResponsibleEntities.Should().BeEquivalentTo(responsibleEntityList);
+        }
+
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(5)]
+        public async Task ReplacePatchResponsibleEntitiesThrowsExceptionOnVersionConflict(int? ifMatch)
+        {
+            // Arrange
+            var responsibleEntityList = new List<ResponsibleEntities> { };
+            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
+
+            var entity = CreateEntityWithResponsibleEntities(responsibleEntityList);
+
+            var dbEntity = entity.ToDatabase();
+
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
+            var query = ConstructQuery(entity.Id);
+            var newResponsibleEntity = _fixture.Create<ResponsibleEntities>();
+            responsibleEntityList.Add(newResponsibleEntity);
+
+            entity.VersionNumber = 0;
+
+            //Act
+            Func<Task<PatchesDb>> func = async () => await _classUnderTest.ReplacePatchResponsibleEntities(query, responsibleEntityList, ifMatch)
+                                                                                                   .ConfigureAwait(false);
+
+            // Assert
+            (await func.Should().ThrowAsync<VersionNumberConflictException>())
+                         .Where(x => (x.IncomingVersionNumber == ifMatch) && (x.ExpectedVersionNumber == 0));
+            _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
+        }
+
 
 
         private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
