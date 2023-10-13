@@ -14,6 +14,7 @@ using Hackney.Shared.PatchesAndAreas.Factories;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using Hackney.Core.Middleware;
 using HeaderConstants = Hackney.Shared.PatchesAndAreas.Infrastructure.Constants.HeaderConstants;
+using Hackney.Shared.PatchesAndAreas.Domain;
 
 namespace PatchesAndAreasApi.V1.Controllers
 {
@@ -26,17 +27,22 @@ namespace PatchesAndAreasApi.V1.Controllers
         private readonly IGetPatchByIdUseCase _getByIdUseCase;
         private readonly IDeleteResponsibilityFromPatchUseCase _deleteResponsibilityFromPatchUseCase;
         private readonly IUpdatePatchResponsibilitiesUseCase _updatePatchResponsibilities;
+        private readonly IReplacePatchResponsibleEntitiesUseCase _replacePatchResponsibleEntities;
         private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
         private readonly IGetAllPatchesUseCase _getAllPatchesUseCase;
         private readonly IHttpContextWrapper _contextWrapper;
 
-        public PatchesAndAreasApiController(IGetPatchByIdUseCase getByIdUseCase, IUpdatePatchResponsibilitiesUseCase updatePatchResponsibilities,
-            IGetPatchByParentIdUseCase getPatchByParentIdUseCase, IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
-            IGetAllPatchesUseCase getAllPatchesUseCase, IHttpContextWrapper contextWrapper)
+        public PatchesAndAreasApiController(IGetPatchByIdUseCase getByIdUseCase,
+                                            IUpdatePatchResponsibilitiesUseCase updatePatchResponsibilities,
+                                            IReplacePatchResponsibleEntitiesUseCase replacePatchResponsibleEntitiesUseCase,
+                                            IGetPatchByParentIdUseCase getPatchByParentIdUseCase,
+                                            IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
+                                            IGetAllPatchesUseCase getAllPatchesUseCase, IHttpContextWrapper contextWrapper)
         {
             _getByIdUseCase = getByIdUseCase;
             _getPatchByParentIdUseCase = getPatchByParentIdUseCase;
             _updatePatchResponsibilities = updatePatchResponsibilities;
+            _replacePatchResponsibleEntities = replacePatchResponsibleEntitiesUseCase;
             _deleteResponsibilityFromPatchUseCase = deleteResponsibilityFromPatchUseCase;
             _getAllPatchesUseCase = getAllPatchesUseCase;
             _contextWrapper = contextWrapper;
@@ -127,6 +133,33 @@ namespace PatchesAndAreasApi.V1.Controllers
                 // The implementation will use the raw body text to identify which fields to update and the request object is specified here so that its
                 // associated validation will be executed by the MVC pipeline before we even get to this point.
                 var patch = await _updatePatchResponsibilities.ExecuteAsync(query, requestObject, ifMatch)
+                                                                .ConfigureAwait(false);
+                if (patch == null) return NotFound(query.Id);
+                return NoContent();
+            }
+            catch (VersionNumberConflictException vncErr)
+            {
+                return Conflict(vncErr.Message);
+            }
+
+        }
+
+        [HttpPatch]
+        [Route("{id}/responsibleEntity")]
+        [LogCall(LogLevel.Information)]
+        public async Task<IActionResult> ReplacePatchResponsibleEntities([FromRoute] PatchesQueryObject query,
+                                                                          [FromBody] List<ResponsibleEntities> responsibleEntitiesRequestObject)
+        {
+            var contextHeaders = _contextWrapper.GetContextRequestHeaders(HttpContext);
+            var ifMatch = GetIfMatchFromHeader();
+
+            try
+            {
+                // We use a request object AND the raw request body text because the incoming request will only contain the fields that changed
+                // whereas the request object has all possible updateable fields defined.
+                // The implementation will use the raw body text to identify which fields to update and the request object is specified here so that its
+                // associated validation will be executed by the MVC pipeline before we even get to this point.
+                var patch = await _replacePatchResponsibleEntities.ExecuteAsync(query, responsibleEntitiesRequestObject, ifMatch)
                                                                 .ConfigureAwait(false);
                 if (patch == null) return NotFound(query.Id);
                 return NoContent();

@@ -33,6 +33,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         private Mock<IGetPatchByIdUseCase> _mockGetByIdUseCase;
         private Mock<IDeleteResponsibilityFromPatchUseCase> _mockDeleteResponsibilityFromPatchUseCase;
         private Mock<IUpdatePatchResponsibilitiesUseCase> _mockPatchResponsibilitiesUseCase;
+        private Mock<IReplacePatchResponsibleEntitiesUseCase> _mockUpdateResponsibleEntityInPatchUseCase;
         private Mock<IGetAllPatchesUseCase> _mockGetAllPatchesUseCase;
 
         private readonly Mock<IHttpContextWrapper> _mockContextWrapper;
@@ -52,6 +53,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             _mockDeleteResponsibilityFromPatchUseCase = new Mock<IDeleteResponsibilityFromPatchUseCase>();
             _mockGetByParentIdUseCase = new Mock<IGetPatchByParentIdUseCase>();
             _mockPatchResponsibilitiesUseCase = new Mock<IUpdatePatchResponsibilitiesUseCase>();
+            _mockUpdateResponsibleEntityInPatchUseCase = new Mock<IReplacePatchResponsibleEntitiesUseCase>();
             _mockGetAllPatchesUseCase = new Mock<IGetAllPatchesUseCase>();
 
             _mockContextWrapper = new Mock<IHttpContextWrapper>();
@@ -61,6 +63,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             _classUnderTest = new PatchesAndAreasApiController(
                 _mockGetByIdUseCase.Object,
                 _mockPatchResponsibilitiesUseCase.Object,
+                _mockUpdateResponsibleEntityInPatchUseCase.Object,
                 _mockGetByParentIdUseCase.Object,
                 _mockDeleteResponsibilityFromPatchUseCase.Object,
                 _mockGetAllPatchesUseCase.Object,
