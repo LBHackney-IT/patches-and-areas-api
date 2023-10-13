@@ -52,7 +52,8 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
         [InlineData(5)]
         public void ServiceReturnsConflictWhenIncorrectVersionNumber(int? versionNumber)
         {
-            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
+
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesRequest())
                 .When(w => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities, versionNumber))
                 .Then(t => _steps.ThenConflictIsReturned(versionNumber))
                 .BDDfy();
@@ -60,22 +61,21 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
 
         [Fact]
         public void ServiceUpdateTheRequestedPatchWithNewResponsibleEntity()
-
         {
-            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesRequest())
                 .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
-                .Then(t => _steps.ThenANewResponsibilityEntityIsAdded(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
+                .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
 
                 .BDDfy();
         }
 
         [Fact]
         public void ServiceUpdateTheRequestedPatchWhenResponsibleEntityIsRemoved()
-
         {
-            this.Given(g => _patchFixture.GivenAReplacePatchResponsibleEntitiesWithRemovingResponsibleEntityRequest())
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesRequest())
+                .And(g => _patchFixture.RemoveResponsibiltyEntityFromRequest(_patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
                 .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
-                .Then(t => _steps.ThenANewResponsibilityEntityIsRemoved(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
+                .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
                 .BDDfy();
         }
 

@@ -56,7 +56,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
         }
 
-        public async Task ThenANewResponsibilityEntityIsAdded(PatchesFixtures patchFixture, List<ResponsibleEntities> responsibleEntities, ResponsibleEntities responsibleEntity)
+        public async Task ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(PatchesFixtures patchFixture, List<ResponsibleEntities> responsibleEntities, ResponsibleEntities responsibleEntity)
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -68,24 +68,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
             result.VersionNumber.Should().Be(1);
 
 
-            result.ResponsibleEntities.Should().ContainEquivalentOf(responsibleEntity);
-
-            _cleanup.Add(async () => await patchFixture._dbContext.DeleteAsync<PatchesDb>(result.Id).ConfigureAwait(false));
-        }
-
-        public async Task ThenANewResponsibilityEntityIsRemoved(PatchesFixtures patchFixture, List<ResponsibleEntities> responsibleEntities, ResponsibleEntities responsibleEntity)
-        {
-            _lastResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-            var result = await patchFixture._dbContext.LoadAsync<PatchesDb>(patchFixture.PatchesDb.Id).ConfigureAwait(false);
-
-            result.Should().BeEquivalentTo(patchFixture.PatchesDb,
-                                           c => c.Excluding(y => y.ResponsibleEntities)
-                                                 .Excluding(z => z.VersionNumber));
-            result.VersionNumber.Should().Be(1);
-
-
-            result.ResponsibleEntities.Should().NotContainEquivalentOf(responsibleEntity);
+            result.ResponsibleEntities.Should().BeEquivalentTo(responsibleEntities);
 
             _cleanup.Add(async () => await patchFixture._dbContext.DeleteAsync<PatchesDb>(result.Id).ConfigureAwait(false));
         }

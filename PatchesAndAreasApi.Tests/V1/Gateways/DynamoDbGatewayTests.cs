@@ -67,14 +67,16 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             return request;
         }
 
-        private PatchEntity CreateEntityWithResponsibleEntities(List<ResponsibleEntities> responsibleEntityList)
+        private (PatchEntity, List<ResponsibleEntities>) CreateEntityWithResponsibleEntities()
         {
+            var responsibleEntityList = new List<ResponsibleEntities> { };
+            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
 
             var entity = _fixture.Build<PatchEntity>()
                                  .With(x => x.ResponsibleEntities, responsibleEntityList)
                                  .Without(x => x.VersionNumber)
                                  .Create();
-            return entity;
+            return (entity, responsibleEntityList);
         }
 
 
@@ -313,16 +315,14 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         public async Task ReplacePatchResponsibleEntitiesWithNewResponsibleEntitySuccessfullyUpdates()
         {
             //Arrange
-            var responsibleEntityList = new List<ResponsibleEntities> { };
-            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
+            var entity = CreateEntityWithResponsibleEntities();
+            var patch = entity.Item1;
+            var responsibleEntityList = entity.Item2;
 
-            var entity = CreateEntityWithResponsibleEntities(responsibleEntityList);
-
-            var dbEntity = entity.ToDatabase();
+            var dbEntity = patch.ToDatabase();
             await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
 
-
-            var query = ConstructQuery(entity.Id);
+            var query = ConstructQuery(patch.Id);
             var newResponsibleEntity = _fixture.Create<ResponsibleEntities>();
             responsibleEntityList.Add(newResponsibleEntity);
 
@@ -347,19 +347,18 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         public async Task ReplacePatchResponsibleEntitiesWithRemovingResponsibleEntitySuccessfullyUpdates()
         {
             //Arrange
-            var responsibleEntityList = new List<ResponsibleEntities> { };
-            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
+            var entity = CreateEntityWithResponsibleEntities();
+            var patch = entity.Item1;
+            var responsibleEntityList = entity.Item2;
+            var dbEntity = patch.ToDatabase();
 
             var toBeDeletedResponsibleEntity = _fixture.Create<ResponsibleEntities>();
             responsibleEntityList.Add(toBeDeletedResponsibleEntity);
 
-            var entity = CreateEntityWithResponsibleEntities(responsibleEntityList);
-
-            var dbEntity = entity.ToDatabase();
             await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
 
 
-            var query = ConstructQuery(entity.Id);
+            var query = ConstructQuery(patch.Id);
             responsibleEntityList.Remove(toBeDeletedResponsibleEntity);
 
             dbEntity.VersionNumber = 0;
@@ -385,19 +384,15 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         public async Task ReplacePatchResponsibleEntitiesThrowsExceptionOnVersionConflict(int? ifMatch)
         {
             // Arrange
-            var responsibleEntityList = new List<ResponsibleEntities> { };
-            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
-
-            var entity = CreateEntityWithResponsibleEntities(responsibleEntityList);
-
-            var dbEntity = entity.ToDatabase();
-
+            var entity = CreateEntityWithResponsibleEntities();
+            var patch = entity.Item1;
+            var responsibleEntityList = entity.Item2;
+            var dbEntity = patch.ToDatabase();
             await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
-            var query = ConstructQuery(entity.Id);
+
+            var query = ConstructQuery(patch.Id);
             var newResponsibleEntity = _fixture.Create<ResponsibleEntities>();
             responsibleEntityList.Add(newResponsibleEntity);
-
-            entity.VersionNumber = 0;
 
             //Act
             Func<Task<PatchesDb>> func = async () => await _classUnderTest.ReplacePatchResponsibleEntities(query, responsibleEntityList, ifMatch)
