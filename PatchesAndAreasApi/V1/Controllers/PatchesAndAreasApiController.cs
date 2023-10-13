@@ -145,7 +145,7 @@ namespace PatchesAndAreasApi.V1.Controllers
         }
 
         [HttpPatch]
-        [Route("{id}/responsibleEntity")]
+        [Route("{id}/responsibleEntities")]
         [LogCall(LogLevel.Information)]
         public async Task<IActionResult> ReplacePatchResponsibleEntities([FromRoute] PatchesQueryObject query,
                                                                           [FromBody] List<ResponsibleEntities> responsibleEntitiesRequestObject)
