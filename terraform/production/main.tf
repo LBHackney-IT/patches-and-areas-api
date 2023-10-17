@@ -56,3 +56,81 @@ module "api-alarm" {
   error_threshold  = "1"
   sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 }
+
+resource "aws_sns_topic" "patches_and_areas_topic" {
+  name                        = "patchesandareas.fifo"
+  fifo_topic                  = true
+  content_based_deduplication = true
+  kms_master_key_id           = "alias/aws/sns"
+}
+
+resource "aws_ssm_parameter" "patches_and_areas_sns_arn" {
+  name  = "/sns-topic/production/patches-and-areas/arn"
+  type  = "String"
+  value = aws_sns_topic.patches_and_areas_topic.arn
+}
+
+resource "aws_sns_topic_policy" "default" {
+  arn = aws_sns_topic.patches_and_areas_topic.arn
+
+  policy = data.aws_iam_policy_document.sns_topic_policy.json
+}
+
+data "aws_iam_policy_document" "sns_topic_policy" {
+  policy_id = "__default_policy_ID"
+  statement {
+      actions = [
+        "sns:GetTopicAttributes",
+        "sns:SetTopicAttributes",
+        "sns:AddPermission",
+        "sns:RemovePermission",
+        "sns:DeleteTopic",
+        "sns:Subscribe",
+        "sns:ListSubscriptionsByTopic",
+        "sns:Publish"
+      ]
+
+      condition {
+        test     = "StringEquals"
+        variable = "AWS:SourceOwner"
+
+        values = [
+          data.aws_caller_identity.current.account_id
+        ]
+
+      }
+
+      effect = "Allow"
+
+      principals {
+        type        = "AWS"
+        identifiers = ["*"]
+      }
+
+      resources = [
+        aws_sns_topic.patches_and_areas_topic.arn
+      ]
+
+      sid = "__default_statement_ID"
+    }
+  statement {
+      actions = [
+        "sns:Subscribe"
+      ]
+
+      effect = "Allow"
+
+      principals {
+        type        = "AWS"
+        identifiers = ["arn:aws:iam::${data.aws_ssm_parameter.dev_account_id.value}:role/LBH_Circle_CI_Deployment_Role"]
+      }
+      resources = [
+        aws_sns_topic.patches_and_areas_topic.arn
+      ]
+
+      sid = "dev-statement"
+    }	
+}
+
+
+
