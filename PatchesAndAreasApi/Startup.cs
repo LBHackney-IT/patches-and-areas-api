@@ -173,6 +173,7 @@ namespace PatchesAndAreasApi
             services.AddScoped<IGetPatchByIdUseCase, GetPatchByIdUseCase>();
             services.AddScoped<IDeleteResponsibilityFromPatchUseCase, DeleteResponsibilityFromPatchUseCase>();
             services.AddScoped<IUpdatePatchResponsibilitiesUseCase, UpdatePatchResponsibilitiesUseCase>();
+            services.AddScoped<IReplacePatchResponsibleEntitiesUseCase, ReplacePatchResponsibleEntitiesUseCase>();
             services.AddScoped<IGetPatchByParentIdUseCase, GetPatchByParentIdUseCase>();
             services.AddScoped<IGetAllPatchesUseCase, GetAllPatchesUseCase>();
         }

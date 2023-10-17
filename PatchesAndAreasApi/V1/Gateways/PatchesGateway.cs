@@ -95,6 +95,23 @@ namespace PatchesAndAreasApi.V1.Gateways
 
             return patch;
         }
+
+        public async Task<PatchesDb> ReplacePatchResponsibleEntities(PatchesQueryObject query, List<ResponsibleEntities> responsibleEntitiesRequestObject,
+                                                                      int? ifMatch)
+        {
+            _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id {query.Id} and then IDynamoDBContext.SaveAsync");
+            var patch = await _dynamoDbContext.LoadAsync<PatchesDb>(query.Id).ConfigureAwait(false);
+            if (patch == null) return null;
+            if (ifMatch != patch.VersionNumber)
+                throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);
+
+            //update responsibleEntity with request sent
+            patch.ResponsibleEntities = responsibleEntitiesRequestObject;
+
+            await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
+
+            return patch;
+        }
         [LogCall]
         public async Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query)
         {

@@ -1,60 +1,63 @@
 using AutoFixture;
-using FluentAssertions;
-using Moq;
-using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
-using Hackney.Shared.PatchesAndAreas.Factories;
 using Hackney.Shared.PatchesAndAreas.Infrastructure;
+using Moq;
 using PatchesAndAreasApi.V1.Gateways;
 using PatchesAndAreasApi.V1.UseCase;
-using System;
 using System.Threading.Tasks;
+using System;
 using Xunit;
+using Hackney.Shared.PatchesAndAreas.Boundary.Request;
+using System.Collections.Generic;
+using Hackney.Shared.PatchesAndAreas.Domain;
+using System.Linq;
+using FluentAssertions;
+using Hackney.Shared.PatchesAndAreas.Factories;
 
 namespace PatchesAndAreasApi.Tests.V1.UseCase
 {
     [Collection("LogCall collection")]
-    public class UpdatePatchResponsibilitiesUseCaseTests
+    public class ReplacePatchResponsibleEntitiesUseCaseTests
     {
         private readonly Mock<IPatchesGateway> _mockGateway;
-        private readonly UpdatePatchResponsibilitiesUseCase _classUnderTest;
+        private readonly ReplacePatchResponsibleEntitiesUseCase _classUnderTest;
         private readonly Fixture _fixture = new Fixture();
 
-        public UpdatePatchResponsibilitiesUseCaseTests()
+        public ReplacePatchResponsibleEntitiesUseCaseTests()
         {
             _mockGateway = new Mock<IPatchesGateway>();
-            _classUnderTest = new UpdatePatchResponsibilitiesUseCase(_mockGateway.Object);
+            _classUnderTest = new ReplacePatchResponsibleEntitiesUseCase(_mockGateway.Object);
         }
 
-        private UpdatePatchesResponsibilityRequest ConstructQuery(Guid? id = null, Guid? responsibilityId = null)
+        private PatchesQueryObject ConstructQuery()
         {
-            return new UpdatePatchesResponsibilityRequest() { Id = id ?? Guid.NewGuid(), ResponsibileEntityId = responsibilityId ?? Guid.NewGuid() };
+            return new PatchesQueryObject() { Id = Guid.NewGuid() };
         }
 
-        private UpdatePatchesResponsibilitiesRequestObject ConstructUpdateRequest()
+        private List<ResponsibleEntities> ConstructRequest()
         {
-            var request = _fixture.Create<UpdatePatchesResponsibilitiesRequestObject>();
-
-            return request;
+            var listOfResponsibleEntitites = _fixture.Build<ResponsibleEntities>().CreateMany(2).ToList();
+            return listOfResponsibleEntitites;
         }
-        private PatchesDb ConstructUpdateResponse(Guid? id)
+
+        private PatchesDb ConstructUpdateResponse(Guid id)
         {
             return _fixture.Build<PatchesDb>()
-                            .With(y => y.Id, id ?? Guid.NewGuid())
+                            .With(y => y.Id, id)
                             .Create();
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData(3)]
-        public async Task UpdatePatchByResponsibilitiesUseCaseReturnsResult(int? ifMatch)
+        public async Task ReplacePatchResponsibleEntitiesUseCaseReturnsResult(int? ifMatch)
         {
             //Arrange
-            var request = ConstructUpdateRequest();
+            var request = ConstructRequest();
             var query = ConstructQuery();
             var gatewayResponse = ConstructUpdateResponse(query.Id);
 
-            _mockGateway.Setup(x => x.UpdatePatchResponsibilities(query, request, ifMatch)).ReturnsAsync(gatewayResponse);
+            _mockGateway.Setup(x => x.ReplacePatchResponsibleEntities(query, request, ifMatch)).ReturnsAsync(gatewayResponse);
             //Act
             var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch).ConfigureAwait(false);
             //Assert
@@ -65,13 +68,13 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         [Theory]
         [InlineData(null)]
         [InlineData(3)]
-        public async Task UpdatePatchByResponsibiltiesUseCaseReturnsNull(int? ifMatch)
+        public async Task ReplacePatchResponsibleEntitiesUseCaseReturnsNull(int? ifMatch)
         {
             //Arrange
-            var request = ConstructUpdateRequest();
+            var request = ConstructRequest();
             var query = ConstructQuery();
 
-            _mockGateway.Setup(x => x.UpdatePatchResponsibilities(query, request, ifMatch)).ReturnsAsync((PatchesDb) null);
+            _mockGateway.Setup(x => x.ReplacePatchResponsibleEntities(query, request, ifMatch)).ReturnsAsync((PatchesDb) null);
             //Act
             var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch).ConfigureAwait(false);
 
@@ -83,13 +86,13 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         [Theory]
         [InlineData(null)]
         [InlineData(3)]
-        public async Task UpdatePatchResponsibilitiesAsyncExceptionIsThrown(int? ifMatch)
+        public async Task ReplacePatchResponsibleEntitiesAsyncExceptionIsThrown(int? ifMatch)
         {
             // Arrange
-            var request = ConstructUpdateRequest();
+            var request = ConstructRequest();
             var query = ConstructQuery();
             var exception = new ApplicationException("Test exception");
-            _mockGateway.Setup(x => x.UpdatePatchResponsibilities(query, request, ifMatch)).ThrowsAsync(exception);
+            _mockGateway.Setup(x => x.ReplacePatchResponsibleEntities(query, request, ifMatch)).ThrowsAsync(exception);
 
             // Act
             Func<Task<PatchesResponseObject>> func = async () =>
@@ -99,5 +102,4 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
             (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);
         }
     }
-
 }
