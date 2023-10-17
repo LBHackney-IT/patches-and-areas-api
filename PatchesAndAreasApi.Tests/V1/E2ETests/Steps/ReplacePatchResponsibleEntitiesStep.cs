@@ -31,9 +31,9 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTUwMTgxMTYwOTIwOTg2NzYxMTMiLCJlbWFpbCI6ImUyZS10ZXN0aW5nQGRldmVsb3BtZW50LmNvbSIsImlzcyI6IkhhY2tuZXkiLCJuYW1lIjoiVGVzdGVyIiwiZ3JvdXBzIjpbImUyZS10ZXN0aW5nIl0sImlhdCI6MTYyMzA1ODIzMn0.SooWAr-NUZLwW8brgiGpi2jZdWjyZBwp4GJikn0PvEw";
             var uri = new Uri($"api/v1/patch/{id}/responsibleEntities", UriKind.Relative);
 
-            var message = new HttpRequestMessage(HttpMethod.Patch, uri);
+            var message = new HttpRequestMessage(HttpMethod.Put, uri);
             message.Content = new StringContent(JsonConvert.SerializeObject(responsibleEntities), Encoding.UTF8, "application/json");
-            message.Method = HttpMethod.Patch;
+            message.Method = HttpMethod.Put;
             message.Headers.Add("Authorization", token);
             message.Headers.TryAddWithoutValidation(HeaderConstants.IfMatch, $"\"{ifMatch?.ToString()}\"");
 
