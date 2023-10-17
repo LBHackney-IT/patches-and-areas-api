@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Extensions.FileSystemGlobbing;
+using PatchesAndAreasApi.V1.Infrastructure;
 
 namespace PatchesAndAreasApi.Tests.V1.Gateways
 {
@@ -350,11 +351,12 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             var entity = CreateEntityWithResponsibleEntities();
             var patch = entity.Item1;
             var responsibleEntityList = entity.Item2;
-            var dbEntity = patch.ToDatabase();
+
 
             var toBeDeletedResponsibleEntity = _fixture.Create<ResponsibleEntities>();
             responsibleEntityList.Add(toBeDeletedResponsibleEntity);
 
+            var dbEntity = patch.ToDatabase();
             await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
 
 
@@ -375,6 +377,28 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
 
             load.VersionNumber.Should().Be(1);
             load.ResponsibleEntities.Should().BeEquivalentTo(responsibleEntityList);
+        }
+
+        [Fact]
+        public async Task ReplacePatchResponsibleEntitiesThrowsExceptionWhenNoChanges()
+        {
+            // Arrange
+            var entity = CreateEntityWithResponsibleEntities();
+            var patch = entity.Item1;
+            var responsibleEntityList = entity.Item2;
+            var dbEntity = patch.ToDatabase();
+            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
+
+            var query = ConstructQuery(patch.Id);
+
+
+            //Act
+            Func<Task<PatchesDb>> func = async () => await _classUnderTest.ReplacePatchResponsibleEntities(query, responsibleEntityList, 0)
+                                                                                                   .ConfigureAwait(false);
+
+            // Assert
+            await func.Should().ThrowAsync<NoChangesException>().WithMessage("The responsible entity is the same as what is currently in the database");
+            _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
         }
 
 

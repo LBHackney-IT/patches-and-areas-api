@@ -150,7 +150,7 @@ namespace PatchesAndAreasApi.V1.Controllers
 
         }
 
-        [HttpPatch]
+        [HttpPut]
         [Route("{id}/responsibleEntities")]
         [LogCall(LogLevel.Information)]
         public async Task<IActionResult> ReplacePatchResponsibleEntities([FromRoute] PatchesQueryObject query,

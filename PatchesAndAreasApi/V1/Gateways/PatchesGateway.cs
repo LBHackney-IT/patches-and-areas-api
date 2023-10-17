@@ -13,6 +13,7 @@ using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
 using Hackney.Shared.PatchesAndAreas.Factories;
 using System.Collections;
+using PatchesAndAreasApi.V1.Infrastructure;
 
 namespace PatchesAndAreasApi.V1.Gateways
 {
@@ -105,8 +106,13 @@ namespace PatchesAndAreasApi.V1.Gateways
             if (ifMatch != patch.VersionNumber)
                 throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);
 
+            if (patch.ResponsibleEntities.Count == responsibleEntitiesRequestObject.Count & patch.ResponsibleEntities.AreAllSame(responsibleEntitiesRequestObject))
+            {
+                throw new NoChangesException();
+            }
             //update responsibleEntity with request sent
             patch.ResponsibleEntities = responsibleEntitiesRequestObject;
+
 
             await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
 

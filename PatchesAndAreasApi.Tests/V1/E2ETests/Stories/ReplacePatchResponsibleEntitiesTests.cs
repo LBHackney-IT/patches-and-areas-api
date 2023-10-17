@@ -1,4 +1,5 @@
 using Hackney.Core.Testing.DynamoDb;
+using Hackney.Core.Testing.Sns;
 using Hackney.Shared.PatchesAndAreas.Domain;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
@@ -17,13 +18,15 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
     public class ReplacePatchResponsibleEntitiesTests : IDisposable
     {
         private readonly IDynamoDbFixture _dbFixture;
+        private readonly ISnsFixture _snsFixture;
         private readonly PatchesFixtures _patchFixture;
         private readonly ReplacePatchResponsibleEntitiesStep _steps;
 
         public ReplacePatchResponsibleEntitiesTests(MockWebApplicationFactory<Startup> appFactory)
         {
             _dbFixture = appFactory.DynamoDbFixture;
-            _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext);
+            _snsFixture = appFactory.SnsFixture;
+            _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext, _snsFixture.SimpleNotificationService);
             _steps = new ReplacePatchResponsibleEntitiesStep(appFactory.Client);
         }
 
@@ -40,6 +43,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
             {
                 if (null != _patchFixture)
                     _patchFixture.Dispose();
+                _snsFixture?.PurgeAllQueueMessages();
                 if (null != _steps)
                     _steps.Dispose();
 
@@ -53,7 +57,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
         public void ServiceReturnsConflictWhenIncorrectVersionNumber(int? versionNumber)
         {
 
-            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesRequest())
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
                 .When(w => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities, versionNumber))
                 .Then(t => _steps.ThenConflictIsReturned(versionNumber))
                 .BDDfy();
@@ -62,20 +66,20 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
         [Fact]
         public void ServiceUpdateTheRequestedPatchWithNewResponsibleEntity()
         {
-            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesRequest())
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
                 .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
                 .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
-
+                .Then(t => _steps.ThenThePatchOrAreaResEntityEditedEventIsRaised(_patchFixture, _snsFixture))
                 .BDDfy();
         }
 
         [Fact]
         public void ServiceUpdateTheRequestedPatchWhenResponsibleEntityIsRemoved()
         {
-            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesRequest())
-                .And(g => _patchFixture.RemoveResponsibiltyEntityFromRequest(_patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
+            this.Given(g => _patchFixture.GivenAReplacePatchResponsibleEntitiesWithRemovingResponsibleEntityRequest())
                 .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
                 .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
+                .Then(t => _steps.ThenThePatchOrAreaResEntityEditedEventIsRaised(_patchFixture, _snsFixture))
                 .BDDfy();
         }
 

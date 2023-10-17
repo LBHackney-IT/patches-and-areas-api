@@ -1,4 +1,5 @@
 using Hackney.Core.Testing.DynamoDb;
+using Hackney.Core.Testing.Sns;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
 using System;
@@ -16,12 +17,15 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
     {
         private readonly IDynamoDbFixture _dbFixture;
         private readonly PatchesFixtures _patchFixtures;
+        private readonly ISnsFixture _snsFixture;
+
         private readonly GetPatchByIdStep _steps;
 
         public GetPatchByIdTests(MockWebApplicationFactory<Startup> appFactory)
         {
             _dbFixture = appFactory.DynamoDbFixture;
-            _patchFixtures = new PatchesFixtures(_dbFixture.DynamoDbContext);
+            _snsFixture = appFactory.SnsFixture;
+            _patchFixtures = new PatchesFixtures(_dbFixture.DynamoDbContext, _snsFixture.SimpleNotificationService);
             _steps = new GetPatchByIdStep(appFactory.Client);
         }
         public void Dispose()
