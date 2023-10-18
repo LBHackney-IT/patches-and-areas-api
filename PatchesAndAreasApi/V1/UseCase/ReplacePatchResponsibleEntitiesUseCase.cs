@@ -34,7 +34,7 @@ namespace PatchesAndAreasApi.V1.UseCase
             var updateResult = await _gateway.ReplacePatchResponsibleEntities(query, responsibleEntitiesRequestObject, ifMatch).ConfigureAwait(false);
             if (updateResult == null) return null;
 
-            var patchSnsMessage = _snsFactory.Update(updateResult, token);
+            var patchSnsMessage = _snsFactory.Update(updateResult, token, _gateway.OldResponsibleEntities);
             var tokenArn = Environment.GetEnvironmentVariable("PATCHES_AND_AREAS_SNS_ARN");
             await _snsGateway.Publish(patchSnsMessage, tokenArn).ConfigureAwait(false);
 
