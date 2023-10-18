@@ -110,13 +110,12 @@ namespace PatchesAndAreasApi.V1.Gateways
                 throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);
 
             if (patch.ResponsibleEntities.Count == responsibleEntitiesRequestObject.Count & patch.ResponsibleEntities.AreAllSame(responsibleEntitiesRequestObject))
-            {
                 throw new NoChangesException();
-            }
+
             //update responsibleEntity with request sent
             patch.ResponsibleEntities = responsibleEntitiesRequestObject;
 
-            
+
             await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
 
             return patch;
