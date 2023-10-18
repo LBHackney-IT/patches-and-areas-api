@@ -76,6 +76,10 @@ resource "aws_sns_topic_policy" "default" {
   policy = data.aws_iam_policy_document.sns_topic_policy.json
 }
 
+data "aws_ssm_parameter" "dev_account_id" {
+  name = "/dev-apis/account-id"
+}
+
 data "aws_iam_policy_document" "sns_topic_policy" {
   policy_id = "__default_policy_ID"
   statement {
@@ -122,7 +126,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
 
       principals {
         type        = "AWS"
-        identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LBH_Circle_CI_Deployment_Role"]
+        identifiers = ["arn:aws:iam::${data.aws_ssm_parameter.dev_account_id.value}:role/LBH_Circle_CI_Deployment_Role"]
       }
       resources = [
         aws_sns_topic.patches_and_areas_topic.arn
