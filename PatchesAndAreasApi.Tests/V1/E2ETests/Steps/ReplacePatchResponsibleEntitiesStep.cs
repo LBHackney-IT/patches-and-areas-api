@@ -109,6 +109,15 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
             responseContent.Should().Contain($"The version number supplied ({sentVersionNumberString}) does not match the current value on the entity (0).");
         }
 
+        public async Task ThenTheNoChangesExceptionIsReturned()
+        {
+            _lastResponse.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+            var responseContent = await _lastResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            responseContent.Should().Contain($"The responsible entity is the same as what is currently in the database");
+
+        }
+
         public void ThenBadRequestIsReturned()
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);

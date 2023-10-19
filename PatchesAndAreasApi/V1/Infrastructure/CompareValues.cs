@@ -23,13 +23,10 @@ namespace PatchesAndAreasApi.V1.Infrastructure
             using (var enumerator = enumerable.GetEnumerator())
             {
                 var toCompare = default(T);
-                if (enumerator.MoveNext())
-                {
-                    toCompare = enumerator.Current;
-                }
 
                 while (enumerator.MoveNext())
                 {
+                    toCompare = enumerator.Current;
                     if (toCompare != null && !toCompare.Equals(enumerator.Current))
                     {
                         return false;

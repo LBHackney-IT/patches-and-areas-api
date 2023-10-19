@@ -73,6 +73,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
                 .BDDfy();
         }
 
+
         [Fact]
         public void ServiceUpdateTheRequestedPatchWhenResponsibleEntityIsRemoved()
         {
@@ -80,6 +81,16 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
                 .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
                 .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
                 .Then(t => _steps.ThenThePatchOrAreaResEntityEditedEventIsRaised(_patchFixture, _snsFixture))
+                .BDDfy();
+        }
+
+        [Fact]
+        public void ServiceReturnsNoChangesExceptionWhenResponsibleEntityIsSame()
+        {
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithSameResponsibleEntityRequest())
+                .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
+                .Then(t => _steps.ThenTheNoChangesExceptionIsReturned())
+                //.Then(t => _steps.ThenThePatchOrAreaResEntityEditedEventIsNotRaised(_patchFixture, _snsFixture))
                 .BDDfy();
         }
 
