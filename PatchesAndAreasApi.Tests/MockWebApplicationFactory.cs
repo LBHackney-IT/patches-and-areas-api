@@ -1,11 +1,14 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Hackney.Core.DynamoDb;
+using Hackney.Core.Sns;
 using Hackney.Core.Testing.DynamoDb;
+using Hackney.Core.Testing.Sns;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PatchesAndAreasApi.V1.Domain;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -44,10 +47,16 @@ namespace PatchesAndAreasApi.Tests
         public HttpClient Client { get; private set; }
         public IDynamoDbFixture DynamoDbFixture { get; private set; }
 
+        public ISnsFixture SnsFixture { get; private set; }
+
+
         public MockWebApplicationFactory()
         {
             EnsureEnvVarConfigured("DynamoDb_LocalMode", "true");
             EnsureEnvVarConfigured("DynamoDb_LocalServiceUrl", "http://localhost:8000");
+            EnsureEnvVarConfigured("Sns_LocalMode", "true");
+            EnsureEnvVarConfigured("Localstack_SnsServiceUrl", "http://localhost:4566");
+
 
             Client = CreateClient();
         }
@@ -60,6 +69,8 @@ namespace PatchesAndAreasApi.Tests
             {
                 if (null != DynamoDbFixture)
                     (DynamoDbFixture as DynamoDbFixture).Dispose();
+                if (null != SnsFixture)
+                    SnsFixture.Dispose();
                 if (null != Client)
                     Client.Dispose();
 
@@ -84,10 +95,16 @@ namespace PatchesAndAreasApi.Tests
                 services.ConfigureDynamoDB();
                 services.ConfigureDynamoDbFixture();
 
+                services.ConfigureSns();
+                services.ConfigureSnsFixture();
+
                 var serviceProvider = services.BuildServiceProvider();
 
                 DynamoDbFixture = serviceProvider.GetRequiredService<IDynamoDbFixture>();
                 DynamoDbFixture.EnsureTablesExist(_tables);
+
+                SnsFixture = serviceProvider.GetRequiredService<ISnsFixture>();
+                SnsFixture.CreateSnsTopic<PatchesAndAreasSns>("patchesandareas.fifo", "PATCHES_AND_AREAS_SNS_ARN");
             });
         }
     }

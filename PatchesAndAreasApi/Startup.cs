@@ -37,6 +37,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using PatchesAndAreasApi.V1.Factories;
 
 namespace PatchesAndAreasApi
 {
@@ -144,6 +145,10 @@ namespace PatchesAndAreasApi
 
             services.ConfigureDynamoDB();
             services.AddLogCallAspect();
+            services.ConfigureSns();
+            services.AddSnsGateway();
+            services.AddTokenFactory();
+            services.AddHttpContextWrapper();
 
 
             RegisterGateways(services);
@@ -166,6 +171,7 @@ namespace PatchesAndAreasApi
         {
 
             services.AddScoped<IPatchesGateway, PatchesGateway>();
+            services.AddScoped<ISnsFactory, PatchSnsFactory>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)

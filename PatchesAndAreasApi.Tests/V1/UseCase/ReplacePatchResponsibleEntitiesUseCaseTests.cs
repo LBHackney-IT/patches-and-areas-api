@@ -13,6 +13,10 @@ using Hackney.Shared.PatchesAndAreas.Domain;
 using System.Linq;
 using FluentAssertions;
 using Hackney.Shared.PatchesAndAreas.Factories;
+using Hackney.Core.Sns;
+using PatchesAndAreasApi.V1.Factories;
+using Hackney.Core.JWT;
+using PatchesAndAreasApi.V1.Domain;
 
 namespace PatchesAndAreasApi.Tests.V1.UseCase
 {
@@ -20,13 +24,18 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
     public class ReplacePatchResponsibleEntitiesUseCaseTests
     {
         private readonly Mock<IPatchesGateway> _mockGateway;
+        private readonly Mock<ISnsGateway> _mockSnsGateway;
+        private readonly Mock<ISnsFactory> _mockSnsFactory;
+
         private readonly ReplacePatchResponsibleEntitiesUseCase _classUnderTest;
         private readonly Fixture _fixture = new Fixture();
 
         public ReplacePatchResponsibleEntitiesUseCaseTests()
         {
             _mockGateway = new Mock<IPatchesGateway>();
-            _classUnderTest = new ReplacePatchResponsibleEntitiesUseCase(_mockGateway.Object);
+            _mockSnsGateway = new Mock<ISnsGateway>();
+            _mockSnsFactory = new Mock<ISnsFactory>();
+            _classUnderTest = new ReplacePatchResponsibleEntitiesUseCase(_mockGateway.Object, _mockSnsGateway.Object, _mockSnsFactory.Object);
         }
 
         private PatchesQueryObject ConstructQuery()
@@ -53,16 +62,21 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         public async Task ReplacePatchResponsibleEntitiesUseCaseReturnsResult(int? ifMatch)
         {
             //Arrange
+            var token = new Token();
             var request = ConstructRequest();
             var query = ConstructQuery();
             var gatewayResponse = ConstructUpdateResponse(query.Id);
 
             _mockGateway.Setup(x => x.ReplacePatchResponsibleEntities(query, request, ifMatch)).ReturnsAsync(gatewayResponse);
+            var snsEvent = _fixture.Create<PatchesAndAreasSns>();
+            _mockSnsFactory.Setup(x => x.Update(gatewayResponse, token, It.IsAny<List<ResponsibleEntities>>()))
+                           .Returns(snsEvent);
             //Act
-            var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch).ConfigureAwait(false);
+            var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch, token).ConfigureAwait(false);
             //Assert
             response.Should().BeEquivalentTo(gatewayResponse.ToDomain().ToResponse());
-
+            _mockSnsFactory.Verify(x => x.Update(gatewayResponse, token, It.IsAny<List<ResponsibleEntities>>()), Times.Once);
+            _mockSnsGateway.Verify(x => x.Publish(snsEvent, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Theory]
@@ -71,15 +85,18 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         public async Task ReplacePatchResponsibleEntitiesUseCaseReturnsNull(int? ifMatch)
         {
             //Arrange
+            var token = new Token();
             var request = ConstructRequest();
             var query = ConstructQuery();
 
             _mockGateway.Setup(x => x.ReplacePatchResponsibleEntities(query, request, ifMatch)).ReturnsAsync((PatchesDb) null);
             //Act
-            var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch).ConfigureAwait(false);
+            var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch, token).ConfigureAwait(false);
 
             //Assert
             response.Should().BeNull();
+            _mockSnsFactory.Verify(x => x.Update(It.IsAny<PatchesDb>(), token, It.IsAny<List<ResponsibleEntities>>()), Times.Never);
+            _mockSnsGateway.Verify(x => x.Publish(It.IsAny<PatchesAndAreasSns>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
 
         }
 
@@ -89,6 +106,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         public async Task ReplacePatchResponsibleEntitiesAsyncExceptionIsThrown(int? ifMatch)
         {
             // Arrange
+            var token = new Token();
             var request = ConstructRequest();
             var query = ConstructQuery();
             var exception = new ApplicationException("Test exception");
@@ -96,7 +114,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
 
             // Act
             Func<Task<PatchesResponseObject>> func = async () =>
-                await _classUnderTest.ExecuteAsync(query, request, ifMatch).ConfigureAwait(false);
+                await _classUnderTest.ExecuteAsync(query, request, ifMatch, token).ConfigureAwait(false);
 
             // Assert
             (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);

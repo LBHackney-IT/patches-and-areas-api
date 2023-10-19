@@ -22,6 +22,8 @@ functions:
     name: ${self:service}-${self:provider.stage}
     handler: PatchesAndAreasApi::PatchesAndAreasApi.LambdaEntryPoint::FunctionHandlerAsync
     role: lambdaExecutionRole
+    environment:
+      PATCHES_AND_AREAS_SNS_ARN: ${ssm:/sns-topic/${self:provider.stage}/patches-and-areas/arn}
     events:
       - http:
           path: /{proxy+}

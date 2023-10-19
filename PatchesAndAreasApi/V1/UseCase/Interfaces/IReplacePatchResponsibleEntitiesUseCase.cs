@@ -1,3 +1,4 @@
+using Hackney.Core.JWT;
 using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
 using Hackney.Shared.PatchesAndAreas.Domain;
@@ -9,6 +10,6 @@ namespace PatchesAndAreasApi.V1.UseCase.Interfaces
     public interface IReplacePatchResponsibleEntitiesUseCase
     {
         Task<PatchesResponseObject> ExecuteAsync(PatchesQueryObject query, List<ResponsibleEntities> responsibleEntitiesRequestObject,
-             int? ifMatch);
+             int? ifMatch, Token token);
     }
 }

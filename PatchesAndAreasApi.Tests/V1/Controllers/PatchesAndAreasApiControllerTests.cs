@@ -24,6 +24,7 @@ using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
 using PatchesAndAreasApi.V1.UseCase;
 using System.Collections;
+using Hackney.Core.JWT;
 
 namespace PatchesAndAreasApi.Tests.V1.Controllers
 {
@@ -36,6 +37,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         private Mock<IReplacePatchResponsibleEntitiesUseCase> _mockReplacePatchResponsibleEntitiesUseCase;
         private Mock<IGetAllPatchesUseCase> _mockGetAllPatchesUseCase;
 
+        private readonly Mock<ITokenFactory> _mockTokenFactory;
         private readonly Mock<IHttpContextWrapper> _mockContextWrapper;
         private readonly Mock<HttpRequest> _mockHttpRequest;
         private readonly HeaderDictionary _requestHeaders;
@@ -56,6 +58,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             _mockReplacePatchResponsibleEntitiesUseCase = new Mock<IReplacePatchResponsibleEntitiesUseCase>();
             _mockGetAllPatchesUseCase = new Mock<IGetAllPatchesUseCase>();
 
+            _mockTokenFactory = new Mock<ITokenFactory>();
             _mockContextWrapper = new Mock<IHttpContextWrapper>();
             _mockHttpRequest = new Mock<HttpRequest>();
             _mockHttpResponse = new Mock<HttpResponse>();
@@ -67,7 +70,8 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
                 _mockGetByParentIdUseCase.Object,
                 _mockDeleteResponsibilityFromPatchUseCase.Object,
                 _mockGetAllPatchesUseCase.Object,
-                _mockContextWrapper.Object);
+                _mockContextWrapper.Object,
+                _mockTokenFactory.Object);
 
             _requestHeaders = new HeaderDictionary();
             _mockHttpRequest.SetupGet(x => x.Headers).Returns(_requestHeaders);
@@ -337,7 +341,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             var query = ConstructQuery();
             var request = _fixture.Build<ResponsibleEntities>().CreateMany(2).ToList();
             var patchResponse = _fixture.Create<PatchesResponseObject>();
-            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, request, It.IsAny<int?>()))
+            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, request, It.IsAny<int?>(), It.IsAny<Token>()))
                                     .ReturnsAsync(patchResponse);
 
             // Act
@@ -351,10 +355,11 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task ReplacePatchResponsibleEntitiesNotFoundReturnsNotFound()
         {
             // Arrange
+            var token = new Token();
             var query = ConstructQuery();
             var request = _fixture.Build<ResponsibleEntities>().CreateMany(2).ToList();
             var patchResponse = _fixture.Create<PatchesResponseObject>();
-            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, request, It.IsAny<int?>()))
+            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, request, It.IsAny<int?>(), It.IsAny<Token>()))
                                     .ReturnsAsync((PatchesResponseObject) null);
 
             // Act
@@ -373,12 +378,13 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task ReplacePatchResponsibleEntitiesAsyncVersionNumberConflictExceptionReturns409(int? expected, int? actual)
         {
             // Arrange
+            var token = new Token();
             var query = ConstructQuery();
 
             _requestHeaders.Add(HeaderConstants.IfMatch, $"\"{expected?.ToString()}\"");
 
             var exception = new VersionNumberConflictException(expected, actual);
-            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, It.IsAny<List<ResponsibleEntities>>(), expected))
+            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, It.IsAny<List<ResponsibleEntities>>(), expected, It.IsAny<Token>()))
                                     .ThrowsAsync(exception);
 
             // Act

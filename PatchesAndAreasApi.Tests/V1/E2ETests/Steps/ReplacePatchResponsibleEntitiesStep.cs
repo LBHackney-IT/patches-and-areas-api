@@ -12,6 +12,10 @@ using System.Threading.Tasks;
 using System;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using System.Collections.Generic;
+using Hackney.Core.Testing.Sns;
+using Bogus;
+using PatchesAndAreasApi.V1.Domain;
+using PatchesAndAreasApi.V1.Infrastructure;
 
 namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 {
@@ -71,6 +75,29 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
             result.ResponsibleEntities.Should().BeEquivalentTo(responsibleEntities);
 
             _cleanup.Add(async () => await patchFixture._dbContext.DeleteAsync<PatchesDb>(result.Id).ConfigureAwait(false));
+        }
+
+        public async Task ThenThePatchOrAreaResEntityEditedEventIsRaised(PatchesFixtures patchesFixture, ISnsFixture snsFixture)
+        {
+            var dbPatch = await patchesFixture._dbContext.LoadAsync<PatchesDb>(patchesFixture.Id).ConfigureAwait(false);
+
+            Action<PatchesAndAreasSns> verifyFunc = (actual) =>
+            {
+                actual.CorrelationId.Should().NotBeEmpty();
+                actual.EntityId.Should().Be(patchesFixture.Id);
+                actual.EventType.Should().Be(PatchOrAreaResEntityEditedEventConstants.EVENTTYPE);
+                actual.Id.Should().NotBeEmpty();
+                actual.SourceDomain.Should().Be(PatchOrAreaResEntityEditedEventConstants.SOURCEDOMAIN);
+                actual.SourceSystem.Should().Be(PatchOrAreaResEntityEditedEventConstants.SOURCESYSTEM);
+                actual.User.Email.Should().Be("e2e-testing@development.com");
+                actual.User.Name.Should().Be("Tester");
+                actual.Version.Should().Be(PatchOrAreaResEntityEditedEventConstants.V1VERSION);
+            };
+
+            var snsVerifer = snsFixture.GetSnsEventVerifier<PatchesAndAreasSns>();
+            var snsResult = await snsVerifer.VerifySnsEventRaised(verifyFunc);
+            if (!snsResult && snsVerifer.LastException != null)
+                throw snsVerifer.LastException;
         }
 
         public async Task ThenConflictIsReturned(int? versionNumber)
