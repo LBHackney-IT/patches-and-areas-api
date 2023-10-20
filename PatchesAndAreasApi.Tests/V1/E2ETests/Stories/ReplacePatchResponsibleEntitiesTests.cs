@@ -90,7 +90,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
             this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithSameResponsibleEntityRequest())
                 .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
                 .Then(t => _steps.ThenTheNoChangesExceptionIsReturned())
-                //.Then(t => _steps.ThenThePatchOrAreaResEntityEditedEventIsNotRaised(_patchFixture, _snsFixture))
                 .BDDfy();
         }
 
