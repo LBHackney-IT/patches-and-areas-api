@@ -109,13 +109,7 @@ namespace PatchesAndAreasApi.V1.Gateways
             if (ifMatch != patch.VersionNumber)
                 throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);
 
-            // Check if the list of patches sent exactly matches the list of patches in the database
-            var allNewInOld = patch.ResponsibleEntities.All(responsibleEntitiesRequestObject.Contains);
-            var allOldInNew = responsibleEntitiesRequestObject.All(patch.ResponsibleEntities.Contains);
-            var entitiesMatch = allNewInOld && allOldInNew;
-
-            if (patch.ResponsibleEntities.Count == responsibleEntitiesRequestObject.Count & entitiesMatch)
-                throw new NoChangesException();
+            //Nice to have: check whether or not the object sent is the exact same object as what is currently in the database.
 
             //update responsibleEntity with request sent
             patch.ResponsibleEntities = responsibleEntitiesRequestObject;

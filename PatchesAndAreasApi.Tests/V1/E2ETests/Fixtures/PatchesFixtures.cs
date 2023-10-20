@@ -175,12 +175,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
 
                 var toBeDeletedResponsibleEntity = _fixture.Create<ResponsibleEntities>();
                 responsibleEntityList.Add(toBeDeletedResponsibleEntity);
-
-                _fixture.Build<PatchesDb>()
-                        .With(x => x.ResponsibleEntities, responsibleEntityList)
-                        .Without(x => x.VersionNumber)
-                        .Create();
-
                 _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
                 PatchesDb = patch;
                 Id = patch.Id;
@@ -188,22 +182,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
 
                 ResponsibleEntities = responsibleEntityList;
                 ResponsibleEntity = toBeDeletedResponsibleEntity;
-            }
-        }
-
-        public void GivenAnReplacePatchResponsibleEntitiesWithSameResponsibleEntityRequest()
-        {
-            if (null == PatchesDb)
-            {
-                var entity = CreateEntityWithResponsibleEntities();
-                var patch = entity.Item1;
-                var responsibleEntityList = entity.Item2;
-
-                _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
-                PatchesDb = patch;
-                Id = patch.Id;
-
-                ResponsibleEntities = responsibleEntityList;
             }
         }
 
