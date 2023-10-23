@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Hackney.Core.Http;
 using System.Collections.Generic;
+using Hackney.Core.Authorization;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
 using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
@@ -153,6 +154,7 @@ namespace PatchesAndAreasApi.V1.Controllers
         [HttpPut]
         [Route("{id}/responsibleEntities")]
         [LogCall(LogLevel.Information)]
+        [AuthorizeEndpointByGroups("ASSET_ADMIN_GROUPS")]
         public async Task<IActionResult> ReplacePatchResponsibleEntities([FromRoute] PatchesQueryObject query,
                                                                           [FromBody] List<ResponsibleEntities> responsibleEntitiesRequestObject)
         {
