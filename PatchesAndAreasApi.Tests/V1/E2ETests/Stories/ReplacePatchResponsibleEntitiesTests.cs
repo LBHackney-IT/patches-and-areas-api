@@ -29,7 +29,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
             _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext, _snsFixture.SimpleNotificationService);
             _steps = new ReplacePatchResponsibleEntitiesStep(appFactory.Client);
 
-            // AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             if (Environment.GetEnvironmentVariable("ASSET_ADMIN_GROUPS") == null)
                 Environment.SetEnvironmentVariable("ASSET_ADMIN_GROUPS", "e2e-testing");
         }
