@@ -73,6 +73,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
                 .BDDfy();
         }
 
+
         [Fact]
         public void ServiceUpdateTheRequestedPatchWhenResponsibleEntityIsRemoved()
         {

@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Domain;
 using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using Newtonsoft.Json;
@@ -36,7 +35,8 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
             var uri = new Uri($"api/v1/patch/{id}/responsibleEntities", UriKind.Relative);
 
             var message = new HttpRequestMessage(HttpMethod.Put, uri);
-            message.Content = new StringContent(JsonConvert.SerializeObject(responsibleEntities), Encoding.UTF8, "application/json");
+            var serialize = JsonConvert.SerializeObject(responsibleEntities);
+            message.Content = new StringContent(serialize, Encoding.UTF8, "application/json");
             message.Method = HttpMethod.Put;
             message.Headers.Add("Authorization", token);
             message.Headers.TryAddWithoutValidation(HeaderConstants.IfMatch, $"\"{ifMatch?.ToString()}\"");
@@ -108,12 +108,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
             var sentVersionNumberString = (versionNumber is null) ? "{null}" : versionNumber.ToString();
             responseContent.Should().Contain($"The version number supplied ({sentVersionNumberString}) does not match the current value on the entity (0).");
         }
-
-        public void ThenBadRequestIsReturned()
-        {
-            _lastResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        }
-
         public void ThenNotFoundIsReturned()
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
