@@ -28,7 +28,13 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
             _snsFixture = appFactory.SnsFixture;
             _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext, _snsFixture.SimpleNotificationService);
             _steps = new ReplacePatchResponsibleEntitiesStep(appFactory.Client);
+
+            if (Environment.GetEnvironmentVariable("ASSET_ADMIN_GROUPS") == null)
+                Environment.SetEnvironmentVariable("ASSET_ADMIN_GROUPS", "e2e-testing");
         }
+
+
+
 
         public void Dispose()
         {
