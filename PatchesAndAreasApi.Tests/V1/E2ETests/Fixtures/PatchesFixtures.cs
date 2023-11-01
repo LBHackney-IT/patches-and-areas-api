@@ -33,7 +33,9 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
         public UpdatePatchesResponsibilitiesRequestObject UpdateResponsibleRequestObject
         { get; private set; }
 
-        public List<ResponsibleEntities> ResponsibleEntities { get; private set; }
+        public List<ResponsibleEntities> NewResponsibleEntities { get; private set; }
+
+        public List<ResponsibleEntities> OldResponsibleEntities { get; private set; }
         public ResponsibleEntities ResponsibleEntity { get; private set; }
         public string InvalidParentId { get; private set; }
 
@@ -143,6 +145,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
                                  .With(x => x.ResponsibleEntities, responsibleEntityList)
                                  .Without(x => x.VersionNumber)
                                  .Create();
+            OldResponsibleEntities = responsibleEntityList;
             return (entity, responsibleEntityList);
         }
 
@@ -157,10 +160,16 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
                 _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
                 PatchesDb = patch;
                 Id = patch.Id;
-                var newResponsibleEntity = _fixture.Create<ResponsibleEntities>();
-                responsibleEntityList.Add(newResponsibleEntity);
 
-                ResponsibleEntities = responsibleEntityList;
+                var newResponsibleEntity = _fixture.Create<ResponsibleEntities>();
+                var newResponsibleEntityList = new List<ResponsibleEntities>
+                {
+                    responsibleEntityList.FirstOrDefault(),
+                    responsibleEntityList.LastOrDefault(),
+                    newResponsibleEntity
+                };
+
+                NewResponsibleEntities = newResponsibleEntityList;
                 ResponsibleEntity = newResponsibleEntity;
             }
         }
@@ -174,13 +183,18 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
                 var responsibleEntityList = entity.Item2;
 
                 var toBeDeletedResponsibleEntity = _fixture.Create<ResponsibleEntities>();
-                responsibleEntityList.Add(toBeDeletedResponsibleEntity);
+                var newResponsibleEntityList = new List<ResponsibleEntities>
+                {
+                    responsibleEntityList.FirstOrDefault(),
+                    responsibleEntityList.LastOrDefault(),
+                    toBeDeletedResponsibleEntity
+                };
                 _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
                 PatchesDb = patch;
                 Id = patch.Id;
-                responsibleEntityList.Remove(toBeDeletedResponsibleEntity);
+                newResponsibleEntityList.Remove(toBeDeletedResponsibleEntity);
 
-                ResponsibleEntities = responsibleEntityList;
+                NewResponsibleEntities = newResponsibleEntityList;
                 ResponsibleEntity = toBeDeletedResponsibleEntity;
             }
         }

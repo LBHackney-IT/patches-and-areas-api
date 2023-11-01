@@ -83,6 +83,17 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
             Action<PatchesAndAreasSns> verifyFunc = (actual) =>
             {
+                var expectedOldData = new Dictionary<string, List<ResponsibleEntities>>()
+                {
+                    {"Entities", patchesFixture.OldResponsibleEntities }
+                };
+                var expectedNewData = new Dictionary<string, List<ResponsibleEntities>>()
+                {
+                    {"Entities", patchesFixture.NewResponsibleEntities }
+                };
+                actual.EventData.OldValues.Should().BeEquivalentTo(expectedOldData);
+                actual.EventData.NewValues.Should().BeEquivalentTo(expectedNewData);
+
                 actual.CorrelationId.Should().NotBeEmpty();
                 actual.EntityId.Should().Be(patchesFixture.Id);
                 actual.EventType.Should().Be(PatchOrAreaResEntityEditedEventConstants.EVENTTYPE);
@@ -99,6 +110,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
             if (!snsResult && snsVerifer.LastException != null)
                 throw snsVerifer.LastException;
         }
+
 
         public async Task ThenConflictIsReturned(int? versionNumber)
         {
