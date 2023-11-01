@@ -102,6 +102,17 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
                 .BDDfy();
         }
 
+        [Fact]
+        public void ServiceReturnsUnauthorizedWhenUserIsNotInAllowedGroups()
+        {
+            Environment.SetEnvironmentVariable("ASSET_ADMIN_GROUPS", "unauthorized-group");
+
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
+                .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.NewResponsibleEntities))
+                .Then(t => _steps.ThenUnauthorizedIsReturned())
+                .BDDfy();
+        }
+
 
     }
 }
