@@ -14,6 +14,14 @@ namespace PatchesAndAreasApi.V1.Factories
     {
         public PatchesAndAreasSns Update(PatchesDb updateResult, Token token, List<ResponsibleEntities> previousResponsibleEntities)
         {
+            var oldValues = new Dictionary<string, List<ResponsibleEntities>>
+            {
+                { "Entities", previousResponsibleEntities }
+            };
+            var newValues = new Dictionary<string, List<ResponsibleEntities>>
+            {
+                { "Entities", updateResult.ResponsibleEntities }
+            };
             return new PatchesAndAreasSns
             {
                 CorrelationId = Guid.NewGuid(),
@@ -31,8 +39,8 @@ namespace PatchesAndAreasApi.V1.Factories
                 },
                 EventData = new EventData
                 {
-                    OldValues = previousResponsibleEntities,
-                    NewValues = updateResult.ResponsibleEntities
+                    OldValues = oldValues,
+                    NewValues = newValues
                 }
             };
         }

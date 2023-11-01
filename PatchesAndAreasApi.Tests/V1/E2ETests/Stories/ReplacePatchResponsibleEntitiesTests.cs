@@ -64,7 +64,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
         {
 
             this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
-                .When(w => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities, versionNumber))
+                .When(w => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.NewResponsibleEntities, versionNumber))
                 .Then(t => _steps.ThenConflictIsReturned(versionNumber))
                 .BDDfy();
         }
@@ -73,8 +73,8 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
         public void ServiceUpdateTheRequestedPatchWithNewResponsibleEntity()
         {
             this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
-                .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
-                .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
+                .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.NewResponsibleEntities))
+                .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.NewResponsibleEntities, _patchFixture.ResponsibleEntity))
                 .Then(t => _steps.ThenThePatchOrAreaResEntityEditedEventIsRaised(_patchFixture, _snsFixture))
                 .BDDfy();
         }
@@ -84,8 +84,8 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
         public void ServiceUpdateTheRequestedPatchWhenResponsibleEntityIsRemoved()
         {
             this.Given(g => _patchFixture.GivenAReplacePatchResponsibleEntitiesWithRemovingResponsibleEntityRequest())
-                .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.ResponsibleEntities))
-                .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.ResponsibleEntities, _patchFixture.ResponsibleEntity))
+                .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.NewResponsibleEntities))
+                .Then(t => _steps.ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(_patchFixture, _patchFixture.NewResponsibleEntities, _patchFixture.ResponsibleEntity))
                 .Then(t => _steps.ThenThePatchOrAreaResEntityEditedEventIsRaised(_patchFixture, _snsFixture))
                 .BDDfy();
         }
@@ -99,6 +99,17 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
             this.Given(g => _patchFixture.GivenAPatchDoesNotExist())
                 .When(w => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, responsibleEntityList))
                 .Then(t => _steps.ThenNotFoundIsReturned())
+                .BDDfy();
+        }
+
+        [Fact]
+        public void ServiceReturnsUnauthorizedWhenUserIsNotInAllowedGroups()
+        {
+            Environment.SetEnvironmentVariable("ASSET_ADMIN_GROUPS", "unauthorized-group");
+
+            this.Given(g => _patchFixture.GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest())
+                .And(g => _steps.WhenTheReplaceResponsibilityEntityApiIsCalled(_patchFixture.Id, _patchFixture.NewResponsibleEntities))
+                .Then(t => _steps.ThenUnauthorizedIsReturned())
                 .BDDfy();
         }
 

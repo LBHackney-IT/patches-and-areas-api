@@ -83,6 +83,17 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
             Action<PatchesAndAreasSns> verifyFunc = (actual) =>
             {
+                var expectedOldData = new Dictionary<string, List<ResponsibleEntities>>()
+                {
+                    {"Entities", patchesFixture.OldResponsibleEntities }
+                };
+                var expectedNewData = new Dictionary<string, List<ResponsibleEntities>>()
+                {
+                    {"Entities", patchesFixture.NewResponsibleEntities }
+                };
+                actual.EventData.OldValues.Should().BeEquivalentTo(expectedOldData);
+                actual.EventData.NewValues.Should().BeEquivalentTo(expectedNewData);
+
                 actual.CorrelationId.Should().NotBeEmpty();
                 actual.EntityId.Should().Be(patchesFixture.Id);
                 actual.EventType.Should().Be(PatchOrAreaResEntityEditedEventConstants.EVENTTYPE);
@@ -100,6 +111,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
                 throw snsVerifer.LastException;
         }
 
+
         public async Task ThenConflictIsReturned(int? versionNumber)
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -111,6 +123,11 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
         public void ThenNotFoundIsReturned()
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+        public async Task ThenUnauthorizedIsReturned()
+        {
+            _lastResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            await _lastResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
     }
 }
