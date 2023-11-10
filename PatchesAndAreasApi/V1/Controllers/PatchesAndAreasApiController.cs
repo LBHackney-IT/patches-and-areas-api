@@ -40,7 +40,7 @@ namespace PatchesAndAreasApi.V1.Controllers
                                             IReplacePatchResponsibleEntitiesUseCase replacePatchResponsibleEntitiesUseCase,
                                             IGetPatchByParentIdUseCase getPatchByParentIdUseCase,
                                             IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
-                                            IGetAllPatchesUseCase getAllPatchesUseCase, 
+                                            IGetAllPatchesUseCase getAllPatchesUseCase,
                                             IHttpContextWrapper contextWrapper,
                                             ITokenFactory tokenFactory)
         {
