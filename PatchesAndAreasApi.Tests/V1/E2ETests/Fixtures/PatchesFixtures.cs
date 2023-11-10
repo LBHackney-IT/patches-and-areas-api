@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.SimpleNotificationService;
 using AutoFixture;
 using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Domain;
@@ -17,6 +18,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
         private readonly Fixture _fixture = new Fixture();
         private readonly Random _random = new Random();
         public readonly IDynamoDBContext _dbContext;
+        public readonly IAmazonSimpleNotificationService _amazonSimpleNotificationService;
         public PatchesDb PatchesDb { get; private set; }
 
         public PatchEntity ExistingPatch { get; private set; }
@@ -30,11 +32,17 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
 
         public UpdatePatchesResponsibilitiesRequestObject UpdateResponsibleRequestObject
         { get; private set; }
+
+        public List<ResponsibleEntities> NewResponsibleEntities { get; private set; }
+
+        public List<ResponsibleEntities> OldResponsibleEntities { get; private set; }
+        public ResponsibleEntities ResponsibleEntity { get; private set; }
         public string InvalidParentId { get; private set; }
 
-        public PatchesFixtures(IDynamoDBContext dbContext)
+        public PatchesFixtures(IDynamoDBContext dbContext, IAmazonSimpleNotificationService amazonSimpleNotificationService)
         {
             _dbContext = dbContext;
+            _amazonSimpleNotificationService = amazonSimpleNotificationService;
         }
 
         public void Dispose()
@@ -60,7 +68,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
             if (null == PatchesDb)
             {
                 var patch = _fixture.Build<PatchesDb>()
-                                    .With(x => x.VersionNumber, (int?) null)
+                                    .Without(x => x.VersionNumber)
                                     .Create();
 
                 _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
@@ -77,7 +85,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
 
             patches.AddRange(_fixture.Build<PatchesDb>()
                                   .With(x => x.ParentId, parentid)
-                                  .With(x => x.VersionNumber, (int?) null)
+                                  .Without(x => x.VersionNumber)
 
                                   .CreateMany(5));
 
@@ -113,7 +121,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
             if (null == PatchesDb)
             {
                 var patch = _fixture.Build<PatchesDb>()
-                                    .With(x => x.VersionNumber, (int?) null)
+                                    .Without(x => x.VersionNumber)
                                     .Create();
 
                 _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
@@ -127,7 +135,69 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
             }
         }
 
+        private (PatchesDb, List<ResponsibleEntities>) CreateEntityWithResponsibleEntities()
+        {
+            var responsibleEntityList = new List<ResponsibleEntities> { };
+            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
+            responsibleEntityList.Add(_fixture.Create<ResponsibleEntities>());
 
+            var entity = _fixture.Build<PatchesDb>()
+                                 .With(x => x.ResponsibleEntities, responsibleEntityList)
+                                 .Without(x => x.VersionNumber)
+                                 .Create();
+            OldResponsibleEntities = responsibleEntityList;
+            return (entity, responsibleEntityList);
+        }
+
+        public void GivenAnReplacePatchResponsibleEntitiesWithNewResponsibleEntityRequest()
+        {
+            if (null == PatchesDb)
+            {
+                var entity = CreateEntityWithResponsibleEntities();
+                var patch = entity.Item1;
+                var responsibleEntityList = entity.Item2;
+
+                _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
+                PatchesDb = patch;
+                Id = patch.Id;
+
+                var newResponsibleEntity = _fixture.Create<ResponsibleEntities>();
+                var newResponsibleEntityList = new List<ResponsibleEntities>
+                {
+                    responsibleEntityList.FirstOrDefault(),
+                    responsibleEntityList.LastOrDefault(),
+                    newResponsibleEntity
+                };
+
+                NewResponsibleEntities = newResponsibleEntityList;
+                ResponsibleEntity = newResponsibleEntity;
+            }
+        }
+
+        public void GivenAReplacePatchResponsibleEntitiesWithRemovingResponsibleEntityRequest()
+        {
+            if (null == PatchesDb)
+            {
+                var entity = CreateEntityWithResponsibleEntities();
+                var patch = entity.Item1;
+                var responsibleEntityList = entity.Item2;
+
+                var toBeDeletedResponsibleEntity = _fixture.Create<ResponsibleEntities>();
+                var newResponsibleEntityList = new List<ResponsibleEntities>
+                {
+                    responsibleEntityList.FirstOrDefault(),
+                    responsibleEntityList.LastOrDefault(),
+                    toBeDeletedResponsibleEntity
+                };
+                _dbContext.SaveAsync<PatchesDb>(patch).GetAwaiter().GetResult();
+                PatchesDb = patch;
+                Id = patch.Id;
+                newResponsibleEntityList.Remove(toBeDeletedResponsibleEntity);
+
+                NewResponsibleEntities = newResponsibleEntityList;
+                ResponsibleEntity = toBeDeletedResponsibleEntity;
+            }
+        }
 
         public void GivenAnUpdatePatchWithNewResponsibleEntityRequestWithValidationError()
         {

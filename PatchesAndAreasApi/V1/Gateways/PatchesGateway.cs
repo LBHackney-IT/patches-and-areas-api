@@ -13,6 +13,8 @@ using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
 using Hackney.Shared.PatchesAndAreas.Factories;
 using System.Collections;
+using PatchesAndAreasApi.V1.Infrastructure;
+using PatchesAndAreasApi.V1.Domain;
 
 namespace PatchesAndAreasApi.V1.Gateways
 {
@@ -22,7 +24,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         private readonly ILogger<PatchesGateway> _logger;
         private const string GETPATCHBYPARENTIDINDEX = "PatchByParentId";
 
-
+        public List<ResponsibleEntities> OldResponsibleEntities { get; private set; }
 
         public PatchesGateway(IDynamoDBContext dynamoDbContext, ILogger<PatchesGateway> logger)
         {
@@ -90,6 +92,28 @@ namespace PatchesAndAreasApi.V1.Gateways
                 ResponsibleType = requestObject.ResponsibleType
             };
             patch.ResponsibleEntities.Add(responsibleEntity);
+
+            await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
+
+            return patch;
+        }
+
+        public async Task<PatchesDb> ReplacePatchResponsibleEntities(PatchesQueryObject query, List<ResponsibleEntities> responsibleEntitiesRequestObject,
+                                                                      int? ifMatch)
+        {
+            _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id {query.Id} and then IDynamoDBContext.SaveAsync");
+            var patch = await _dynamoDbContext.LoadAsync<PatchesDb>(query.Id).ConfigureAwait(false);
+            if (patch == null) return null;
+            OldResponsibleEntities = patch.ResponsibleEntities;
+
+            if (ifMatch != patch.VersionNumber)
+                throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);
+
+            //Nice to have: check whether or not the object sent is the exact same object as what is currently in the database.
+
+            //update responsibleEntity with request sent
+            patch.ResponsibleEntities = responsibleEntitiesRequestObject;
+
 
             await _dynamoDbContext.SaveAsync(patch).ConfigureAwait(false);
 

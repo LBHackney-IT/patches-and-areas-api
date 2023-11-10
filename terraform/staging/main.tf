@@ -56,3 +56,16 @@ module "api-alarm" {
   error_threshold  = "1"
   sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 }
+
+resource "aws_sns_topic" "patches_and_areas_topic" {
+  name                        = "patchesandareas.fifo"
+  fifo_topic                  = true
+  content_based_deduplication = true
+  kms_master_key_id           = "alias/aws/sns"
+}
+
+resource "aws_ssm_parameter" "patches_and_areas_sns_arn" {
+  name  = "/sns-topic/staging/patches-and-areas/arn"
+  type  = "String"
+  value = aws_sns_topic.patches_and_areas_topic.arn
+}

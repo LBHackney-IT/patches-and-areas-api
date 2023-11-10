@@ -1,5 +1,6 @@
 using AutoFixture;
 using Hackney.Core.Testing.DynamoDb;
+using Hackney.Core.Testing.Sns;
 using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
@@ -21,13 +22,16 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
         private readonly IDynamoDbFixture _dbFixture;
 
         private readonly PatchesFixtures _patchFixture;
+        private readonly ISnsFixture _snsFixture;
+
         private readonly DeleteResponsibilityFromPatchStep _steps;
         private readonly Fixture _fixture = new Fixture();
 
         public DeleteResponsibilityFromPatchTests(MockWebApplicationFactory<Startup> appFactory)
         {
             _dbFixture = appFactory.DynamoDbFixture;
-            _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext);
+            _snsFixture = appFactory.SnsFixture;
+            _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext, _snsFixture.SimpleNotificationService);
             _steps = new DeleteResponsibilityFromPatchStep(appFactory.Client);
         }
 

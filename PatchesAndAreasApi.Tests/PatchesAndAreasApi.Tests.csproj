@@ -19,10 +19,12 @@
   <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.17.0" />
     <PackageReference Include="FluentAssertions" Version="6.7.0" />
+    <PackageReference Include="Hackney.Core.Authorization" Version="1.78.0" />
     <PackageReference Include="Hackney.Core.DynamoDb" Version="1.51.0" />
     <PackageReference Include="Hackney.Core.Testing.DynamoDb" Version="1.55.0" />
     <PackageReference Include="Hackney.Core.Testing.Shared" Version="1.54.0" />
-    <PackageReference Include="Hackney.Shared.PatchesAndAreas" Version="0.8.0" />
+    <PackageReference Include="Hackney.Core.Testing.Sns" Version="1.71.0" />
+    <PackageReference Include="Hackney.Shared.PatchesAndAreas" Version="0.9.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

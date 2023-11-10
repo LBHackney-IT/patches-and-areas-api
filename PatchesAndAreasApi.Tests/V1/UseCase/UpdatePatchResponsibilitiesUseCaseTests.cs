@@ -83,7 +83,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         [Theory]
         [InlineData(null)]
         [InlineData(3)]
-        public async Task UpdateTenureByIdAsyncExceptionIsThrown(int? ifMatch)
+        public async Task UpdatePatchResponsibilitiesAsyncExceptionIsThrown(int? ifMatch)
         {
             // Arrange
             var request = ConstructUpdateRequest();

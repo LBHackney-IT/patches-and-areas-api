@@ -1,4 +1,5 @@
 using Hackney.Core.Testing.DynamoDb;
+using Hackney.Core.Testing.Sns;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Steps;
 using System;
@@ -16,12 +17,15 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Stories
     {
         private readonly IDynamoDbFixture _dbFixture;
         private readonly PatchesFixtures _patchFixture;
+        private readonly ISnsFixture _snsFixture;
+
         private readonly UpdatePatchResponsibilityStep _steps;
 
         public UpdateResponsibleEntityTests(MockWebApplicationFactory<Startup> appFactory)
         {
             _dbFixture = appFactory.DynamoDbFixture;
-            _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext);
+            _snsFixture = appFactory.SnsFixture;
+            _patchFixture = new PatchesFixtures(_dbFixture.DynamoDbContext, _snsFixture.SimpleNotificationService);
             _steps = new UpdatePatchResponsibilityStep(appFactory.Client);
         }
 

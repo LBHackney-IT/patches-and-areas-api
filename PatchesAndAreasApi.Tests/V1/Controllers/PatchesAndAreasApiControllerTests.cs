@@ -24,6 +24,7 @@ using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
 using PatchesAndAreasApi.V1.UseCase;
 using System.Collections;
+using Hackney.Core.JWT;
 
 namespace PatchesAndAreasApi.Tests.V1.Controllers
 {
@@ -33,8 +34,10 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         private Mock<IGetPatchByIdUseCase> _mockGetByIdUseCase;
         private Mock<IDeleteResponsibilityFromPatchUseCase> _mockDeleteResponsibilityFromPatchUseCase;
         private Mock<IUpdatePatchResponsibilitiesUseCase> _mockPatchResponsibilitiesUseCase;
+        private Mock<IReplacePatchResponsibleEntitiesUseCase> _mockReplacePatchResponsibleEntitiesUseCase;
         private Mock<IGetAllPatchesUseCase> _mockGetAllPatchesUseCase;
 
+        private readonly Mock<ITokenFactory> _mockTokenFactory;
         private readonly Mock<IHttpContextWrapper> _mockContextWrapper;
         private readonly Mock<HttpRequest> _mockHttpRequest;
         private readonly HeaderDictionary _requestHeaders;
@@ -52,8 +55,10 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             _mockDeleteResponsibilityFromPatchUseCase = new Mock<IDeleteResponsibilityFromPatchUseCase>();
             _mockGetByParentIdUseCase = new Mock<IGetPatchByParentIdUseCase>();
             _mockPatchResponsibilitiesUseCase = new Mock<IUpdatePatchResponsibilitiesUseCase>();
+            _mockReplacePatchResponsibleEntitiesUseCase = new Mock<IReplacePatchResponsibleEntitiesUseCase>();
             _mockGetAllPatchesUseCase = new Mock<IGetAllPatchesUseCase>();
 
+            _mockTokenFactory = new Mock<ITokenFactory>();
             _mockContextWrapper = new Mock<IHttpContextWrapper>();
             _mockHttpRequest = new Mock<HttpRequest>();
             _mockHttpResponse = new Mock<HttpResponse>();
@@ -61,10 +66,12 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             _classUnderTest = new PatchesAndAreasApiController(
                 _mockGetByIdUseCase.Object,
                 _mockPatchResponsibilitiesUseCase.Object,
+                _mockReplacePatchResponsibleEntitiesUseCase.Object,
                 _mockGetByParentIdUseCase.Object,
                 _mockDeleteResponsibilityFromPatchUseCase.Object,
                 _mockGetAllPatchesUseCase.Object,
-                _mockContextWrapper.Object);
+                _mockContextWrapper.Object,
+                _mockTokenFactory.Object);
 
             _requestHeaders = new HeaderDictionary();
             _mockHttpRequest.SetupGet(x => x.Headers).Returns(_requestHeaders);
@@ -293,7 +300,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         [InlineData(0, 1)]
         [InlineData(0, null)]
         [InlineData(2, 1)]
-        public async Task UpdatePersonByIdAsyncVersionNumberConflictExceptionReturns409(int? expected, int? actual)
+        public async Task UpdatePatchForResponsibilityAsyncVersionNumberConflictExceptionReturns409(int? expected, int? actual)
         {
             // Arrange
             var query = ConstructUpdateQuery();
@@ -326,6 +333,66 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             // Assert
             var outcome = Assert.IsType<OkObjectResult>(result);
             var resultPatches = Assert.IsType<List<PatchesResponseObject>>(outcome.Value);
+        }
+        [Fact]
+        public async Task ReplacePatchResponsibleEntitiesAsyncFoundReturnsFound()
+        {
+            // Arrange
+            var query = ConstructQuery();
+            var request = _fixture.Build<ResponsibleEntities>().CreateMany(2).ToList();
+            var patchResponse = _fixture.Create<PatchesResponseObject>();
+            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, request, It.IsAny<int?>(), It.IsAny<Token>()))
+                                    .ReturnsAsync(patchResponse);
+
+            // Act
+            var response = await _classUnderTest.ReplacePatchResponsibleEntities(query, request).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(NoContentResult));
+        }
+
+        [Fact]
+        public async Task ReplacePatchResponsibleEntitiesNotFoundReturnsNotFound()
+        {
+            // Arrange
+            var token = new Token();
+            var query = ConstructQuery();
+            var request = _fixture.Build<ResponsibleEntities>().CreateMany(2).ToList();
+            var patchResponse = _fixture.Create<PatchesResponseObject>();
+            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, request, It.IsAny<int?>(), It.IsAny<Token>()))
+                                    .ReturnsAsync((PatchesResponseObject) null);
+
+            // Act
+            var response = await _classUnderTest.ReplacePatchResponsibleEntities(query, request).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(NotFoundObjectResult));
+            (response as NotFoundObjectResult).Value.Should().Be(query.Id);
+        }
+
+        [Theory]
+        [InlineData(null, 0)]
+        [InlineData(0, 1)]
+        [InlineData(0, null)]
+        [InlineData(2, 1)]
+        public async Task ReplacePatchResponsibleEntitiesAsyncVersionNumberConflictExceptionReturns409(int? expected, int? actual)
+        {
+            // Arrange
+            var token = new Token();
+            var query = ConstructQuery();
+
+            _requestHeaders.Add(HeaderConstants.IfMatch, $"\"{expected?.ToString()}\"");
+
+            var exception = new VersionNumberConflictException(expected, actual);
+            _mockReplacePatchResponsibleEntitiesUseCase.Setup(x => x.ExecuteAsync(query, It.IsAny<List<ResponsibleEntities>>(), expected, It.IsAny<Token>()))
+                                    .ThrowsAsync(exception);
+
+            // Act
+            var result = await _classUnderTest.ReplacePatchResponsibleEntities(query, new List<ResponsibleEntities>()).ConfigureAwait(false);
+
+            // Assert
+            result.Should().BeOfType(typeof(ConflictObjectResult));
+            (result as ConflictObjectResult).Value.Should().BeEquivalentTo(exception.Message);
         }
     }
 }
