@@ -405,8 +405,6 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
         }
 
-
-
         private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
         {
             await _dbFixture.SaveEntityAsync(dbEntity).ConfigureAwait(false);
