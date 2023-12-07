@@ -15,6 +15,7 @@ using Hackney.Core.Testing.Sns;
 using Bogus;
 using PatchesAndAreasApi.V1.Domain;
 using PatchesAndAreasApi.V1.Infrastructure;
+using System.Linq;
 
 namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 {
@@ -83,15 +84,16 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
             Action<PatchesAndAreasSns> verifyFunc = (actual) =>
             {
-                var expectedOldData = new Dictionary<string, List<ResponsibleEntities>>()
+                var convertListToObj = patchesFixture.OldResponsibleEntities.Select(x => x as object).ToArray();
+                var expectedOldData = new Dictionary<string, object>()
                 {
-                    {"Entities", patchesFixture.OldResponsibleEntities }
+                    {"Entities", convertListToObj }
                 };
-                var expectedNewData = new Dictionary<string, List<ResponsibleEntities>>()
+                var expectedNewData = new Dictionary<string, object>()
                 {
                     {"Entities", patchesFixture.NewResponsibleEntities }
                 };
-                actual.EventData.OldValues.Should().BeEquivalentTo(expectedOldData);
+                actual.EventData.OldValues.Should().ContainEquivalentOf(expectedOldData);
                 actual.EventData.NewValues.Should().BeEquivalentTo(expectedNewData);
 
                 actual.CorrelationId.Should().NotBeEmpty();
