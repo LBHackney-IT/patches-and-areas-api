@@ -14,12 +14,10 @@ namespace PatchesAndAreasApi.V1.Factories
     {
         public PatchesAndAreasSns Update(PatchesDb updateResult, Token token, List<ResponsibleEntities> previousResponsibleEntities)
         {
-            var oldValues = new Dictionary<string, object> { };
-            foreach (var entity in previousResponsibleEntities)
-            {
-
-            }
-            var newValues = new Dictionary<string, object>
+            var oldValues = new Dictionary<string, List<ResponsibleEntities>> {
+                { "Entities", previousResponsibleEntities }
+            };
+            var newValues = new Dictionary<string, List<ResponsibleEntities>>
             {
                 { "Entities", updateResult.ResponsibleEntities }
             };

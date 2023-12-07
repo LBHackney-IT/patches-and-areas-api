@@ -12,10 +12,8 @@ using System;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using System.Collections.Generic;
 using Hackney.Core.Testing.Sns;
-using Bogus;
 using PatchesAndAreasApi.V1.Domain;
 using PatchesAndAreasApi.V1.Infrastructure;
-using System.Linq;
 
 namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 {
@@ -25,7 +23,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
         { }
 
         /// <summary>
-        /// You can use jwt.io to decode the token - it is the same one we'd use on dev, etc. 
+        /// You can use jwt.io to decode the token - it is the same one we'd use on dev, etc.
         /// </summary>
         /// <param name="requestObject"></param>
         /// <returns></returns>
@@ -58,7 +56,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
         public async Task WhenTheReplaceResponsibilityEntityApiIsCalled(Guid id, List<ResponsibleEntities> responsibleEntities, int? ifMatch)
         {
             _lastResponse = await CallAPI(id, responsibleEntities, ifMatch).ConfigureAwait(false);
-
         }
 
         public async Task ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(PatchesFixtures patchFixture, List<ResponsibleEntities> responsibleEntities, ResponsibleEntities responsibleEntity)
@@ -80,20 +77,18 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
         public async Task ThenThePatchOrAreaResEntityEditedEventIsRaised(PatchesFixtures patchesFixture, ISnsFixture snsFixture)
         {
-            var dbPatch = await patchesFixture._dbContext.LoadAsync<PatchesDb>(patchesFixture.Id).ConfigureAwait(false);
 
             Action<PatchesAndAreasSns> verifyFunc = (actual) =>
             {
-                var convertListToObj = patchesFixture.OldResponsibleEntities.Select(x => x as object).ToArray();
-                var expectedOldData = new Dictionary<string, object>()
+                var expectedOldData = new Dictionary<string, List<ResponsibleEntities>>()
                 {
-                    {"Entities", convertListToObj }
+                    {"Entities", patchesFixture.OldResponsibleEntities }
                 };
-                var expectedNewData = new Dictionary<string, object>()
+                var expectedNewData = new Dictionary<string, List<ResponsibleEntities>>()
                 {
                     {"Entities", patchesFixture.NewResponsibleEntities }
                 };
-                actual.EventData.OldValues.Should().ContainEquivalentOf(expectedOldData);
+                actual.EventData.OldValues.Should().BeEquivalentTo(expectedOldData);
                 actual.EventData.NewValues.Should().BeEquivalentTo(expectedNewData);
 
                 actual.CorrelationId.Should().NotBeEmpty();

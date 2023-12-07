@@ -30,7 +30,7 @@ namespace PatchesAndAreasApi.V1.Domain
 
     public class EventData
     {
-        public Dictionary<string, object> OldValues { get; set; }
-        public Dictionary<string, object> NewValues { get; set; }
+        public Dictionary<string, List<ResponsibleEntities>> OldValues { get; set; }
+        public Dictionary<string, List<ResponsibleEntities>> NewValues { get; set; }
     }
 }
