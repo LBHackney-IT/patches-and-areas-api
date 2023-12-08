@@ -69,13 +69,13 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
 
             _mockGateway.Setup(x => x.ReplacePatchResponsibleEntities(query, request, ifMatch)).ReturnsAsync(gatewayResponse);
             var snsEvent = _fixture.Create<PatchesAndAreasSns>();
-            _mockSnsFactory.Setup(x => x.Update(gatewayResponse, token, It.IsAny<List<ResponsibleEntities>>()))
+            _mockSnsFactory.Setup(x => x.Update(gatewayResponse, token, It.IsAny<ResponsibleEntities>()))
                            .Returns(snsEvent);
             //Act
             var response = await _classUnderTest.ExecuteAsync(query, request, ifMatch, token).ConfigureAwait(false);
             //Assert
             response.Should().BeEquivalentTo(gatewayResponse.ToDomain().ToResponse());
-            _mockSnsFactory.Verify(x => x.Update(gatewayResponse, token, It.IsAny<List<ResponsibleEntities>>()), Times.Once);
+            _mockSnsFactory.Verify(x => x.Update(gatewayResponse, token, It.IsAny<ResponsibleEntities>()), Times.Once);
             _mockSnsGateway.Verify(x => x.Publish(snsEvent, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
@@ -95,7 +95,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
 
             //Assert
             response.Should().BeNull();
-            _mockSnsFactory.Verify(x => x.Update(It.IsAny<PatchesDb>(), token, It.IsAny<List<ResponsibleEntities>>()), Times.Never);
+            _mockSnsFactory.Verify(x => x.Update(It.IsAny<PatchesDb>(), token, It.IsAny<ResponsibleEntities>()), Times.Never);
             _mockSnsGateway.Verify(x => x.Publish(It.IsAny<PatchesAndAreasSns>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
 
         }

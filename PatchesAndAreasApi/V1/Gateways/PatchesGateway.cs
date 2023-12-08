@@ -24,7 +24,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         private readonly ILogger<PatchesGateway> _logger;
         private const string GETPATCHBYPARENTIDINDEX = "PatchByParentId";
 
-        public List<ResponsibleEntities> OldResponsibleEntities { get; private set; }
+        public ResponsibleEntities OldResponsibleEntity { get; private set; }
 
         public PatchesGateway(IDynamoDBContext dynamoDbContext, ILogger<PatchesGateway> logger)
         {
@@ -104,7 +104,7 @@ namespace PatchesAndAreasApi.V1.Gateways
             _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id {query.Id} and then IDynamoDBContext.SaveAsync");
             var patch = await _dynamoDbContext.LoadAsync<PatchesDb>(query.Id).ConfigureAwait(false);
             if (patch == null) return null;
-            OldResponsibleEntities = patch.ResponsibleEntities;
+            OldResponsibleEntity = patch.ResponsibleEntities.FirstOrDefault();
 
             if (ifMatch != patch.VersionNumber)
                 throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);

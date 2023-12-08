@@ -6,22 +6,15 @@ using PatchesAndAreasApi.V1.Domain;
 using PatchesAndAreasApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using EventData = PatchesAndAreasApi.V1.Domain.EventData;
 
 namespace PatchesAndAreasApi.V1.Factories
 {
     public class PatchSnsFactory : ISnsFactory
     {
-        public PatchesAndAreasSns Update(PatchesDb updateResult, Token token, List<ResponsibleEntities> previousResponsibleEntities)
+        public PatchesAndAreasSns Update(PatchesDb updateResult, Token token, ResponsibleEntities previousResponsibleEntity)
         {
-            var oldValues = new Dictionary<string, List<ResponsibleEntities>>
-            {
-                { "Entities", previousResponsibleEntities }
-            };
-            var newValues = new Dictionary<string, List<ResponsibleEntities>>
-            {
-                { "Entities", updateResult.ResponsibleEntities }
-            };
             return new PatchesAndAreasSns
             {
                 CorrelationId = Guid.NewGuid(),
@@ -39,8 +32,8 @@ namespace PatchesAndAreasApi.V1.Factories
                 },
                 EventData = new EventData
                 {
-                    OldValues = oldValues,
-                    NewValues = newValues
+                    OldValues = previousResponsibleEntity,
+                    NewValues = updateResult.ResponsibleEntities.FirstOrDefault()
                 }
             };
         }

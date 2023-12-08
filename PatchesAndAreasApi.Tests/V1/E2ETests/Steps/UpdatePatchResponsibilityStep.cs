@@ -1,13 +1,11 @@
 using FluentAssertions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Domain;
 using Hackney.Shared.PatchesAndAreas.Infrastructure;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -23,11 +21,14 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
         { }
 
         /// <summary>
-        /// You can use jwt.io to decode the token - it is the same one we'd use on dev, etc. 
+        /// You can use jwt.io to decode the token - it is the same one we'd use on dev, etc.
         /// </summary>
+        /// <param name="id"></param>
+        /// <param name="responsibileEntityId"></param>
         /// <param name="requestObject"></param>
+        /// <param name="ifMatch"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> CallAPI(Guid id, Guid responsibileEntityId, UpdatePatchesResponsibilitiesRequestObject requestObject, int? ifMatch)
+        private async Task<HttpResponseMessage> CallAPI(Guid id, Guid responsibileEntityId, UpdatePatchesResponsibilitiesRequestObject requestObject, int? ifMatch)
         {
             var token =
                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTUwMTgxMTYwOTIwOTg2NzYxMTMiLCJlbWFpbCI6ImUyZS10ZXN0aW5nQGRldmVsb3BtZW50LmNvbSIsImlzcyI6IkhhY2tuZXkiLCJuYW1lIjoiVGVzdGVyIiwiZ3JvdXBzIjpbImUyZS10ZXN0aW5nIl0sImlhdCI6MTYyMzA1ODIzMn0.SooWAr-NUZLwW8brgiGpi2jZdWjyZBwp4GJikn0PvEw";
@@ -80,7 +81,9 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
                                    .Should()
                                    .BeEquivalentTo(patchFixture.PatchesDb.ResponsibleEntities);
 
-            _cleanup.Add(async () => await patchFixture._dbContext.DeleteAsync<PatchesDb>(result.Id).ConfigureAwait(false));
+            async void Item() => await patchFixture._dbContext.DeleteAsync<PatchesDb>(result.Id).ConfigureAwait(false);
+
+            _cleanup.Add(Item);
         }
 
         public async Task ThenConflictIsReturned(int? versionNumber)
