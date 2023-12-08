@@ -9,6 +9,6 @@ namespace PatchesAndAreasApi.V1.Factories
 {
     public interface ISnsFactory
     {
-        PatchesAndAreasSns Update(PatchesDb updateResult, Token token, List<ResponsibleEntities> previousResponsibleEntities);
+        PatchesAndAreasSns Update(PatchesDb updateResult, Token token, ResponsibleEntities previousResponsibleEntity);
     }
 }

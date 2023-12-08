@@ -12,7 +12,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         Task<PatchEntity> GetPatchByIdAsync(PatchesQueryObject query);
         Task<PatchesDb> UpdatePatchResponsibilities(UpdatePatchesResponsibilityRequest query, UpdatePatchesResponsibilitiesRequestObject requestObject, int? ifMatch);
         Task<PatchesDb> ReplacePatchResponsibleEntities(PatchesQueryObject query, List<ResponsibleEntities> responsibleEntitiesRequestObject, int? ifMatch);
-        List<ResponsibleEntities> OldResponsibleEntities { get; }
+        ResponsibleEntities OldResponsibleEntity { get; }
 
         Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query);
         Task<PatchesDb> DeleteResponsibilityFromPatch(DeleteResponsibilityFromPatchRequest query);
