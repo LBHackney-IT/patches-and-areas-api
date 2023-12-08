@@ -32,7 +32,6 @@ namespace PatchesAndAreasApi.V1.Controllers
         private readonly IReplacePatchResponsibleEntitiesUseCase _replacePatchResponsibleEntities;
         private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
         private readonly IGetAllPatchesUseCase _getAllPatchesUseCase;
-
         private readonly ITokenFactory _tokenFactory;
         private readonly IHttpContextWrapper _contextWrapper;
 
@@ -41,7 +40,8 @@ namespace PatchesAndAreasApi.V1.Controllers
                                             IReplacePatchResponsibleEntitiesUseCase replacePatchResponsibleEntitiesUseCase,
                                             IGetPatchByParentIdUseCase getPatchByParentIdUseCase,
                                             IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
-                                            IGetAllPatchesUseCase getAllPatchesUseCase, IHttpContextWrapper contextWrapper,
+                                            IGetAllPatchesUseCase getAllPatchesUseCase,
+                                            IHttpContextWrapper contextWrapper,
                                             ITokenFactory tokenFactory)
         {
             _getByIdUseCase = getByIdUseCase;
@@ -50,7 +50,6 @@ namespace PatchesAndAreasApi.V1.Controllers
             _replacePatchResponsibleEntities = replacePatchResponsibleEntitiesUseCase;
             _deleteResponsibilityFromPatchUseCase = deleteResponsibilityFromPatchUseCase;
             _getAllPatchesUseCase = getAllPatchesUseCase;
-
             _tokenFactory = tokenFactory;
             _contextWrapper = contextWrapper;
         }
