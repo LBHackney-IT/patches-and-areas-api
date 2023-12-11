@@ -93,8 +93,8 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
             Action<PatchesAndAreasSns> verifyFunc = (actual) =>
             {
-                verifyData(actual.EventData.OldValues.ToString(), patchesFixture.OldResponsibleEntities.FirstOrDefault());
-                verifyData(actual.EventData.NewValues.ToString(), patchesFixture.NewResponsibleEntities.FirstOrDefault());
+                verifyData(actual.EventData.OldData.ToString(), patchesFixture.OldResponsibleEntities.FirstOrDefault());
+                verifyData(actual.EventData.NewData.ToString(), patchesFixture.NewResponsibleEntities.FirstOrDefault());
 
                 actual.CorrelationId.Should().NotBeEmpty();
                 actual.EntityId.Should().Be(patchesFixture.Id);
