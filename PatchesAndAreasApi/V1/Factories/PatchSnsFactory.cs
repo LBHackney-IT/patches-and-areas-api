@@ -32,8 +32,8 @@ namespace PatchesAndAreasApi.V1.Factories
                 },
                 EventData = new EventData
                 {
-                    OldValues = previousResponsibleEntity,
-                    NewValues = updateResult.ResponsibleEntities.FirstOrDefault()
+                    OldData = previousResponsibleEntity,
+                    NewData = updateResult.ResponsibleEntities.FirstOrDefault()
                 }
             };
         }
