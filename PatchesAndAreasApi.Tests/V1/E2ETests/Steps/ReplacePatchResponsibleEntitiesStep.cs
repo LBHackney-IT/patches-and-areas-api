@@ -15,6 +15,7 @@ using System.Linq;
 using Hackney.Core.Testing.Sns;
 using PatchesAndAreasApi.V1.Domain;
 using PatchesAndAreasApi.V1.Infrastructure;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 {
@@ -78,11 +79,22 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
         public async Task ThenThePatchOrAreaResEntityEditedEventIsRaised(PatchesFixtures patchesFixture, ISnsFixture snsFixture)
         {
+            Action<string, ResponsibleEntities> verifyData = (dataAsString, responsibleEntity) =>
+            {
+                var dataDic = JsonSerializer.Deserialize<Dictionary<string, object>>(dataAsString, CreateJsonOptions());
+                dataDic["id"].ToString().Should().Be(responsibleEntity.Id.ToString());
+                dataDic["name"].ToString().Should().Be(responsibleEntity.Name);
+                dataDic["responsibleType"].ToString().ToString().Should().Be(responsibleEntity.ResponsibleType.ToString());
+
+                var contactDetails = dataDic["contactDetails"].ToString();
+                contactDetails.Should().Contain(responsibleEntity.ContactDetails.EmailAddress.ToString());
+
+            };
 
             Action<PatchesAndAreasSns> verifyFunc = (actual) =>
             {
-                actual.EventData.OldValues.Should().BeEquivalentTo(patchesFixture.OldResponsibleEntities.FirstOrDefault());
-                actual.EventData.NewValues.Should().BeEquivalentTo(patchesFixture.NewResponsibleEntities.FirstOrDefault());
+                verifyData(actual.EventData.OldValues.ToString(), patchesFixture.OldResponsibleEntities.FirstOrDefault());
+                verifyData(actual.EventData.NewValues.ToString(), patchesFixture.NewResponsibleEntities.FirstOrDefault());
 
                 actual.CorrelationId.Should().NotBeEmpty();
                 actual.EntityId.Should().Be(patchesFixture.Id);

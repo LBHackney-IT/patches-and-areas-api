@@ -30,7 +30,7 @@ namespace PatchesAndAreasApi.V1.Domain
 
     public class EventData
     {
-        public ResponsibleEntities OldValues { get; set; }
-        public ResponsibleEntities NewValues { get; set; }
+        public object OldValues { get; set; }
+        public object NewValues { get; set; }
     }
 }
