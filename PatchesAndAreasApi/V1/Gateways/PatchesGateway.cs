@@ -104,6 +104,9 @@ namespace PatchesAndAreasApi.V1.Gateways
             _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id {query.Id} and then IDynamoDBContext.SaveAsync");
             var patch = await _dynamoDbContext.LoadAsync<PatchesDb>(query.Id).ConfigureAwait(false);
             if (patch == null) return null;
+
+            // For our currently usecase we always expect for there to be only one person responsibile to a patch/area
+            // hence only sending the first object to SNS
             OldResponsibleEntity = patch.ResponsibleEntities.FirstOrDefault();
 
             if (ifMatch != patch.VersionNumber)
