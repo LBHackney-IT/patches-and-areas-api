@@ -95,7 +95,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
             {
                 verifyData(actual.EventData.OldData.ToString(), patchesFixture.OldResponsibleEntities.FirstOrDefault());
                 verifyData(actual.EventData.NewData.ToString(), patchesFixture.NewResponsibleEntities.FirstOrDefault());
-
                 actual.CorrelationId.Should().NotBeEmpty();
                 actual.EntityId.Should().Be(patchesFixture.Id);
                 actual.EventType.Should().Be(PatchOrAreaResEntityEditedEventConstants.EVENTTYPE);
