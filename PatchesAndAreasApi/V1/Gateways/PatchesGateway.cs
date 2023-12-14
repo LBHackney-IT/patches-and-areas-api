@@ -23,9 +23,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         private readonly IDynamoDBContext _dynamoDbContext;
         private readonly ILogger<PatchesGateway> _logger;
         private const string GETPATCHBYPARENTIDINDEX = "PatchByParentId";
-
         public ResponsibleEntities OldResponsibleEntity { get; private set; }
-
         public PatchesGateway(IDynamoDBContext dynamoDbContext, ILogger<PatchesGateway> logger)
         {
             _dynamoDbContext = dynamoDbContext;

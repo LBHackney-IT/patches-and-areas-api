@@ -32,5 +32,6 @@ namespace PatchesAndAreasApi.V1.Domain
     {
         public object OldData { get; set; }
         public object NewData { get; set; }
+
     }
 }
