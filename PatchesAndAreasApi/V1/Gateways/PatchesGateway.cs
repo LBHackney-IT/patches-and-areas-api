@@ -23,9 +23,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         private readonly IDynamoDBContext _dynamoDbContext;
         private readonly ILogger<PatchesGateway> _logger;
         private const string GETPATCHBYPARENTIDINDEX = "PatchByParentId";
-
-        public List<ResponsibleEntities> OldResponsibleEntities { get; private set; }
-
+        public ResponsibleEntities OldResponsibleEntity { get; private set; }
         public PatchesGateway(IDynamoDBContext dynamoDbContext, ILogger<PatchesGateway> logger)
         {
             _dynamoDbContext = dynamoDbContext;
@@ -104,7 +102,10 @@ namespace PatchesAndAreasApi.V1.Gateways
             _logger.LogDebug($"Calling IDynamoDBContext.LoadAsync for id {query.Id} and then IDynamoDBContext.SaveAsync");
             var patch = await _dynamoDbContext.LoadAsync<PatchesDb>(query.Id).ConfigureAwait(false);
             if (patch == null) return null;
-            OldResponsibleEntities = patch.ResponsibleEntities;
+
+            // For our currently usecase we always expect for there to be only one person responsibile to a patch/area
+            // hence only sending the first object to SNS
+            OldResponsibleEntity = patch.ResponsibleEntities.FirstOrDefault();
 
             if (ifMatch != patch.VersionNumber)
                 throw new VersionNumberConflictException(ifMatch, patch.VersionNumber);

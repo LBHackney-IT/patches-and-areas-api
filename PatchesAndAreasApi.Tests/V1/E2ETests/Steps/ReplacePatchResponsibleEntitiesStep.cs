@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 using System;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using System.Collections.Generic;
+using System.Linq;
 using Hackney.Core.Testing.Sns;
-using Bogus;
 using PatchesAndAreasApi.V1.Domain;
 using PatchesAndAreasApi.V1.Infrastructure;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 {
@@ -24,7 +25,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
         { }
 
         /// <summary>
-        /// You can use jwt.io to decode the token - it is the same one we'd use on dev, etc. 
+        /// You can use jwt.io to decode the token - it is the same one we'd use on dev, etc.
         /// </summary>
         /// <param name="requestObject"></param>
         /// <returns></returns>
@@ -57,7 +58,6 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
         public async Task WhenTheReplaceResponsibilityEntityApiIsCalled(Guid id, List<ResponsibleEntities> responsibleEntities, int? ifMatch)
         {
             _lastResponse = await CallAPI(id, responsibleEntities, ifMatch).ConfigureAwait(false);
-
         }
 
         public async Task ThenTheResponsibilityEntityIsReplacedWithEntitySentFromClient(PatchesFixtures patchFixture, List<ResponsibleEntities> responsibleEntities, ResponsibleEntities responsibleEntity)
@@ -79,21 +79,22 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
         public async Task ThenThePatchOrAreaResEntityEditedEventIsRaised(PatchesFixtures patchesFixture, ISnsFixture snsFixture)
         {
-            var dbPatch = await patchesFixture._dbContext.LoadAsync<PatchesDb>(patchesFixture.Id).ConfigureAwait(false);
+            Action<string, ResponsibleEntities> verifyData = (dataAsString, responsibleEntity) =>
+            {
+                var dataDic = JsonSerializer.Deserialize<Dictionary<string, object>>(dataAsString, CreateJsonOptions());
+                dataDic["id"].ToString().Should().Be(responsibleEntity.Id.ToString());
+                dataDic["name"].ToString().Should().Be(responsibleEntity.Name);
+                dataDic["responsibleType"].ToString().ToString().Should().Be(responsibleEntity.ResponsibleType.ToString());
+
+                var contactDetails = dataDic["contactDetails"].ToString();
+                contactDetails.Should().Contain(responsibleEntity.ContactDetails.EmailAddress.ToString());
+
+            };
 
             Action<PatchesAndAreasSns> verifyFunc = (actual) =>
             {
-                var expectedOldData = new Dictionary<string, List<ResponsibleEntities>>()
-                {
-                    {"Entities", patchesFixture.OldResponsibleEntities }
-                };
-                var expectedNewData = new Dictionary<string, List<ResponsibleEntities>>()
-                {
-                    {"Entities", patchesFixture.NewResponsibleEntities }
-                };
-                actual.EventData.OldValues.Should().BeEquivalentTo(expectedOldData);
-                actual.EventData.NewValues.Should().BeEquivalentTo(expectedNewData);
-
+                verifyData(actual.EventData.OldData.ToString(), patchesFixture.OldResponsibleEntities.FirstOrDefault());
+                verifyData(actual.EventData.NewData.ToString(), patchesFixture.NewResponsibleEntities.FirstOrDefault());
                 actual.CorrelationId.Should().NotBeEmpty();
                 actual.EntityId.Should().Be(patchesFixture.Id);
                 actual.EventType.Should().Be(PatchOrAreaResEntityEditedEventConstants.EVENTTYPE);
