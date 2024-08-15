@@ -26,9 +26,7 @@ COPY ./PatchesAndAreasApi/PatchesAndAreasApi.csproj ./PatchesAndAreasApi/
 COPY ./PatchesAndAreasApi.Tests/PatchesAndAreasApi.Tests.csproj ./PatchesAndAreasApi.Tests/
 COPY /NuGet.Config /root/.nuget/NuGet/NuGet.Config
 
-RUN dotnet restore ./PatchesAndAreasApi/PatchesAndAreasApi.csproj \
-&& dotnet restore ./PatchesAndAreasApi.Tests/PatchesAndAreasApi.Tests.csproj
-
+RUN dotnet restore
 # Copy everything else and build
 COPY . .
 
