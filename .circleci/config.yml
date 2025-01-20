@@ -235,31 +235,34 @@ workflows:
     jobs:
       - check-code-formatting:
           context: api-nuget-token-context
-          branches:
-            ignore:
-              - master
-              - release
+          filters:
+            branches:
+              ignore:
+                - master
+                - release
       - build-and-test:
           context:
             - api-nuget-token-context
             - SonarCloud
-          branches:
-            ignore:
-              - master
-              - release
-
+          filters:
+            branches:
+              ignore:
+                - master
+                - release
   check-and-deploy-development:
     jobs:
       - check-code-formatting:
           context: api-nuget-token-context
-          branches:
-            only: master
+          filters:
+            branches:
+              only: master
       - build-and-test:
           context:
             - api-nuget-token-context
             - SonarCloud
-          branches:
-            only: master
+          filters:
+            branches:
+              only: master
       - assume-role-development:
           context: api-assume-role-housing-development-context
           requires:
