@@ -116,7 +116,7 @@ commands:
             apt-get update && apt-get install -y nodejs
       - run:
           name: Install serverless CLI
-          command: npm i -g serverless@^3
+          command: npm i -g serverless
       - run:
           name: Build lambda
           command: |
@@ -277,7 +277,9 @@ workflows:
           requires:
             - terraform-compliance-development
       - deploy-to-development:
-          context: api-nuget-token-context
+          context:
+            - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - terraform-apply-development
   check-and-deploy-staging-and-production:
@@ -303,7 +305,9 @@ workflows:
           requires:
             - terraform-compliance-staging
       - deploy-to-staging:
-          context: api-nuget-token-context
+          context:
+            - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - terraform-apply-staging
       - permit-production-terraform-release:
@@ -328,6 +332,8 @@ workflows:
           requires:
             - terraform-apply-production
       - deploy-to-production:
-          context: api-nuget-token-context
+          context:
+            - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - permit-production-release
