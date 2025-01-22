@@ -1,22 +1,22 @@
 .PHONY: setup
 setup:
-	docker-compose build
+	docker compose build
 
 .PHONY: build
 build:
-	docker-compose build patches-and-areas-api
+	docker compose build patches-and-areas-api
 
 .PHONY: serve
 serve:
-	docker-compose build patches-and-areas-api && docker-compose up patches-and-areas-api
+	docker compose build patches-and-areas-api && docker compose up patches-and-areas-api
 
 .PHONY: shell
 shell:
-	docker-compose run patches-and-areas-api bash
+	docker compose run patches-and-areas-api bash
 
 .PHONY: test
 test:
-	docker-compose up test-database & docker-compose build patches-and-areas-api-test && docker-compose up patches-and-areas-api-test
+	docker compose build patches-and-areas-api-test && docker compose run patches-and-areas-api-test
 
 .PHONY: lint
 lint:
@@ -29,4 +29,4 @@ restart-db:
 	docker stop $$(docker ps -q --filter ancestor=test-database -a)
 	-docker rm $$(docker ps -q --filter ancestor=test-database -a)
 	docker rmi test-database
-	docker-compose up -d test-database
+	docker compose up -d test-database
