@@ -23,6 +23,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         private readonly IDynamoDBContext _dynamoDbContext;
         private readonly ILogger<PatchesGateway> _logger;
         private const string GETPATCHBYPARENTIDINDEX = "PatchByParentId";
+        private const string GETBYPATCHNAMEINDEX = "PatchByParentName";
         public ResponsibleEntities OldResponsibleEntity { get; private set; }
         public PatchesGateway(IDynamoDBContext dynamoDbContext, ILogger<PatchesGateway> logger)
         {
@@ -155,6 +156,46 @@ namespace PatchesAndAreasApi.V1.Gateways
                 }
             }
             return patchDb.Select(x => x.ToDomain()).ToList();
+        }
+
+        [LogCall]
+        public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQuery query)
+        {
+            var patchesDb = new List<PatchesDb>();
+
+            var filterExpression = new Expression();
+            var keyExpression = new Expression();
+
+            filterExpression.ExpressionAttributeNames.Add("#t", "patchName");
+            filterExpression.ExpressionAttributeValues.Add(":patchName", query.PatchName);
+            keyExpression.ExpressionStatement = "#t = :patchName";
+
+            var table = _dynamoDbContext.GetTargetTable<PatchesDb>();
+            var queryConfig = new QueryOperationConfig
+            {
+                IndexName = GETBYPATCHNAMEINDEX,
+                BackwardSearch = true,
+                ConsistentRead = false,
+                Limit = int.MaxValue,
+                FilterExpression = filterExpression,
+                KeyExpression = keyExpression,
+            };
+
+            var search = table.Query(queryConfig);
+
+            _logger.LogDebug($"Querying {queryConfig.IndexName} index for patchName {query.PatchName}");
+            while (!search.IsDone)
+            {
+                var resultsSet = await search.GetNextSetAsync().ConfigureAwait(false);
+                if (resultsSet.Any())
+                {
+                    patchesDb.AddRange(_dynamoDbContext.FromDocuments<PatchesDb>(resultsSet));
+                }
+                var patchDb = new PatchesDb();   
+            }
+
+            //we always expect one record to be returned
+            return patchesDb[0].ToDomain();
         }
     }
 }

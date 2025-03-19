@@ -13,8 +13,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Hackney.Core.Http;
-using System.IO;
-using System.Text;
 using System.Collections.Generic;
 using Hackney.Shared.PatchesAndAreas.Boundary.Request;
 using Hackney.Shared.PatchesAndAreas.Domain;
@@ -22,8 +20,6 @@ using Hackney.Shared.PatchesAndAreas.Infrastructure.Exceptions;
 using Hackney.Shared.PatchesAndAreas.Factories;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
-using PatchesAndAreasApi.V1.UseCase;
-using System.Collections;
 using Hackney.Core.JWT;
 
 namespace PatchesAndAreasApi.Tests.V1.Controllers
@@ -36,6 +32,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         private Mock<IUpdatePatchResponsibilitiesUseCase> _mockPatchResponsibilitiesUseCase;
         private Mock<IReplacePatchResponsibleEntitiesUseCase> _mockReplacePatchResponsibleEntitiesUseCase;
         private Mock<IGetAllPatchesUseCase> _mockGetAllPatchesUseCase;
+        private Mock<IGetByPatchNameUseCase> _mockGetByPatchNameUseCase;
 
         private readonly Mock<ITokenFactory> _mockTokenFactory;
         private readonly Mock<IHttpContextWrapper> _mockContextWrapper;
@@ -57,6 +54,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             _mockPatchResponsibilitiesUseCase = new Mock<IUpdatePatchResponsibilitiesUseCase>();
             _mockReplacePatchResponsibleEntitiesUseCase = new Mock<IReplacePatchResponsibleEntitiesUseCase>();
             _mockGetAllPatchesUseCase = new Mock<IGetAllPatchesUseCase>();
+            _mockGetByPatchNameUseCase = new Mock<IGetByPatchNameUseCase>();
 
             _mockTokenFactory = new Mock<ITokenFactory>();
             _mockContextWrapper = new Mock<IHttpContextWrapper>();
@@ -70,6 +68,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
                 _mockGetByParentIdUseCase.Object,
                 _mockDeleteResponsibilityFromPatchUseCase.Object,
                 _mockGetAllPatchesUseCase.Object,
+                _mockGetByPatchNameUseCase.Object,
                 _mockContextWrapper.Object,
                 _mockTokenFactory.Object);
 
@@ -393,6 +392,52 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
             // Assert
             result.Should().BeOfType(typeof(ConflictObjectResult));
             (result as ConflictObjectResult).Value.Should().BeEquivalentTo(exception.Message);
+        }
+
+        [Fact]
+        public async Task GetByPatchNameNotFoundReturnsNotFound()
+        {
+            var queryParam = _fixture.Create<GetByPatchNameQuery>();
+            _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync((PatchEntity) null);
+
+            // Act
+            var response = await _classUnderTest.GetByPatchNameAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(NotFoundObjectResult));
+            (response as NotFoundObjectResult).Value.Should().Be(queryParam.PatchName);
+        }
+
+        [Fact]
+        public async Task GetByPatchNameFoundReturnsResponse()
+        {
+            // Arrange
+            var queryParam = _fixture.Create<GetByPatchNameQuery>();
+            var patchResponse = _fixture.Create<PatchEntity>();
+            _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync(patchResponse);
+
+            // Act
+            var response = await _classUnderTest.GetByPatchNameAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            response.Should().BeOfType(typeof(OkObjectResult));
+            (response as OkObjectResult).Value.Should().BeEquivalentTo(patchResponse.ToResponse());
+        }
+
+
+        [Fact]
+        public async Task GetByPatchNameExceptionIsThrown()
+        {
+            // Arrange
+            var queryParam = _fixture.Create<GetByPatchNameQuery>();
+            var exception = new ApplicationException("Test exception");
+            _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ThrowsAsync(exception);
+
+            // Act
+            Func<Task<IActionResult>> func = async () => await _classUnderTest.GetByPatchNameAsync(queryParam).ConfigureAwait(false);
+
+            // Assert
+            (await func.Should().ThrowAsync<ApplicationException>()).WithMessage(exception.Message);
         }
     }
 }

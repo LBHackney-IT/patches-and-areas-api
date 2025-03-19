@@ -405,6 +405,35 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
         }
 
+        [Fact]
+        public async Task GetByPatchNameReturnsNullIfNoRecord()
+        {
+            var query = _fixture.Create<GetByPatchNameQuery>();
+            var response = await _classUnderTest.GetByPatchNameAsync(query).ConfigureAwait(false);
+            response.Should().BeNull();
+
+            _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByPatchName index for patchName {query.PatchName}", Times.Once());
+        }
+
+        [Fact]
+        public async Task GetByPatchNameReturnsRecord()
+        {
+            var patches = new List<PatchesDb>();
+
+            patches.AddRange(_fixture.Build<PatchesDb>()
+                                  .Without(x => x.VersionNumber)
+                                  .CreateMany(5));
+            InsertListDataToDynamoDB(patches);
+            var patchName = patches.First().Name;
+
+            var query = new GetByPatchNameQuery() { PatchName = patchName };
+            var response = await _classUnderTest.GetByPatchNameAsync(query).ConfigureAwait(false);
+            response.Should().NotBeNull();
+            response.Should().BeEquivalentTo(patches.First());
+
+            _logger.VerifyExact(LogLevel.Debug, $"Querying PatchByPatchName index for patchName {query.PatchName}", Times.Once());
+        }
+
         private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
         {
             await _dbFixture.SaveEntityAsync(dbEntity).ConfigureAwait(false);
