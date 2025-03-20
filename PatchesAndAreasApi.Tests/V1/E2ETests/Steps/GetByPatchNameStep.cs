@@ -17,7 +17,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Steps
 
         public async Task WhenPatchDetailsAreRequested(string patchName)
         {
-            var uri = new Uri($"api/v1/patch?patchName={patchName}", UriKind.Relative);
+            var uri = new Uri($"api/v1/patch/patchName/{patchName}", UriKind.Relative);
             _lastResponse = await _httpClient.GetAsync(uri).ConfigureAwait(false);
         }
 

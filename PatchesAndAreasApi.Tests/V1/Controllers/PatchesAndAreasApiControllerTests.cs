@@ -21,6 +21,7 @@ using Hackney.Shared.PatchesAndAreas.Factories;
 using Hackney.Shared.PatchesAndAreas.Infrastructure.Constants;
 using Hackney.Shared.PatchesAndAreas.Boundary.Response;
 using Hackney.Core.JWT;
+using PatchesAndAreasApi.V1;
 
 namespace PatchesAndAreasApi.Tests.V1.Controllers
 {
@@ -397,7 +398,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         [Fact]
         public async Task GetByPatchNameNotFoundReturnsNotFound()
         {
-            var queryParam = _fixture.Create<GetByPatchNameQuery>();
+            var queryParam = _fixture.Create<GetByPatchNameQueryV1>();
             _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync((PatchEntity) null);
 
             // Act
@@ -412,7 +413,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task GetByPatchNameFoundReturnsResponse()
         {
             // Arrange
-            var queryParam = _fixture.Create<GetByPatchNameQuery>();
+            var queryParam = _fixture.Create<GetByPatchNameQueryV1>();
             var patchResponse = _fixture.Create<PatchEntity>();
             _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync(patchResponse);
 
@@ -429,7 +430,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task GetByPatchNameExceptionIsThrown()
         {
             // Arrange
-            var queryParam = _fixture.Create<GetByPatchNameQuery>();
+            var queryParam = _fixture.Create<GetByPatchNameQueryV1>();
             var exception = new ApplicationException("Test exception");
             _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ThrowsAsync(exception);
 

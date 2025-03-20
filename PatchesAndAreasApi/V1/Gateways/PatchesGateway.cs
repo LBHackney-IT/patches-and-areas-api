@@ -23,7 +23,6 @@ namespace PatchesAndAreasApi.V1.Gateways
         private readonly IDynamoDBContext _dynamoDbContext;
         private readonly ILogger<PatchesGateway> _logger;
         private const string GETPATCHBYPARENTIDINDEX = "PatchByParentId";
-        private const string GETBYPATCHNAMEINDEX = "PatchByPatchName";
         public ResponsibleEntities OldResponsibleEntity { get; private set; }
         public PatchesGateway(IDynamoDBContext dynamoDbContext, ILogger<PatchesGateway> logger)
         {
@@ -159,43 +158,21 @@ namespace PatchesAndAreasApi.V1.Gateways
         }
 
         [LogCall]
-        public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQuery query)
+        public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQueryV1 query)
         {
-            var patchesDb = new List<PatchesDb>();
+            _logger.LogDebug($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
 
-            var filterExpression = new Expression();
-            var keyExpression = new Expression();
-
-            filterExpression.ExpressionAttributeNames.Add("#t", "patchName");
-            filterExpression.ExpressionAttributeValues.Add(":patchName", query.PatchName);
-            keyExpression.ExpressionStatement = "#t = :patchName";
-
-            var table = _dynamoDbContext.GetTargetTable<PatchesDb>();
-            var queryConfig = new QueryOperationConfig
+            var config = new DynamoDBOperationConfig
             {
-                IndexName = GETBYPATCHNAMEINDEX,
-                BackwardSearch = true,
-                ConsistentRead = false,
-                Limit = int.MaxValue,
-                FilterExpression = filterExpression,
-                KeyExpression = keyExpression,
+                IndexName = "PatchByPatchName"
             };
 
-            var search = table.Query(queryConfig);
+            var search = _dynamoDbContext.QueryAsync<PatchesDb>(query.PatchName, config);
 
-            _logger.LogDebug($"Querying {queryConfig.IndexName} index for patchName {query.PatchName}");
-            while (!search.IsDone)
-            {
-                var resultsSet = await search.GetNextSetAsync().ConfigureAwait(false);
-                if (resultsSet.Any())
-                {
-                    patchesDb.AddRange(_dynamoDbContext.FromDocuments<PatchesDb>(resultsSet));
-                }
-                var patchDb = new PatchesDb();   
-            }
+            var response = await search.GetNextSetAsync().ConfigureAwait(false);
+            if (response.Count == 0) return null;
 
-            //we always expect one record to be returned
-            return patchesDb[0].ToDomain();
+            return response.First().ToDomain();
         }
     }
 }

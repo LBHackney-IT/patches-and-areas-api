@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System;
 using Xunit;
 using FluentAssertions;
+using PatchesAndAreasApi.V1;
 
 namespace PatchesAndAreasApi.Tests.V1.UseCase
 {
@@ -26,9 +27,9 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
             _classUnderTest = new GetByPatchNameUseCase(_mockGateway.Object);
         }
 
-        private GetByPatchNameQuery ConstructQueryParameter()
+        private GetByPatchNameQueryV1 ConstructQueryParameter()
         {
-            return _fixture.Create<GetByPatchNameQuery>();
+            return _fixture.Create<GetByPatchNameQueryV1>();
         }
 
 

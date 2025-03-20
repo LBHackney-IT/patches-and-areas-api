@@ -18,7 +18,7 @@ namespace PatchesAndAreasApi.V1.UseCase
         }
 
         [LogCall]
-        public async Task<PatchEntity> ExecuteAsync(GetByPatchNameQuery query)
+        public async Task<PatchEntity> ExecuteAsync(GetByPatchNameQueryV1 query)
         {
 
             var gatewayResult = await _gateway.GetByPatchNameAsync(query).ConfigureAwait(false);

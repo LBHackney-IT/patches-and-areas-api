@@ -6,6 +6,6 @@ namespace PatchesAndAreasApi.V1.UseCase.Interfaces
 {
     public interface IGetByPatchNameUseCase
     {
-        Task<PatchEntity> ExecuteAsync(GetByPatchNameQuery query);
+        Task<PatchEntity> ExecuteAsync(GetByPatchNameQueryV1 query);
     }
 }
