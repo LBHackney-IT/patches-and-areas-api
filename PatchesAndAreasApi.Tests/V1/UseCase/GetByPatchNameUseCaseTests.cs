@@ -27,9 +27,9 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
             _classUnderTest = new GetByPatchNameUseCase(_mockGateway.Object);
         }
 
-        private GetByPatchNameQueryV1 ConstructQueryParameter()
+        private GetByPatchNameQuery ConstructQueryParameter()
         {
-            return _fixture.Create<GetByPatchNameQueryV1>();
+            return _fixture.Create<GetByPatchNameQuery>();
         }
 
 

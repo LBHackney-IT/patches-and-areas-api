@@ -16,7 +16,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         Task<List<PatchEntity>> GetByParentIdAsync(GetPatchByParentIdQuery query);
         Task<PatchesDb> DeleteResponsibilityFromPatch(DeleteResponsibilityFromPatchRequest query);
 
-        Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQueryV1 query);
+        Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQuery query);
 
 
     }

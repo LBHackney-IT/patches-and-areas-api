@@ -234,7 +234,7 @@ namespace PatchesAndAreasApi.V1.Controllers
         [HttpGet]
         [Route("patchName/{patchName}")]
         [LogCall(LogLevel.Information)]
-        public async Task<IActionResult> GetByPatchNameAsync([FromRoute] GetByPatchNameQueryV1 query)
+        public async Task<IActionResult> GetByPatchNameAsync([FromRoute] GetByPatchNameQuery query)
         {
             var patch = await _getByPatchNameUseCase.ExecuteAsync(query).ConfigureAwait(false);
             if (patch == null) return NotFound(query.PatchName);

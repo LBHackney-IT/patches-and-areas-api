@@ -158,7 +158,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         }
 
         [LogCall]
-        public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQueryV1 query)
+        public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQuery query)
         {
             _logger.LogDebug($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
 

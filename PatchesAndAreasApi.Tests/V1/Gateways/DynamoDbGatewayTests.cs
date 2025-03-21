@@ -409,7 +409,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         [Fact]
         public async Task GetByPatchNameReturnsNullIfNoRecord()
         {
-            var query = _fixture.Create<GetByPatchNameQueryV1>();
+            var query = _fixture.Create<GetByPatchNameQuery>();
             var response = await _classUnderTest.GetByPatchNameAsync(query).ConfigureAwait(false);
             response.Should().BeNull();
 
@@ -428,7 +428,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             InsertListDataToDynamoDB(patches);
             var patchName = patches.First().Name;
 
-            var query = new GetByPatchNameQueryV1() { PatchName = patchName };
+            var query = new GetByPatchNameQuery() { PatchName = patchName };
             var response = await _classUnderTest.GetByPatchNameAsync(query).ConfigureAwait(false);
             response.Should().NotBeNull();
             response.Should().BeEquivalentTo(patches.First());

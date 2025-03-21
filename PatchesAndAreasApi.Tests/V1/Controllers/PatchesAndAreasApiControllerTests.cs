@@ -398,7 +398,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         [Fact]
         public async Task GetByPatchNameNotFoundReturnsNotFound()
         {
-            var queryParam = _fixture.Create<GetByPatchNameQueryV1>();
+            var queryParam = _fixture.Create<GetByPatchNameQuery>();
             _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync((PatchEntity) null);
 
             // Act
@@ -413,7 +413,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task GetByPatchNameFoundReturnsResponse()
         {
             // Arrange
-            var queryParam = _fixture.Create<GetByPatchNameQueryV1>();
+            var queryParam = _fixture.Create<GetByPatchNameQuery>();
             var patchResponse = _fixture.Create<PatchEntity>();
             _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync(patchResponse);
 
@@ -430,7 +430,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task GetByPatchNameExceptionIsThrown()
         {
             // Arrange
-            var queryParam = _fixture.Create<GetByPatchNameQueryV1>();
+            var queryParam = _fixture.Create<GetByPatchNameQuery>();
             var exception = new ApplicationException("Test exception");
             _mockGetByPatchNameUseCase.Setup(x => x.ExecuteAsync(queryParam)).ThrowsAsync(exception);
 
