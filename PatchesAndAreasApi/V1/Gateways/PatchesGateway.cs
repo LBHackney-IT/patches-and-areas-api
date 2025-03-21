@@ -156,5 +156,23 @@ namespace PatchesAndAreasApi.V1.Gateways
             }
             return patchDb.Select(x => x.ToDomain()).ToList();
         }
+
+        [LogCall]
+        public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQuery query)
+        {
+            _logger.LogDebug($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
+
+            var config = new DynamoDBOperationConfig
+            {
+                IndexName = "PatchByPatchName"
+            };
+
+            var search = _dynamoDbContext.QueryAsync<PatchesDb>(query.PatchName, config);
+
+            var response = await search.GetNextSetAsync().ConfigureAwait(false);
+            if (response.Count == 0) return null;
+
+            return response.First().ToDomain();
+        }
     }
 }
