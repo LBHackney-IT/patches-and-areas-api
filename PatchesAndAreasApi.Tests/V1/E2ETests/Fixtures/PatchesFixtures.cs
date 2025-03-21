@@ -102,6 +102,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
         {
             Id = Guid.NewGuid();
             ParentId = Guid.NewGuid();
+            PatchName = _fixture.Create<string>();
         }
 
         public void GivenAPatchUpdateRequestDoesNotExist()
