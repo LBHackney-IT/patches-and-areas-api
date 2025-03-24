@@ -413,7 +413,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             var response = await _classUnderTest.GetByPatchNameAsync(query).ConfigureAwait(false);
             response.Should().BeNull();
 
-            _logger.VerifyExact(LogLevel.Information, $"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}", Times.Once());
+            _logger.VerifyExact(LogLevel.Information, $"Querying PatchByPatchName index for patchName {query.PatchName}", Times.Once());
         }
 
         [Fact]
@@ -433,7 +433,7 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             response.Should().NotBeNull();
             response.Should().BeEquivalentTo(patches.First());
 
-            _logger.VerifyExact(LogLevel.Information, $"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}", Times.Once());
+            _logger.VerifyExact(LogLevel.Information, $"Querying PatchByPatchName index for patchName {query.PatchName}", Times.Once());
         }
 
         private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
