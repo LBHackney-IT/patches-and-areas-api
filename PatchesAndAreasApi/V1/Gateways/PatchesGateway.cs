@@ -170,7 +170,6 @@ namespace PatchesAndAreasApi.V1.Gateways
             var search = _dynamoDbContext.QueryAsync<PatchesDb>(query.PatchName, config);
 
             var response = await search.GetNextSetAsync().ConfigureAwait(false);
-            _logger.LogInformation($"Found {response.Count} records for patchName {query.PatchName}");
             if (response.Count == 0) return null;
 
             return response.First().ToDomain();
