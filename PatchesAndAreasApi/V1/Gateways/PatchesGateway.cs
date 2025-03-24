@@ -160,7 +160,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         [LogCall]
         public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQuery query)
         {
-            _logger.LogDebug($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
+            _logger.LogInformation($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
 
             var config = new DynamoDBOperationConfig
             {
@@ -170,6 +170,7 @@ namespace PatchesAndAreasApi.V1.Gateways
             var search = _dynamoDbContext.QueryAsync<PatchesDb>(query.PatchName, config);
 
             var response = await search.GetNextSetAsync().ConfigureAwait(false);
+            _logger.LogInformation($"Found {response.Count} records for patchName {query.PatchName}");
             if (response.Count == 0) return null;
 
             return response.First().ToDomain();
