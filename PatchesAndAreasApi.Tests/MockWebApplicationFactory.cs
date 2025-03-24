@@ -46,7 +46,7 @@ namespace PatchesAndAreasApi.Tests
                         IndexName = "PatchByPatchName",
                         KeySchema = new List<KeySchemaElement>(new[]
                         {
-                            new KeySchemaElement("Name", KeyType.HASH)
+                            new KeySchemaElement("name", KeyType.HASH)
                         }),
                         ProvisionedThroughput = new ProvisionedThroughput
                         {

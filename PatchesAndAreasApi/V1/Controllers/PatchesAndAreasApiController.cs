@@ -232,7 +232,7 @@ namespace PatchesAndAreasApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
-        [Route("patchName/{Name}")]
+        [Route("patchName/{name}")] 
         [LogCall(LogLevel.Information)]
         public async Task<IActionResult> GetByPatchNameAsync([FromRoute] GetByPatchNameQuery query)
         {

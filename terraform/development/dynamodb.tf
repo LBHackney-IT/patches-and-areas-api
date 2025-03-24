@@ -30,7 +30,7 @@ resource "aws_dynamodb_table" "PatchesAndAreasApi_dynamodb_table" {
 
   global_secondary_index {
     name               = "PatchByPatchName"
-    hash_key           = "Name"
+    hash_key           = "name"
     write_capacity     = 10
     read_capacity      = 10
     projection_type    = "ALL"

@@ -165,9 +165,9 @@ namespace PatchesAndAreasApi.V1.Gateways
             var filterExpression = new Expression();
             var keyExpression = new Expression();
 
-            filterExpression.ExpressionAttributeNames.Add("#t", "Name");
-            filterExpression.ExpressionAttributeValues.Add(":Name", query.PatchName);
-            keyExpression.ExpressionStatement = "#t = :Name";
+            filterExpression.ExpressionAttributeNames.Add("#t", "name");
+            filterExpression.ExpressionAttributeValues.Add(":name", query.PatchName);
+            keyExpression.ExpressionStatement = "#t = :name";
 
             var table = _dynamoDbContext.GetTargetTable<PatchesDb>();
             var queryConfig = new QueryOperationConfig
@@ -193,7 +193,7 @@ namespace PatchesAndAreasApi.V1.Gateways
             }
 
             //we always expect one record to be returned
-            _logger.LogInformation($"Returning patch {query.PatchName} with list object {patchesDb}");
+            _logger.LogInformation($"Returning patch {query.PatchName} with list object {patchesDb} first object {patchesDb[0]} or {patchesDb.First()}");
             if (patchesDb.Count == 0) return null;
             _logger.LogInformation($"Returning patch {query.PatchName} with object {patchesDb[0]}");
             return patchesDb[0].ToDomain();
