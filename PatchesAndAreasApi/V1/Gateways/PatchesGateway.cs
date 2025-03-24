@@ -190,26 +190,27 @@ namespace PatchesAndAreasApi.V1.Gateways
                 {
                     patchesDb.AddRange(_dynamoDbContext.FromDocuments<PatchesDb>(resultsSet));
                 }
-                var patchDb = new PatchesDb();
             }
 
             //we always expect one record to be returned
-            if(patchesDb.Count == 0) return null;
+            _logger.LogInformation($"Returning patch {query.PatchName} with list object {patchesDb}");
+            if (patchesDb.Count == 0) return null;
+            _logger.LogInformation($"Returning patch {query.PatchName} with object {patchesDb[0]}");
             return patchesDb[0].ToDomain();
-        
-        //_logger.LogInformation($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
 
-        //var config = new DynamoDBOperationConfig
-        //{
-        //    IndexName = "PatchByPatchName"
-        //};
+            //_logger.LogInformation($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
 
-        //var search = _dynamoDbContext.QueryAsync<PatchesDb>(query.PatchName, config);
+            //var config = new DynamoDBOperationConfig
+            //{
+            //    IndexName = "PatchByPatchName"
+            //};
 
-        //var response = await search.GetNextSetAsync().ConfigureAwait(false);
-        //if (response.Count == 0) return null;
+            //var search = _dynamoDbContext.QueryAsync<PatchesDb>(query.PatchName, config);
 
-        //return response.First().ToDomain();
-    }
+            //var response = await search.GetNextSetAsync().ConfigureAwait(false);
+            //if (response.Count == 0) return null;
+
+            //return response.First().ToDomain();
+        }
     }
 }
