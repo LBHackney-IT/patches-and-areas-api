@@ -160,7 +160,7 @@ namespace PatchesAndAreasApi.V1.Gateways
         [LogCall]
         public async Task<PatchEntity> GetByPatchNameAsync(GetByPatchNameQuery query)
         {
-            _logger.LogDebug($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
+            _logger.LogInformation($"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}");
 
             var config = new DynamoDBOperationConfig
             {
