@@ -15,9 +15,22 @@ resource "aws_dynamodb_table" "PatchesAndAreasApi_dynamodb_table" {
     type = "S"
   }
   
+  attribute {
+    name = "patchName"
+    type = "S"
+  }
+  
   global_secondary_index {
     name               = "PatchByParentId"
     hash_key           = "parentId"
+    write_capacity     = 10
+    read_capacity      = 10
+    projection_type    = "ALL"
+  }
+
+  global_secondary_index {
+    name               = "PatchByPatchName"
+    hash_key           = "patchName"
     write_capacity     = 10
     read_capacity      = 10
     projection_type    = "ALL"

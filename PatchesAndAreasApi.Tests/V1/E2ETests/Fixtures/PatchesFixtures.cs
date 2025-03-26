@@ -28,6 +28,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
         public Guid ParentId { get; private set; }
         public string InvalidId { get; private set; }
         public Guid ResponsibleId { get; private set; }
+        public string PatchName { get; private set; }
 
 
         public UpdatePatchesResponsibilitiesRequestObject UpdateResponsibleRequestObject
@@ -75,6 +76,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
                 PatchesDb = patch;
                 Id = patch.Id;
                 ParentId = patch.ParentId;
+                PatchName = patch.Name;
             }
         }
 
@@ -100,6 +102,7 @@ namespace PatchesAndAreasApi.Tests.V1.E2ETests.Fixtures
         {
             Id = Guid.NewGuid();
             ParentId = Guid.NewGuid();
+            PatchName = _fixture.Create<string>();
         }
 
         public void GivenAPatchUpdateRequestDoesNotExist()

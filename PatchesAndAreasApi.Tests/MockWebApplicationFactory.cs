@@ -39,6 +39,21 @@ namespace PatchesAndAreasApi.Tests
                             WriteCapacityUnits = 10
                         },
                         Projection = new Projection { ProjectionType = ProjectionType.ALL }
+                    },
+
+                    new GlobalSecondaryIndex
+                    {
+                        IndexName = "PatchByPatchName",
+                        KeySchema = new List<KeySchemaElement>(new[]
+                        {
+                            new KeySchemaElement("Name", KeyType.HASH)
+                        }),
+                        ProvisionedThroughput = new ProvisionedThroughput
+                        {
+                            ReadCapacityUnits = 10,
+                            WriteCapacityUnits = 10
+                        },
+                        Projection = new Projection { ProjectionType = ProjectionType.ALL }
                     }
                 })
             }
