@@ -32,6 +32,7 @@ namespace PatchesAndAreasApi.V1.Controllers
         private readonly IReplacePatchResponsibleEntitiesUseCase _replacePatchResponsibleEntities;
         private readonly IGetPatchByParentIdUseCase _getPatchByParentIdUseCase;
         private readonly IGetAllPatchesUseCase _getAllPatchesUseCase;
+        private readonly IGetByPatchNameUseCase _getByPatchNameUseCase;
         private readonly ITokenFactory _tokenFactory;
         private readonly IHttpContextWrapper _contextWrapper;
 
@@ -41,6 +42,7 @@ namespace PatchesAndAreasApi.V1.Controllers
                                             IGetPatchByParentIdUseCase getPatchByParentIdUseCase,
                                             IDeleteResponsibilityFromPatchUseCase deleteResponsibilityFromPatchUseCase,
                                             IGetAllPatchesUseCase getAllPatchesUseCase,
+                                            IGetByPatchNameUseCase getByPatchNameUseCase,
                                             IHttpContextWrapper contextWrapper,
                                             ITokenFactory tokenFactory)
         {
@@ -50,6 +52,7 @@ namespace PatchesAndAreasApi.V1.Controllers
             _replacePatchResponsibleEntities = replacePatchResponsibleEntitiesUseCase;
             _deleteResponsibilityFromPatchUseCase = deleteResponsibilityFromPatchUseCase;
             _getAllPatchesUseCase = getAllPatchesUseCase;
+            _getByPatchNameUseCase = getByPatchNameUseCase;
             _tokenFactory = tokenFactory;
             _contextWrapper = contextWrapper;
         }
@@ -214,6 +217,27 @@ namespace PatchesAndAreasApi.V1.Controllers
         {
             var patch = await _getPatchByParentIdUseCase.ExecuteAsync(query).ConfigureAwait(false);
             if (patch == null || patch.Count == 0) return NotFound(query.ParentId);
+
+
+            return Ok(patch);
+        }
+        /// <summary>
+        /// Retrieves patch for the supplied patchName.
+        /// </summary>
+        /// <response code="200">Returns patch record based on patchName given.</response>
+        /// <response code="400">Invalid Query Parameter.</response>
+        /// <response code="404">No patch found for the supplied targetId</response>
+        [ProducesResponseType(typeof(PatchesResponseObject), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("patchName/{patchName}")]
+        [LogCall(LogLevel.Information)]
+        public async Task<IActionResult> GetByPatchNameAsync([FromRoute] GetByPatchNameQuery query)
+        {
+            var patch = await _getByPatchNameUseCase.ExecuteAsync(query).ConfigureAwait(false);
+            if (patch == null) return NotFound(query.PatchName);
 
 
             return Ok(patch);

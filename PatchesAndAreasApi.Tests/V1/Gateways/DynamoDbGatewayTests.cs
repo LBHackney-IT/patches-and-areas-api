@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Extensions.FileSystemGlobbing;
 using PatchesAndAreasApi.V1.Infrastructure;
+using PatchesAndAreasApi.V1;
 
 namespace PatchesAndAreasApi.Tests.V1.Gateways
 {
@@ -403,6 +404,36 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
             (await func.Should().ThrowAsync<VersionNumberConflictException>())
                          .Where(x => (x.IncomingVersionNumber == ifMatch) && (x.ExpectedVersionNumber == 0));
             _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.SaveAsync to update id {query.Id}", Times.Never());
+        }
+
+        [Fact]
+        public async Task GetByPatchNameReturnsNullIfNoRecord()
+        {
+            var query = _fixture.Create<GetByPatchNameQuery>();
+            var response = await _classUnderTest.GetByPatchNameAsync(query).ConfigureAwait(false);
+            response.Should().BeNull();
+
+            _logger.VerifyExact(LogLevel.Information, $"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}", Times.Once());
+        }
+
+        [Fact]
+        public async Task GetByPatchNameReturnsRecord()
+        {
+            var patches = new List<PatchesDb>();
+
+            patches.AddRange(_fixture.Build<PatchesDb>()
+                                  .Without(x => x.VersionNumber)
+                                  .CreateMany(5));
+            patches.First().Name = "HN10";
+            InsertListDataToDynamoDB(patches);
+            var patchName = patches.First().Name;
+
+            var query = new GetByPatchNameQuery() { PatchName = patchName };
+            var response = await _classUnderTest.GetByPatchNameAsync(query).ConfigureAwait(false);
+            response.Should().NotBeNull();
+            response.Should().BeEquivalentTo(patches.First());
+
+            _logger.VerifyExact(LogLevel.Information, $"Calling IDynamoDBContext.QueryAsync for patchName {query.PatchName}", Times.Once());
         }
 
         private async Task InsertDataToDynamoDB(PatchesDb dbEntity)
