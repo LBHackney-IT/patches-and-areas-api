@@ -319,7 +319,7 @@ workflows:
             branches:
               only: dr-testing
       - assume-role-production:
-          context: api-assume-role-housing-production-context
+          context: api-assume-role-disaster-recovery-context
           requires:
               - permit-production-terraform-release
           filters:
