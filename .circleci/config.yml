@@ -56,6 +56,7 @@ commands:
           command: |
             cd ./terraform/<<parameters.environment>>/
             terraform plan -out=plan.out
+            terraform import aws_dynamodb_table.PatchesAndAreasApi_dynamodb_table PatchesAndAreas
       - persist_to_workspace:
           root: *workspace_root
           paths:
@@ -168,7 +169,7 @@ jobs:
     executor: docker-python
     steps:
       - assume-role-and-persist-workspace:
-          aws-account: $AWS_ACCOUNT_PRODUCTION
+          aws-account: $AWS_ACCOUNT_DISASTER_RECOVERY
   terraform-init-and-plan-development:
     executor: docker-terraform
     steps:
@@ -231,109 +232,130 @@ jobs:
           stage: "production"
 
 workflows:
-  check:
-    jobs:
-      - check-code-formatting:
-          context: api-nuget-token-context
-          filters:
-            branches:
-              ignore:
-                - master
-                - release
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-            - SonarCloud
-          filters:
-            branches:
-              ignore:
-                - master
-                - release
-  check-and-deploy-development:
-    jobs:
-      - check-code-formatting:
-          context: api-nuget-token-context
-          filters:
-            branches:
-              only: master
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-            - SonarCloud
-          filters:
-            branches:
-              only: master
-      - assume-role-development:
-          context: api-assume-role-housing-development-context
-          requires:
-            - build-and-test
-      - terraform-init-and-plan-development:
-          requires:
-            - assume-role-development
-      - terraform-compliance-development:
-          requires:
-            - terraform-init-and-plan-development
-      - terraform-apply-development:
-          requires:
-            - terraform-compliance-development
-      - deploy-to-development:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - terraform-apply-development
+  # check:
+  #   jobs:
+  #     - check-code-formatting:
+  #         context: api-nuget-token-context
+  #         filters:
+  #           branches:
+  #             ignore:
+  #               - master
+  #               - release
+  #     - build-and-test:
+  #         context:
+  #           - api-nuget-token-context
+  #           - SonarCloud
+  #         filters:
+  #           branches:
+  #             ignore:
+  #               - master
+  #               - release
+  # check-and-deploy-development:
+  #   jobs:
+  #     - check-code-formatting:
+  #         context: api-nuget-token-context
+  #         filters:
+  #           branches:
+  #             only: master
+  #     - build-and-test:
+  #         context:
+  #           - api-nuget-token-context
+  #           - SonarCloud
+  #         filters:
+  #           branches:
+  #             only: master
+  #     - assume-role-development:
+  #         context: api-assume-role-housing-development-context
+  #         requires:
+  #           - build-and-test
+  #     - terraform-init-and-plan-development:
+  #         requires:
+  #           - assume-role-development
+  #     - terraform-compliance-development:
+  #         requires:
+  #           - terraform-init-and-plan-development
+  #     - terraform-apply-development:
+  #         requires:
+  #           - terraform-compliance-development
+  #     - deploy-to-development:
+  #         context:
+  #           - api-nuget-token-context
+  #           - "Serverless Framework"
+  #         requires:
+  #           - terraform-apply-development
   check-and-deploy-staging-and-production:
       jobs:
-      - build-and-test:
-          context:
-              - api-nuget-token-context
-              - SonarCloud
-          filters:
-            branches:
-              only: release
-      - assume-role-staging:
-          context: api-assume-role-housing-staging-context
-          requires:
-              - build-and-test
-      - terraform-init-and-plan-staging:
-          requires:
-            - assume-role-staging
-      - terraform-compliance-staging:
-          requires:
-            - terraform-init-and-plan-staging
-      - terraform-apply-staging:
-          requires:
-            - terraform-compliance-staging
-      - deploy-to-staging:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - terraform-apply-staging
+      # - build-and-test:
+      #     context:
+      #         - api-nuget-token-context
+      #         - SonarCloud
+      #     filters:
+      #       branches:
+      #         only: release
+      # - assume-role-staging:
+      #     context: api-assume-role-housing-staging-context
+      #     requires:
+      #         - build-and-test
+      # - terraform-init-and-plan-staging:
+      #     requires:
+      #       - assume-role-staging
+      # - terraform-compliance-staging:
+      #     requires:
+      #       - terraform-init-and-plan-staging
+      # - terraform-apply-staging:
+      #     requires:
+      #       - terraform-compliance-staging
+      # - deploy-to-staging:
+      #     context:
+      #       - api-nuget-token-context
+      #       - "Serverless Framework"
+      #     requires:
+      #       - terraform-apply-staging
       - permit-production-terraform-release:
           type: approval
-          requires:
-            - deploy-to-staging
+          # requires:
+          #   - deploy-to-staging
+          filters:
+            branches:
+              only: dr-testing
       - assume-role-production:
           context: api-assume-role-housing-production-context
           requires:
               - permit-production-terraform-release
+          filters:
+            branches:
+              only: dr-testing
       - terraform-init-and-plan-production:
           requires:
             - assume-role-production
+          filters:
+            branches:
+              only: dr-testing
       - terraform-compliance-production:
           requires:
             - terraform-init-and-plan-production
+          filters:
+            branches:
+              only: dr-testing
       - terraform-apply-production:
           requires:
             - terraform-compliance-production
+          filters:
+            branches:
+              only: dr-testing
       - permit-production-release:
           type: approval
           requires:
             - terraform-apply-production
+          filters:
+            branches:
+              only: dr-testing
       - deploy-to-production:
           context:
             - api-nuget-token-context
             - "Serverless Framework"
           requires:
             - permit-production-release
+          filters:
+            branches:
+              only: dr-testing
