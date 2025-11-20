@@ -51,7 +51,7 @@ functions:
           path: /swagger/{proxy+}
           method: GET
           private: false
-# resources:
+resources:
 #   Conditions:
 #     # Only create the Canaries for staging/prod
 #     IsProdDeployment:
