@@ -23,7 +23,7 @@ functions:
     handler: PatchesAndAreasApi::PatchesAndAreasApi.LambdaEntryPoint::FunctionHandlerAsync
     role: lambdaExecutionRole
     environment:
-      PATCHES_AND_AREAS_SNS_ARN: ${ssm:/sns-topic/${self:provider.stage}/patches-and-areas/arn}
+      # PATCHES_AND_AREAS_SNS_ARN: ${ssm:/sns-topic/${self:provider.stage}/patches-and-areas/arn}
       ASSET_ADMIN_GROUPS: ${ssm:/ta-housing/${self:provider.stage}/asset-api-admin-allowed-groups}
     events:
       - http:
