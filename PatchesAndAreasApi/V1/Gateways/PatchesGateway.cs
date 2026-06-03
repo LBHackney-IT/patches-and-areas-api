@@ -38,7 +38,8 @@ namespace PatchesAndAreasApi.V1.Gateways
             var scanConfig = new ScanOperationConfig();
 
             var tableScan = await _dynamoDbContext.GetTargetTable<PatchesDb>().Scan(scanConfig).GetRemainingAsync().ConfigureAwait(false);
-            var result = _dynamoDbContext.FromDocuments<PatchesDb>(tableScan);
+            var result = _dynamoDbContext.FromDocuments<PatchesDb>(tableScan)
+                                         .Where(x => !x.IsDisabled);
 
             return result.Select(x => x.ToDomain()).ToList();
         }
