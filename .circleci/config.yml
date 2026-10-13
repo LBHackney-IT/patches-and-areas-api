@@ -148,7 +148,6 @@ jobs:
       - checkout:
           method: full
       - setup_remote_docker
-      - sonarcloud/scan
       - run:
           name: build
           command: docker compose build patches-and-areas-api-test
@@ -161,6 +160,7 @@ jobs:
             mkdir coverage
             docker cp $(docker ps -aqf "name=patches-and-areas-api-test"):/app/coverage ./
             sed -i "s|/app/|$(pwd)/|g" coverage/*/coverage.opencover.xml
+      - sonarcloud/scan
   assume-role-development:
     executor: docker-python
     steps:
