@@ -13,9 +13,11 @@ ENV SONAR_TOKEN=$SONAR_TOKEN
 WORKDIR /app
 
 # Update OS package repos to install recent enough Java runtime for SonarScanner to use
-# Also install the dotnet sonar scanner cli
+# Also install the dotnet sonar scanner cli. Using JRE as we only need runtime, not a
+# development kit + headless as it strips out any GUI or audio support, which reduces
+# docker image build speed.
 RUN apt-get update && \
-    apt-get install -y openjdk-21-jdk && \
+    apt-get install -y openjdk-21-jre-headless && \
     apt-get clean && \
     dotnet tool install --global dotnet-sonarscanner
 
