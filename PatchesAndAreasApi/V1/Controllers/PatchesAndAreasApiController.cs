@@ -18,6 +18,9 @@ using HeaderConstants = Hackney.Shared.PatchesAndAreas.Infrastructure.Constants.
 using Hackney.Shared.PatchesAndAreas.Domain;
 using Hackney.Core.JWT;
 
+// Will be addressed with the release of Cognito M2M auth
+#pragma warning disable HACKNEY_DEPRECATED_TOKEN_CREATE
+
 namespace PatchesAndAreasApi.V1.Controllers
 {
     [ApiController]
