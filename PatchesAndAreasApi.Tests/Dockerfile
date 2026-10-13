@@ -12,9 +12,13 @@ ENV SONAR_TOKEN=$SONAR_TOKEN
 
 WORKDIR /app
 
-# Install and run sonar cloud scanner
-RUN apt-get update && apt-get install -y openjdk-17-jdk && apt-get clean \
-&& dotnet tool install --global dotnet-sonarscanner
+# Update OS package repos to install recent enough Java runtime for SonarScanner to use
+# Also install the dotnet sonar scanner cli
+RUN apt-get update && \
+    apt-get install -y openjdk-21-jdk && \
+    apt-get clean && \
+    dotnet tool install --global dotnet-sonarscanner
+
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 RUN dotnet sonarscanner begin /k:"LBHackney-IT_patches-and-areas-api" \
