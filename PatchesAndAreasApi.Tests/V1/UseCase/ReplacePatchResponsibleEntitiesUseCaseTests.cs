@@ -62,7 +62,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         public async Task ReplacePatchResponsibleEntitiesUseCaseReturnsResult(int? ifMatch)
         {
             //Arrange
-            var token = new Token();
+            var token = _fixture.Create<Token>();
             var request = ConstructRequest();
             var query = ConstructQuery();
             var gatewayResponse = ConstructUpdateResponse(query.Id);
@@ -85,7 +85,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         public async Task ReplacePatchResponsibleEntitiesUseCaseReturnsNull(int? ifMatch)
         {
             //Arrange
-            var token = new Token();
+            var token = _fixture.Create<Token>();
             var request = ConstructRequest();
             var query = ConstructQuery();
 
@@ -106,7 +106,7 @@ namespace PatchesAndAreasApi.Tests.V1.UseCase
         public async Task ReplacePatchResponsibleEntitiesAsyncExceptionIsThrown(int? ifMatch)
         {
             // Arrange
-            var token = new Token();
+            var token = _fixture.Create<Token>();
             var request = ConstructRequest();
             var query = ConstructQuery();
             var exception = new ApplicationException("Test exception");
