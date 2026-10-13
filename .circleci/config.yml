@@ -155,6 +155,12 @@ jobs:
       - run:
           name: Run tests
           command: docker compose run patches-and-areas-api-test
+      - run:
+          name: Prepare the code coverage report
+          command: |
+            mkdir coverage
+            docker cp $(docker ps -aqf "name=patches-and-areas-api-test"):/app/coverage ./
+            sed -i "s|/app/|$(pwd)/|g" coverage/*/coverage.opencover.xml
   assume-role-development:
     executor: docker-python
     steps:
