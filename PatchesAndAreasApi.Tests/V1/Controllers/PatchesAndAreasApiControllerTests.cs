@@ -355,7 +355,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task ReplacePatchResponsibleEntitiesNotFoundReturnsNotFound()
         {
             // Arrange
-            var token = new Token();
+            var token = _fixture.Create<Token>();
             var query = ConstructQuery();
             var request = _fixture.Build<ResponsibleEntities>().CreateMany(2).ToList();
             var patchResponse = _fixture.Create<PatchesResponseObject>();
@@ -378,7 +378,7 @@ namespace PatchesAndAreasApi.Tests.V1.Controllers
         public async Task ReplacePatchResponsibleEntitiesAsyncVersionNumberConflictExceptionReturns409(int? expected, int? actual)
         {
             // Arrange
-            var token = new Token();
+            var token = _fixture.Create<Token>();
             var query = ConstructQuery();
 
             _requestHeaders.Add(HeaderConstants.IfMatch, $"\"{expected?.ToString()}\"");
