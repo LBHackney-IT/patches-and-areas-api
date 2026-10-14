@@ -121,27 +121,6 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task GetPatchByIdReturnsDisabledPatchIfItExists()
-        {
-            //Arrange
-            var entity = _fixture.Build<PatchEntity>()
-                                 .With(x => x.IsDisabled, true)
-                                 .With(x => x.VersionNumber, (int?) null)
-                                 .Create();
-            var dbEntity = entity.ToDatabase();
-
-            await InsertDataToDynamoDB(dbEntity).ConfigureAwait(false);
-
-            var query = ConstructQuery(entity.Id);
-            //Act
-            var result = await _classUnderTest.GetPatchByIdAsync(query).ConfigureAwait(false);
-
-            //Assert
-            result.Should().BeEquivalentTo(dbEntity, config => config.Excluding(y => y.VersionNumber));
-            _logger.VerifyExact(LogLevel.Debug, $"Calling IDynamoDBContext.LoadAsync for id parameter {query.Id}", Times.Once());
-        }
-
-        [Fact]
         public async Task DeleteResponsibilityFromPatchWhenPatchDoesntExistThrowsException()
         {
             // Arrange
@@ -317,7 +296,6 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
         {
             // Arrange
             var patches = _fixture.Build<PatchesDb>()
-                                  .With(x => x.IsDisabled, false)
                                   .Without(x => x.VersionNumber)
                                   .CreateMany(5).ToList();
 
@@ -332,30 +310,6 @@ namespace PatchesAndAreasApi.Tests.V1.Gateways
                 results.Should().ContainEquivalentOf(patch.ToDomain());
             }
 
-            _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
-        }
-
-        [Fact]
-        public async Task GetAllPatchesAsyncDoesNotReturnDisabledPatches()
-        {
-            // Arrange
-            var enabledPatch = _fixture.Build<PatchesDb>()
-                                       .With(x => x.IsDisabled, false)
-                                       .Without(x => x.VersionNumber)
-                                       .Create();
-            var disabledPatch = _fixture.Build<PatchesDb>()
-                                        .With(x => x.IsDisabled, true)
-                                        .Without(x => x.VersionNumber)
-                                        .Create();
-
-            InsertListDataToDynamoDB(new List<PatchesDb> { enabledPatch, disabledPatch });
-
-            // Act
-            var results = await _classUnderTest.GetAllPatchesAsync().ConfigureAwait(false);
-
-            // Assert
-            results.Should().ContainEquivalentOf(enabledPatch.ToDomain());
-            results.Should().NotContain(x => x.Id == disabledPatch.Id);
             _logger.VerifyExact(LogLevel.Debug, "Calling IDynamoDBContext.ScanAsync for all PatchEntity records", Times.Once());
         }
 
