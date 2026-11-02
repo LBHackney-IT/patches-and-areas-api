@@ -76,6 +76,8 @@ namespace PatchesAndAreasApi.Tests
             EnsureEnvVarConfigured("AWS_ACCESS_KEY_ID", "local");
             EnsureEnvVarConfigured("AWS_SECRET_ACCESS_KEY", "local");
             EnsureEnvVarConfigured("ASSET_ADMIN_GROUPS", "e2e-testing");
+            // Table setup runs during host build, outside a request, so X-Ray has no segment.
+            EnsureEnvVarConfigured("AWS_XRAY_CONTEXT_MISSING", "LOG_ERROR");
 
             Client = CreateClient();
         }
