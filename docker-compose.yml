@@ -38,6 +38,7 @@ services:
       - AWS_ACCESS_KEY_ID=local
       - AWS_SECRET_ACCESS_KEY=local
       - ASSET_ADMIN_GROUPS=e2e-testing
+      - AWS_XRAY_CONTEXT_MISSING=LOG_ERROR
     links:
       - dynamodb-database
       - localstack
