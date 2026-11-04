@@ -13,7 +13,7 @@ executors:
       - image: "hashicorp/terraform:light"
   docker-dotnet:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:8.0
+      - image: mcr.microsoft.com/dotnet/sdk:10.0
 
 references:
   workspace_root: &workspace_root "~"
@@ -153,7 +153,8 @@ jobs:
           command: docker compose build patches-and-areas-api-test
       - run:
           name: Run tests
-          command: docker compose run patches-and-areas-api-test
+          command: docker compose run -T patches-and-areas-api-test --logger "console;verbosity=normal" -tl:off
+          no_output_timeout: 20m
       - run:
           name: Prepare the code coverage report
           command: |

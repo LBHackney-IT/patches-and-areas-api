@@ -1,146 +1,55 @@
-# LBH Patches and Areas API
+# Patches and Areas API
 
+The Patches and Areas API stores housing patch and area records and the people responsible for them. Callers can list patches, look one up by id, parent id, or name, and change those responsible entities. Replacing the responsible entities publishes `PatchOrAreaResEntityEditedEvent`. The API runs as an AWS Lambda behind API Gateway.
 
-## Stack
+## Tech stack
 
-- .NET Core as a web framework.
-- nUnit as a test framework.
+- .NET 10 and ASP.NET Core
+- AWS Lambda (`dotnet10`), API Gateway, DynamoDB, SNS, and X-Ray
+- Serverless Framework for the Lambda deployment
+- Terraform in this repository for the DynamoDB table
+- CircleCI
+- Docker Compose with DynamoDB Local and LocalStack for local SNS
+- xUnit, FluentAssertions, Moq, and BDDfy
+- Swashbuckle for Swagger
 
-## Dependencies
+## Endpoints
 
-- Universal Housing Simulator
+| Verb | Route | Request | Response | Summary |
+| --- | --- | --- | --- | --- |
+| GET | `/api/v1/healthcheck/ping` | none | health-check report | Checks that the API and its DynamoDB dependency are available. |
+| GET | `/api/v1/patch/all` | none | `List<PatchesResponseObject>` | Returns every patch record. |
+| GET | `/api/v1/patch/{id}` | `PatchesQueryObject` | `PatchesResponseObject` | Returns one patch and sets an `ETag` from its version number. |
+| GET | `/api/v1/patch` | `GetPatchByParentIdQuery` | `List<PatchEntity>` | Returns the patches for the supplied `parentId`. |
+| GET | `/api/v1/patch/patchName/{patchName}` | `GetByPatchNameQuery` | `PatchEntity` | Returns the patch with the supplied name. |
+| PATCH | `/api/v1/patch/{id}/responsibleEntity/{responsibileEntityId}` | `UpdatePatchesResponsibilityRequest`, `UpdatePatchesResponsibilitiesRequestObject` | none | Updates one responsible entity. `If-Match` carries the expected version. |
+| PUT | `/api/v1/patch/{id}/responsibleEntities` | `PatchesQueryObject`, `List<ResponsibleEntities>` | none | Replaces the responsible entities. Callers must belong to a group in `ASSET_ADMIN_GROUPS`. Publishes `PatchOrAreaResEntityEditedEvent`. |
+| DELETE | `/api/v1/patch/{id}/responsibleEntity/{responsibileEntityId}` | `DeleteResponsibilityFromPatchRequest` | none | Removes one responsible entity from the patch. |
 
-## Contributing
+`PATCH` and `PUT` return `204` when the update is stored, `404` when the patch is missing, and `409` when `If-Match` does not match the stored version. `GET` by parent id and by name return the domain entity. The end-to-end tests read that JSON as `PatchesResponseObject`.
 
-### Setup
+## Linked repositories
 
-1. Install [Docker][docker-download].
-2. Install [AWS CLI][AWS-CLI].
-3. Clone this repository.
-4. Rename the initial template.
-5. Open it in your IDE.
+| Repository | Summary |
+| --- | --- |
+| [patches-and-areas-shared](https://github.com/LBHackney-IT/patches-and-areas-shared) | Shared patch and area models, request and response types, and factories, published as `Hackney.Shared.PatchesAndAreas`. |
+| [lbh-core](https://github.com/LBHackney-IT/lbh-core) | Shared libraries used here for DynamoDB, SNS, JWT, authorisation, validation, logging, middleware, HTTP context, and health checks. |
 
-### Development
+DynamoDB and the Lambda deployment live in this repository, under `terraform/` and `PatchesAndAreasApi/serverless.yml`. There is no `patches-and-areas-listener` repository.
 
-To serve the application, run it using your IDE of choice, we use Visual Studio CE and JetBrains Rider on Mac.
+## Data sources
 
-**Note**
-When running locally the appropriate database conneciton details are still needed.
+| Source | Summary |
+| --- | --- |
+| DynamoDB table `PatchesAndAreas` | Stores patch records and their responsible entities. `PatchesGateway` reads and writes the table, including the parent-id and patch-name indexes. |
+| Amazon SNS topic `patches-and-areas` | Receives `PatchOrAreaResEntityEditedEvent` when a patch's responsible entities are replaced. |
 
-##### DynamoDb
-To use a local instance of DynamoDb, this will need to be installed. This is most easily done using [Docker](https://www.docker.com/products/docker-desktop).
-Run the following command, specifying the local path where you want the container's shared volume to be stored.
-```
-docker run --name dynamodb-local -p 8000:8000 -v <PUT YOUR LOCAL PATH HERE>:/data/ amazon/dynamodb-local -jar DynamoDBLocal.jar -sharedDb -dbPath /data
-```
-
-If you would like to see what is in your local DynamoDb instance using a simple gui, then [this admin tool](https://github.com/aaronshaf/dynamodb-admin) can do that.
-
-The application can also be served locally using docker:
-1.  Add you security credentials to AWS CLI.
-```sh
-$ aws configure
-```
-2. Log into AWS ECR.
-```sh
-$ aws ecr get-login --no-include-email
-```
-3. Build and serve the application. It will be available in the port 3000.
-```sh
-$ make build && make serve
-```
-### NuGet Packages
-At Hackney, we have created the NuGet Package to prevent the duplication of common code when implementing our APIs. Hence our NuGet packages will store the common code that can then be used in the relevant projects. For full details on the different features implemented within our packages please read [this ReadMe](https://github.com/LBHackney-IT/lbh-core/blob/release/README.md)
-
-##### Using the package
-For full details on how to use the package(s) within this repository please read 
-[this wiki page](https://github.com/LBHackney-IT/lbh-core/wiki/Using-the-package(s)-from-the-Hackney.Core-repository).
-
-
-### Release process
-
-We use a pull request workflow, where changes are made on a branch and approved by one or more other maintainers before the developer can merge into `master` branch.
-
-![Circle CI Workflow Example](docs/circle_ci_workflow.png)
-
-Then we have an automated six step deployment process, which runs in CircleCI.
-
-1. Automated tests (nUnit) are run to ensure the release is of good quality.
-2. The application is deployed to development automatically, where we check our latest changes work well.
-3. We manually confirm a staging deployment in the CircleCI workflow once we're happy with our changes in development.
-4. The application is deployed to staging.
-5. We manually confirm a production deployment in the CircleCI workflow once we're happy with our changes in staging.
-6. The application is deployed to production.
-
-Our staging and production environments are hosted by AWS. We would deploy to production per each feature/config merged into  `master`  branch.
-
-### Creating A PR
-
-To help with making changes to code easier to understand when being reviewed, we've added a PR template.
-When a new PR is created on a repo that uses this API template, the PR template will automatically fill in the `Open a pull request` description textbox.
-The PR author can edit and change the PR description using the template as a guide.
-
-## Static Code Analysis
-
-### Using [FxCop Analysers](https://www.nuget.org/packages/Microsoft.CodeAnalysis.FxCopAnalyzers)
-
-FxCop runs code analysis when the Solution is built.
-
-Both the API and Test projects have been set up to **treat all warnings from the code analysis as errors** and therefore, fail the build.
-
-However, we can select which errors to suppress by setting the severity of the responsible rule to none, e.g `dotnet_analyzer_diagnostic.<Category-or-RuleId>.severity = none`, within the `.editorconfig` file.
-Documentation on how to do this can be found [here](https://docs.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers?view=vs-2019).
-
-## Testing
-
-### Run the tests
-
-```sh
-$ make test
-```
-
-To run database tests locally (e.g. via Visual Studio) and you are using Postgres the `CONNECTION_STRING` environment variable will need to be populated with:
-
-`Host=localhost;Database=testdb;Username=postgres;Password=mypassword"`
-
-Note: The Host name needs to be the name of the stub database docker-compose service, in order to run tests via Docker.
-
-If changes to the database schema are made then the docker image for the database will have to be removed and recreated. The restart-db make command will do this for you.
-
-### Agreed Testing Approach
-- Use nUnit, FluentAssertions and Moq
-- Always follow a TDD approach
-- Tests should be independent of each other
-- Gateway tests should interact with a real test instance of the database
-- Test coverage should never go down
-- All use cases should be covered by E2E tests
-- Optimise when test run speed starts to hinder development
-- Unit tests and E2E tests should run in CI
-- Test database schemas should match up with production database schema
-- Have integration tests which test from the PostgreSQL database to API Gateway
-
-## Data Migrations
-### A good data migration
-- Record failure logs
-- Automated
-- Reliable
-- As close to real time as possible
-- Observable monitoring in place
-- Should not affect any existing databases
+The API does not call another service over HTTP.
 
 ## Contacts
 
-### Active Maintainers
+**Housing product team** at [mmh-project-team@hackney.gov.uk](mailto:mmh-project-team@hackney.gov.uk)
 
-- **Selwyn Preston**, Lead Developer at London Borough of Hackney (selwyn.preston@hackney.gov.uk)
-- **Mirela Georgieva**, Lead Developer at London Borough of Hackney (mirela.georgieva@hackney.gov.uk)
-- **Matt Keyworth**, Lead Developer at London Borough of Hackney (matthew.keyworth@hackney.gov.uk)
+## Contributing
 
-### Other Contacts
-
-- **Rashmi Shetty**, Product Owner at London Borough of Hackney (rashmi.shetty@hackney.gov.uk)
-
-[docker-download]: https://www.docker.com/products/docker-desktop
-[universal-housing-simulator]: https://github.com/LBHackney-IT/lbh-universal-housing-simulator
-[made-tech]: https://madetech.com/
-[AWS-CLI]: https://aws.amazon.com/cli/
+Build, test, and release steps are in [CONTRIBUTION.md](CONTRIBUTION.md).
